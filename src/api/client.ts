@@ -1,6 +1,7 @@
 import type {
   Attendance,
   Contract,
+  LeaveRequest,
   LoginResponse,
   Notification,
   Shift,
@@ -119,4 +120,22 @@ export const api = {
   listNotifications: () => request<Notification[]>("/api/notifications"),
   markNotificationRead: (id: number) =>
     request<Notification>(`/api/notifications/${id}/read`, { method: "PATCH" }),
+
+  listLeaveRequests: () => request<LeaveRequest[]>("/api/leave-requests"),
+  createLeaveRequest: (data: {
+    type: "vacation" | "sick";
+    startDate: string;
+    endDate: string;
+    reason?: string;
+  }) => request<LeaveRequest>("/api/leave-requests", { method: "POST", body: JSON.stringify(data) }),
+  cancelLeaveRequest: (id: number) =>
+    request<void>(`/api/leave-requests/${id}`, { method: "DELETE" }),
+
+  listLeaveRequestsForReport: (userId: number) =>
+    request<LeaveRequest[]>(`/api/users/${userId}/leave-requests`),
+  decideLeaveRequest: (userId: number, requestId: number, status: "approved" | "rejected") =>
+    request<LeaveRequest>(`/api/users/${userId}/leave-requests/${requestId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
 };

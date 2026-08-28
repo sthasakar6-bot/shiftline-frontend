@@ -52,3 +52,15 @@ export interface LoginResponse {
   token: string;
   user: User;
 }
+
+export interface LeaveRequest {
+  id: number;
+  userId: number;
+  type: "vacation" | "sick";
+  startDate: string;
+  endDate: string;
+  reason: string | null;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
+  updatedAt: string;
+}
