@@ -76,16 +76,27 @@ export const api = {
   promoteUser: (id: number) => request<UserSummary>(`/api/users/${id}/promote`, { method: "POST" }),
 
   listContracts: () => request<Contract[]>("/api/contracts"),
-  createContract: (data: {
-    title: string;
-    description?: string;
-    startDate: string;
-    endDate?: string;
-    status?: string;
-  }) => request<Contract>("/api/contracts", { method: "POST", body: JSON.stringify(data) }),
-  updateContract: (id: number, data: Partial<{ title: string; status: string }>) =>
-    request<Contract>(`/api/contracts/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-  deleteContract: (id: number) => request<void>(`/api/contracts/${id}`, { method: "DELETE" }),
+
+  listContractsForReport: (userId: number) => request<Contract[]>(`/api/users/${userId}/contracts`),
+  createContractForReport: (
+    userId: number,
+    data: { title: string; description?: string; startDate: string; endDate?: string; status?: string },
+  ) =>
+    request<Contract>(`/api/users/${userId}/contracts`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateContractForReport: (
+    userId: number,
+    contractId: number,
+    data: Partial<{ title: string; endDate: string; status: string }>,
+  ) =>
+    request<Contract>(`/api/users/${userId}/contracts/${contractId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteContractForReport: (userId: number, contractId: number) =>
+    request<void>(`/api/users/${userId}/contracts/${contractId}`, { method: "DELETE" }),
 
   listShifts: () => request<Shift[]>("/api/shifts"),
   createShift: (data: { startsAt: string; endsAt: string }) =>

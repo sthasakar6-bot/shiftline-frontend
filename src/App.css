@@ -126,6 +126,12 @@
   margin-bottom: 8px;
 }
 
+.hint {
+  font-size: 13px;
+  opacity: 0.7;
+  margin: -8px 0 12px;
+}
+
 .loading {
   display: flex;
   align-items: center;
