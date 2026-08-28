@@ -53,17 +53,37 @@
   font-weight: 600;
 }
 
-.dashboard {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 24px;
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
 }
 
-.dashboard-header {
+.app-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.app-header h1 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.app-content {
+  flex: 1;
+  padding: 16px;
+  padding-bottom: 88px;
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .role-badge {
@@ -71,13 +91,114 @@
   background: var(--accent-bg);
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 11px;
 }
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 16px;
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--panel-bg);
+  border-top: 1px solid var(--border);
+  padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  z-index: 10;
+}
+
+.tab-bar button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 2px;
+  color: var(--text);
+  opacity: 0.6;
+  font-size: 11px;
+}
+
+.tab-bar button.active {
+  opacity: 1;
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.user-box {
+  position: relative;
+}
+
+.user-box-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  padding: 4px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.user-box-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 500;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-box-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  overflow: hidden;
+  z-index: 20;
+}
+
+.user-box-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  text-align: left;
+  font-size: 13px;
+}
+
+.user-box-menu button:hover {
+  background: var(--accent-bg);
 }
 
 .panel {

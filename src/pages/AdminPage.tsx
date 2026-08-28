@@ -1,34 +1,34 @@
-import { Link } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
+import { useState } from "react";
+import { Users, Palmtree, Clock } from "lucide-react";
+import UserBox from "../components/UserBox";
+import TabBar, { type Tab } from "../components/TabBar";
 import ManagerSection from "../components/ManagerSection";
 import LeaveApprovalsSection from "../components/LeaveApprovalsSection";
 import AttendanceTrackingSection from "../components/AttendanceTrackingSection";
 
+const tabs: Tab[] = [
+  { key: "team", label: "Team", icon: Users },
+  { key: "leave", label: "Leave", icon: Palmtree },
+  { key: "attendance", label: "Attendance", icon: Clock },
+];
+
 export default function AdminPage() {
-  const { user, logout } = useAuth();
+  const [active, setActive] = useState("team");
 
   return (
-    <div className="dashboard">
-      <header className="dashboard-header">
-        <div>
-          <h1>Administration</h1>
-          <p>
-            {user?.name} · <span className="role-badge">{user?.role}</span>
-          </p>
-        </div>
-        <span className="actions">
-          <Link to="/">
-            <button>Back to Dashboard</button>
-          </Link>
-          <button onClick={logout}>Log out</button>
-        </span>
+    <div className="app-shell">
+      <header className="app-header">
+        <h1>Administration</h1>
+        <UserBox />
       </header>
 
-      <div className="dashboard-grid">
-        <ManagerSection />
-        <LeaveApprovalsSection />
-        <AttendanceTrackingSection />
-      </div>
+      <main className="app-content">
+        {active === "team" && <ManagerSection />}
+        {active === "leave" && <LeaveApprovalsSection />}
+        {active === "attendance" && <AttendanceTrackingSection />}
+      </main>
+
+      <TabBar tabs={tabs} active={active} onChange={setActive} />
     </div>
   );
 }

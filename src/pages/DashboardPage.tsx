@@ -1,40 +1,40 @@
-import { Link } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
+import { useState } from "react";
+import { FileText, CalendarDays, Clock, Palmtree, Bell } from "lucide-react";
+import UserBox from "../components/UserBox";
+import TabBar, { type Tab } from "../components/TabBar";
 import ContractsSection from "../components/ContractsSection";
 import ShiftsSection from "../components/ShiftsSection";
 import AttendanceSection from "../components/AttendanceSection";
 import NotificationsSection from "../components/NotificationsSection";
 import LeaveSection from "../components/LeaveSection";
 
+const tabs: Tab[] = [
+  { key: "contracts", label: "Contracts", icon: FileText },
+  { key: "roster", label: "Roster", icon: CalendarDays },
+  { key: "attendance", label: "Attendance", icon: Clock },
+  { key: "leave", label: "Leave", icon: Palmtree },
+  { key: "notifications", label: "Alerts", icon: Bell },
+];
+
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const [active, setActive] = useState("contracts");
 
   return (
-    <div className="dashboard">
-      <header className="dashboard-header">
-        <div>
-          <h1>Shiftline</h1>
-          <p>
-            {user?.name} · {user?.email} · <span className="role-badge">{user?.role}</span>
-          </p>
-        </div>
-        <span className="actions">
-          {user?.role === "manager" && (
-            <Link to="/admin">
-              <button>Switch to Administration</button>
-            </Link>
-          )}
-          <button onClick={logout}>Log out</button>
-        </span>
+    <div className="app-shell">
+      <header className="app-header">
+        <h1>Shiftline</h1>
+        <UserBox />
       </header>
 
-      <div className="dashboard-grid">
-        <ContractsSection />
-        <ShiftsSection />
-        <AttendanceSection />
-        <LeaveSection />
-        <NotificationsSection />
-      </div>
+      <main className="app-content">
+        {active === "contracts" && <ContractsSection />}
+        {active === "roster" && <ShiftsSection />}
+        {active === "attendance" && <AttendanceSection />}
+        {active === "leave" && <LeaveSection />}
+        {active === "notifications" && <NotificationsSection />}
+      </main>
+
+      <TabBar tabs={tabs} active={active} onChange={setActive} />
     </div>
   );
 }
