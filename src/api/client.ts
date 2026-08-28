@@ -100,13 +100,21 @@ export const api = {
     request<void>(`/api/users/${userId}/contracts/${contractId}`, { method: "DELETE" }),
 
   listShifts: () => request<Shift[]>("/api/shifts"),
-  createShift: (data: { startsAt: string; endsAt: string }) =>
-    request<Shift>("/api/shifts", { method: "POST", body: JSON.stringify(data) }),
-  deleteShift: (id: number) => request<void>(`/api/shifts/${id}`, { method: "DELETE" }),
 
   createShiftForReport: (userId: number, data: { startsAt: string; endsAt: string }) =>
     request<Shift>(`/api/users/${userId}/shifts`, { method: "POST", body: JSON.stringify(data) }),
   listShiftsForReport: (userId: number) => request<Shift[]>(`/api/users/${userId}/shifts`),
+  updateShiftForReport: (
+    userId: number,
+    shiftId: number,
+    data: Partial<{ startsAt: string; endsAt: string }>,
+  ) =>
+    request<Shift>(`/api/users/${userId}/shifts/${shiftId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteShiftForReport: (userId: number, shiftId: number) =>
+    request<void>(`/api/users/${userId}/shifts/${shiftId}`, { method: "DELETE" }),
 
   listAttendance: () => request<Attendance[]>("/api/attendance"),
   clockIn: (shiftId: number) =>
@@ -116,6 +124,8 @@ export const api = {
     }),
   clockOut: (id: number) =>
     request<Attendance>(`/api/attendance/${id}/clock-out`, { method: "POST" }),
+  listAttendanceForReport: (userId: number) =>
+    request<Attendance[]>(`/api/users/${userId}/attendance`),
 
   listNotifications: () => request<Notification[]>("/api/notifications"),
   markNotificationRead: (id: number) =>

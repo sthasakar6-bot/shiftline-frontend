@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import ManagerSection from "../components/ManagerSection";
 import LeaveApprovalsSection from "../components/LeaveApprovalsSection";
+import AttendanceTrackingSection from "../components/AttendanceTrackingSection";
 
 export default function AdminPage() {
   const { user, logout } = useAuth();
@@ -26,6 +27,7 @@ export default function AdminPage() {
       <div className="dashboard-grid">
         <ManagerSection />
         <LeaveApprovalsSection />
+        <AttendanceTrackingSection />
       </div>
     </div>
   );

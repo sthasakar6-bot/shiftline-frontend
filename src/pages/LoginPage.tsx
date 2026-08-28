@@ -4,8 +4,9 @@ import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../api/client";
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const navigate = useNavigate();
+  const [mode, setMode] = useState<"employee" | "administration">("employee");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -16,8 +17,13 @@ export default function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await login(email, password);
-      navigate("/");
+      const user = await login(email, password);
+      if (mode === "administration" && user.role !== "manager") {
+        logout();
+        setError("This account doesn't have administrator access.");
+        return;
+      }
+      navigate(mode === "administration" ? "/admin" : "/");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Login failed");
     } finally {
@@ -29,6 +35,22 @@ export default function LoginPage() {
     <div className="auth-page">
       <form className="auth-form" onSubmit={handleSubmit}>
         <h1>Log in</h1>
+        <div className="mode-toggle">
+          <button
+            type="button"
+            className={mode === "employee" ? "active" : ""}
+            onClick={() => setMode("employee")}
+          >
+            Employee / Team Member
+          </button>
+          <button
+            type="button"
+            className={mode === "administration" ? "active" : ""}
+            onClick={() => setMode("administration")}
+          >
+            Administration
+          </button>
+        </div>
         {error && <div className="error">{error}</div>}
         <label>
           Email
@@ -44,7 +66,11 @@ export default function LoginPage() {
           />
         </label>
         <button type="submit" disabled={submitting}>
-          {submitting ? "Logging in..." : "Log in"}
+          {submitting
+            ? "Logging in..."
+            : mode === "administration"
+              ? "Log in to Administration"
+              : "Log in"}
         </button>
         <p>
           No account? <Link to="/register">Register</Link>

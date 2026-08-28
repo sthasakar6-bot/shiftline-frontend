@@ -28,6 +28,31 @@
   padding: 10px;
 }
 
+.mode-toggle {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.mode-toggle button {
+  flex: 1;
+  margin-top: 0;
+  padding: 8px 6px;
+  font-size: 13px;
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+}
+
+.mode-toggle button.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .dashboard {
   max-width: 1100px;
   margin: 0 auto;
