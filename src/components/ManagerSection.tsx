@@ -15,10 +15,9 @@ export default function ManagerSection() {
   // Contract management
   const [contractReport, setContractReport] = useState("");
   const [contracts, setContracts] = useState<Contract[]>([]);
-  const [title, setTitle] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [editEndDates, setEditEndDates] = useState<Record<number, string>>({});
+  const [role, setRole] = useState("");
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [reuploadFiles, setReuploadFiles] = useState<Record<number, File | null>>({});
 
   function loadReports() {
     api.listReports().then(setReports).catch(() => {});
@@ -73,14 +72,12 @@ export default function ManagerSection() {
     setMessage(null);
     try {
       const userId = Number(contractReport);
-      await api.createContractForReport(userId, {
-        title,
-        startDate,
-        endDate: endDate || undefined,
-      });
-      setTitle("");
-      setStartDate("");
-      setEndDate("");
+      const contract = await api.createContractForReport(userId, { role });
+      if (pdfFile) {
+        await api.uploadContractPdfForReport(userId, contract.id, pdfFile);
+      }
+      setRole("");
+      setPdfFile(null);
       loadContracts(userId);
       setMessage("Contract created.");
     } catch (err) {
@@ -88,15 +85,30 @@ export default function ManagerSection() {
     }
   }
 
-  async function handleUpdateEndDate(contractId: number) {
+  async function handleUploadPdf(contractId: number) {
     const userId = Number(contractReport);
-    const newEndDate = editEndDates[contractId];
-    if (!newEndDate) return;
+    const file = reuploadFiles[contractId];
+    if (!file) return;
+    setError(null);
     try {
-      await api.updateContractForReport(userId, contractId, { endDate: newEndDate });
+      await api.uploadContractPdfForReport(userId, contractId, file);
+      setReuploadFiles({ ...reuploadFiles, [contractId]: null });
       loadContracts(userId);
+      setMessage("Contract PDF uploaded.");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to update end date");
+      setError(err instanceof ApiError ? err.message : "Failed to upload PDF");
+    }
+  }
+
+  async function handleViewPdf(contractId: number) {
+    const userId = Number(contractReport);
+    setError(null);
+    try {
+      const blob = await api.getContractPdfForReport(userId, contractId);
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to open contract");
     }
   }
 
@@ -157,20 +169,26 @@ export default function ManagerSection() {
                 {contracts.map((c) => (
                   <li key={c.id}>
                     <span>
-                      <strong>{c.title}</strong> — {c.status}
-                      <br />
-                      Start: {c.startDate.slice(0, 10)} · End:{" "}
-                      {c.endDate ? c.endDate.slice(0, 10) : "Not set"}
+                      <strong>{c.role}</strong>
+                      {!c.pdfFilename && " — no PDF uploaded"}
                     </span>
                     <span className="actions">
+                      {c.pdfFilename && (
+                        <button onClick={() => handleViewPdf(c.id)}>View PDF</button>
+                      )}
                       <input
-                        type="date"
-                        value={editEndDates[c.id] ?? ""}
+                        type="file"
+                        accept="application/pdf"
                         onChange={(e) =>
-                          setEditEndDates({ ...editEndDates, [c.id]: e.target.value })
+                          setReuploadFiles({
+                            ...reuploadFiles,
+                            [c.id]: e.target.files?.[0] ?? null,
+                          })
                         }
                       />
-                      <button onClick={() => handleUpdateEndDate(c.id)}>Set end date</button>
+                      <button onClick={() => handleUploadPdf(c.id)}>
+                        {c.pdfFilename ? "Replace PDF" : "Upload PDF"}
+                      </button>
                       <button onClick={() => handleDeleteContract(c.id)}>Delete</button>
                     </span>
                   </li>
@@ -180,23 +198,15 @@ export default function ManagerSection() {
 
               <form className="inline-form" onSubmit={handleCreateContract}>
                 <input
-                  placeholder="Title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
                   required
                 />
                 <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  required
-                  title="Start date"
-                />
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  title="End date (optional)"
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => setPdfFile(e.target.files?.[0] ?? null)}
                 />
                 <button type="submit">Create contract</button>
               </form>

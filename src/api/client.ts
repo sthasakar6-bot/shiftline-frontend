@@ -35,8 +35,9 @@ export class ApiError extends Error {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
+  const isFormData = options.body instanceof FormData;
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...(options.headers as Record<string, string> | undefined),
   };
   if (token) {
@@ -56,6 +57,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   return body as T;
+}
+
+async function requestBlob(path: string): Promise<Blob> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_URL}${path}`, { headers });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(res.status, body.error || `Request failed with status ${res.status}`);
+  }
+
+  return res.blob();
 }
 
 export const api = {
@@ -83,25 +101,29 @@ export const api = {
     request<UserSummary>(`/api/users/${id}/manager`, { method: "DELETE" }),
 
   listContracts: () => request<Contract[]>("/api/contracts"),
+  getContractPdf: (contractId: number) => requestBlob(`/api/contracts/${contractId}/pdf`),
 
   listContractsForReport: (userId: number) => request<Contract[]>(`/api/users/${userId}/contracts`),
-  createContractForReport: (
-    userId: number,
-    data: { title: string; description?: string; startDate: string; endDate?: string; status?: string },
-  ) =>
+  createContractForReport: (userId: number, data: { role: string }) =>
     request<Contract>(`/api/users/${userId}/contracts`, {
       method: "POST",
       body: JSON.stringify(data),
     }),
-  updateContractForReport: (
-    userId: number,
-    contractId: number,
-    data: Partial<{ title: string; endDate: string; status: string }>,
-  ) =>
+  updateContractForReport: (userId: number, contractId: number, data: { role: string }) =>
     request<Contract>(`/api/users/${userId}/contracts/${contractId}`, {
       method: "PATCH",
       body: JSON.stringify(data),
     }),
+  uploadContractPdfForReport: (userId: number, contractId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("pdf", file);
+    return request<Contract>(`/api/users/${userId}/contracts/${contractId}/pdf`, {
+      method: "POST",
+      body: formData,
+    });
+  },
+  getContractPdfForReport: (userId: number, contractId: number) =>
+    requestBlob(`/api/users/${userId}/contracts/${contractId}/pdf`),
   deleteContractForReport: (userId: number, contractId: number) =>
     request<void>(`/api/users/${userId}/contracts/${contractId}`, { method: "DELETE" }),
 

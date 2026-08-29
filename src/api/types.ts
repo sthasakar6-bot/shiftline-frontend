@@ -11,11 +11,8 @@ export interface UserSummary extends User {
 
 export interface Contract {
   id: number;
-  title: string;
-  description: string | null;
-  startDate: string;
-  endDate: string | null;
-  status: string;
+  role: string;
+  pdfFilename: string | null;
   userId: number;
   createdAt: string;
   updatedAt: string;
