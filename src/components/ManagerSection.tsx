@@ -154,7 +154,7 @@ export default function ManagerSection() {
           <h3>Manage contracts</h3>
           <div className="inline-form">
             <select value={contractReport} onChange={(e) => setContractReport(e.target.value)}>
-              <option value="">Select report</option>
+              <option value="">Select employee</option>
               {reports.map((r) => (
                 <option key={r.id} value={r.id}>
                   {r.name}
