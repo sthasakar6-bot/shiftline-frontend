@@ -34,6 +34,8 @@ export default function AttendanceSection() {
 
   const openRecord = records.find((r) => !r.clockOut);
   const pastRecords = records.filter((r) => r.id !== openRecord?.id);
+  const completedShiftIds = new Set(records.filter((r) => r.clockOut).map((r) => r.shiftId));
+  const clockableShifts = shifts.filter((s) => !completedShiftIds.has(s.id));
 
   async function handleClockIn(e: FormEvent) {
     e.preventDefault();
@@ -105,7 +107,7 @@ export default function AttendanceSection() {
         <form className="clock-status" onSubmit={handleClockIn}>
           <select value={shiftId} onChange={(e) => setShiftId(e.target.value)} required>
             <option value="">Select a shift</option>
-            {shifts.map((s) => (
+            {clockableShifts.map((s) => (
               <option key={s.id} value={s.id}>
                 {formatDateTime(s.startsAt)}
               </option>
