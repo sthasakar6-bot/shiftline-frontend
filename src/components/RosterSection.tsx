@@ -148,8 +148,8 @@ export default function RosterSection() {
   return (
     <section className="panel">
       <h2>Roster</h2>
-      <p className="hint">Who's working, and when. Shown read-only on each employee's own page.</p>
 
+      <h3>Assign a shift</h3>
       <form className="inline-form" onSubmit={handleAssign}>
         <label className="field">
           <span className="field-label">Employee</span>
@@ -194,6 +194,8 @@ export default function RosterSection() {
       </form>
       {message && <div className="success">{message}</div>}
       {error && <div className="error">{error}</div>}
+
+      <hr className="section-divider" />
 
       <div className="calendar-header">
         <button
@@ -249,7 +251,9 @@ export default function RosterSection() {
           </ul>
         </div>
       ))}
-      {groupedByDay.length === 0 && <p className="hint">No shifts scheduled this week.</p>}
+      {groupedByDay.length === 0 && (
+        <p className="empty-state">No shifts scheduled this week.</p>
+      )}
 
       {removeTarget && (
         <ConfirmDialog

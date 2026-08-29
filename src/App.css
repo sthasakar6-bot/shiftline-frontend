@@ -418,6 +418,19 @@
   margin: -8px 0 12px;
 }
 
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 20px 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 24px 0;
+  opacity: 0.6;
+  font-size: 14px;
+}
+
 .loading {
   display: flex;
   align-items: center;
