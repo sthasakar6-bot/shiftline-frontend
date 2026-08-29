@@ -43,10 +43,6 @@ export default function InvitesSection() {
   return (
     <section className="panel">
       <h2>Invite an employee</h2>
-      <p className="hint">
-        Create an invite, then copy the link and send it to them yourself (Gmail, WhatsApp, etc).
-        The link lets them create an account under you.
-      </p>
       <form className="inline-form" onSubmit={handleSendInvite}>
         <input
           type="email"
@@ -59,18 +55,21 @@ export default function InvitesSection() {
       </form>
       {error && <div className="error">{error}</div>}
       {lastInviteToken && (
-        <div className="inline-form">
-          <input value={inviteLinkFor(lastInviteToken)} readOnly />
-          <button type="button" onClick={() => handleCopyLink(lastInviteToken)}>
-            {copiedToken === lastInviteToken ? "Copied!" : "Copy link"}
-          </button>
+        <div className="invite-link-callout">
+          <span className="field-label">Invite link — copy and send it to them</span>
+          <div className="inline-form">
+            <input value={inviteLinkFor(lastInviteToken)} readOnly />
+            <button type="button" onClick={() => handleCopyLink(lastInviteToken)}>
+              {copiedToken === lastInviteToken ? "Copied!" : "Copy link"}
+            </button>
+          </div>
         </div>
       )}
       <ul className="list">
         {invites.map((i) => (
           <li key={i.id}>
             <span>
-              {i.email} — {i.status}
+              {i.email} <span className={`status-badge ${i.status}`}>{i.status}</span>
             </span>
             {i.status === "pending" && (
               <span className="actions">
