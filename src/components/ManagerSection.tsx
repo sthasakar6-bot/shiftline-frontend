@@ -112,14 +112,7 @@ export default function ManagerSection() {
       <ul className="list">
         {employees.map((e) => (
           <li key={e.id}>
-            <span>
-              {e.name} —{" "}
-              {e.managerId === user?.id
-                ? "Reports to you"
-                : e.managerId
-                  ? "Managed by someone else"
-                  : "Unassigned"}
-            </span>
+            <span>{e.name}</span>
             <span className="actions">
               {e.managerId === user?.id ? (
                 <button onClick={() => setRemoveTarget(e)}>Remove from team</button>
