@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FileText, CalendarDays, Clock, Palmtree, Bell } from "lucide-react";
 import UserBox from "../components/UserBox";
 import TabBar, { type Tab } from "../components/TabBar";
@@ -15,9 +16,14 @@ const tabs: Tab[] = [
   { key: "leave", label: "Leave", icon: Palmtree },
   { key: "notifications", label: "Alerts", icon: Bell },
 ];
+const tabKeys = tabs.map((t) => t.key);
 
 export default function DashboardPage() {
-  const [active, setActive] = useState("contracts");
+  const [searchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab");
+  const [active, setActive] = useState(
+    requestedTab && tabKeys.includes(requestedTab) ? requestedTab : "contracts",
+  );
 
   return (
     <div className="app-shell">
