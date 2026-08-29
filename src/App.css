@@ -154,16 +154,20 @@
   position: absolute;
   top: -6px;
   right: -8px;
-  min-width: 15px;
-  height: 15px;
+  min-width: 16px;
+  height: 16px;
   padding: 0 3px;
   border-radius: 999px;
-  background: var(--danger);
+  /* Deliberately not var(--danger) -- that's tuned as a muted error-text
+     color, too dull to work as an attention-grabbing badge. */
+  background: #ff3b30;
+  border: 1.5px solid var(--panel-bg);
   color: white;
   font-size: 9px;
   font-weight: 700;
-  line-height: 15px;
+  line-height: 13px;
   text-align: center;
+  box-shadow: 0 0 0 1px rgba(255, 59, 48, 0.35);
 }
 
 .user-box {
