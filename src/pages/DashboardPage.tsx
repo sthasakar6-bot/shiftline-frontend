@@ -17,7 +17,7 @@ export default function DashboardPage() {
   const [searchParams] = useSearchParams();
   const requestedTab = searchParams.get("tab");
   const [active, setActive] = useState(
-    requestedTab && tabKeys.includes(requestedTab) ? requestedTab : "contracts",
+    requestedTab && tabKeys.includes(requestedTab) ? requestedTab : "attendance",
   );
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
