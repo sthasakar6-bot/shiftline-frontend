@@ -110,10 +110,10 @@ export default function ShiftsSection() {
             {selectedShifts.map((s) => (
               <p key={s.id}>
                 Shift: {formatTime(s.startsAt)} – {formatTime(s.endsAt)}
-                {s.breakStart && s.breakEnd && (
+                {s.breakMinutes && (
                   <>
                     <br />
-                    Break: {formatTime(s.breakStart)} – {formatTime(s.breakEnd)}
+                    Break: {s.breakMinutes} min
                   </>
                 )}
               </p>

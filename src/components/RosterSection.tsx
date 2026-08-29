@@ -9,6 +9,14 @@ interface RosterEntry extends Shift {
   employeeName: string;
 }
 
+const BREAK_OPTIONS = [
+  { label: "No break", value: "" },
+  { label: "15 minutes", value: "15" },
+  { label: "30 minutes", value: "30" },
+  { label: "45 minutes", value: "45" },
+  { label: "1 hour", value: "60" },
+];
+
 // datetime-local gives a plain string with no timezone (e.g. "2026-09-01T09:00")
 // -- interpreting it via `new Date(...)` reads it as the browser's local time,
 // and toISOString() converts that to the correct UTC instant to send, instead
@@ -24,8 +32,7 @@ export default function RosterSection() {
   const [assignee, setAssignee] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
-  const [breakStart, setBreakStart] = useState("");
-  const [breakEnd, setBreakEnd] = useState("");
+  const [breakMinutes, setBreakMinutes] = useState("");
   const [removeTarget, setRemoveTarget] = useState<RosterEntry | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -72,13 +79,11 @@ export default function RosterSection() {
       await api.createShiftForReport(Number(assignee), {
         startsAt: toIso(startsAt),
         endsAt: toIso(endsAt),
-        breakStart: breakStart ? toIso(breakStart) : undefined,
-        breakEnd: breakEnd ? toIso(breakEnd) : undefined,
+        breakMinutes: breakMinutes ? Number(breakMinutes) : undefined,
       });
       setStartsAt("");
       setEndsAt("");
-      setBreakStart("");
-      setBreakEnd("");
+      setBreakMinutes("");
       setMessage("Shift assigned.");
       loadRoster();
     } catch (err) {
@@ -96,6 +101,13 @@ export default function RosterSection() {
     } finally {
       setRemoveTarget(null);
     }
+  }
+
+  const groupedRoster = new Map<string, RosterEntry[]>();
+  for (const entry of roster) {
+    const group = groupedRoster.get(entry.employeeName) ?? [];
+    group.push(entry);
+    groupedRoster.set(entry.employeeName, group);
   }
 
   return (
@@ -134,47 +146,44 @@ export default function RosterSection() {
           />
         </label>
         <label className="field">
-          <span className="field-label">Break starts (optional)</span>
-          <input
-            type="datetime-local"
-            value={breakStart}
-            onChange={(e) => setBreakStart(e.target.value)}
-          />
-        </label>
-        <label className="field">
-          <span className="field-label">Break ends (optional)</span>
-          <input
-            type="datetime-local"
-            value={breakEnd}
-            onChange={(e) => setBreakEnd(e.target.value)}
-          />
+          <span className="field-label">Break</span>
+          <select value={breakMinutes} onChange={(e) => setBreakMinutes(e.target.value)}>
+            {BREAK_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </label>
         <button type="submit">Assign</button>
       </form>
       {message && <div className="success">{message}</div>}
       {error && <div className="error">{error}</div>}
 
-      <ul className="list">
-        {roster.map((s) => (
-          <li key={s.id}>
-            <span>
-              <strong>{s.employeeName}</strong>
-              <br />
-              {formatDateTime(s.startsAt)} → {formatDateTime(s.endsAt)}
-              {s.breakStart && s.breakEnd && (
-                <>
-                  <br />
-                  Break: {formatTime(s.breakStart)} – {formatTime(s.breakEnd)}
-                </>
-              )}
-            </span>
-            <span className="actions">
-              <button onClick={() => setRemoveTarget(s)}>Remove</button>
-            </span>
-          </li>
-        ))}
-        {roster.length === 0 && <li className="empty">No upcoming shifts scheduled.</li>}
-      </ul>
+      {[...groupedRoster.entries()].map(([employeeName, shifts]) => (
+        <div key={employeeName} className="roster-group">
+          <h3>{employeeName}</h3>
+          <ul className="list">
+            {shifts.map((s) => (
+              <li key={s.id}>
+                <span>
+                  {formatDateTime(s.startsAt)} → {formatTime(s.endsAt)}
+                  {s.breakMinutes && (
+                    <>
+                      <br />
+                      Break: {s.breakMinutes} min
+                    </>
+                  )}
+                </span>
+                <span className="actions">
+                  <button onClick={() => setRemoveTarget(s)}>Remove</button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      {roster.length === 0 && <p className="hint">No upcoming shifts scheduled.</p>}
 
       {removeTarget && (
         <ConfirmDialog

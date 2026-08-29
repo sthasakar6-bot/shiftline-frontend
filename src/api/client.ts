@@ -131,7 +131,7 @@ export const api = {
 
   createShiftForReport: (
     userId: number,
-    data: { startsAt: string; endsAt: string; breakStart?: string; breakEnd?: string },
+    data: { startsAt: string; endsAt: string; breakMinutes?: number },
   ) =>
     request<Shift>(`/api/users/${userId}/shifts`, { method: "POST", body: JSON.stringify(data) }),
   listShiftsForReport: (userId: number) => request<Shift[]>(`/api/users/${userId}/shifts`),

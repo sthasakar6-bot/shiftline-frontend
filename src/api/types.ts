@@ -23,8 +23,7 @@ export interface Shift {
   userId: number;
   startsAt: string;
   endsAt: string;
-  breakStart: string | null;
-  breakEnd: string | null;
+  breakMinutes: number | null;
   createdAt: string;
   updatedAt: string;
 }

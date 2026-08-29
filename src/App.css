@@ -251,7 +251,7 @@
 .list li {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 8px 0;
   border-bottom: 1px solid var(--border);
@@ -260,6 +260,19 @@
 
 .list li:last-child {
   border-bottom: none;
+}
+
+.list li > span:first-child {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.roster-group {
+  margin-bottom: 20px;
+}
+
+.roster-group h3 {
+  margin-bottom: 8px;
 }
 
 .list li.empty {
