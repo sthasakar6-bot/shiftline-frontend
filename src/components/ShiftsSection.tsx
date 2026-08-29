@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "../api/client";
-import type { Shift } from "../api/types";
+import type { Attendance, Shift } from "../api/types";
 import { formatTime } from "../lib/formatDate";
 
 function dateKey(d: Date): string {
@@ -12,6 +12,7 @@ const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function ShiftsSection() {
   const [shifts, setShifts] = useState<Shift[]>([]);
+  const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [monthCursor, setMonthCursor] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -20,7 +21,13 @@ export default function ShiftsSection() {
 
   useEffect(() => {
     api.listShifts().then(setShifts).catch(() => {});
+    api.listAttendance().then(setAttendance).catch(() => {});
   }, []);
+
+  const completedShiftIds = useMemo(
+    () => new Set(attendance.filter((a) => a.clockOut).map((a) => a.shiftId)),
+    [attendance],
+  );
 
   const shiftsByDay = useMemo(() => {
     const map = new Map<string, Shift[]>();
@@ -86,7 +93,9 @@ export default function ShiftsSection() {
         ))}
         {cells.map((day, i) => {
           if (!day) return <div key={`blank-${i}`} className="calendar-day empty" />;
-          const hasShift = shiftsByDay.has(dateKey(day));
+          const dayShifts = shiftsByDay.get(dateKey(day)) ?? [];
+          const hasShift = dayShifts.length > 0;
+          const hasActiveShift = dayShifts.some((s) => !completedShiftIds.has(s.id));
           const isToday = dateKey(day) === dateKey(new Date());
           return (
             <button
@@ -97,7 +106,7 @@ export default function ShiftsSection() {
               disabled={!hasShift}
             >
               {day.getDate()}
-              {hasShift && <span className="calendar-dot" />}
+              {hasActiveShift && <span className="calendar-dot" />}
             </button>
           );
         })}
