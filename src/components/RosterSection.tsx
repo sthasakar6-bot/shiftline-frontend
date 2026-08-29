@@ -1,9 +1,10 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { api, ApiError } from "../api/client";
 import type { Shift, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "./ConfirmDialog";
-import { formatDateTime, formatTime } from "../lib/formatDate";
+import { formatTime } from "../lib/formatDate";
 
 interface RosterEntry extends Shift {
   employeeName: string;
@@ -25,10 +26,21 @@ function toIso(localValue: string): string {
   return new Date(localValue).toISOString();
 }
 
+function startOfWeek(d: Date): Date {
+  const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  date.setDate(date.getDate() - date.getDay());
+  return date;
+}
+
+function dateKey(d: Date): string {
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
 export default function RosterSection() {
   const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [roster, setRoster] = useState<RosterEntry[]>([]);
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [assignee, setAssignee] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
@@ -46,7 +58,6 @@ export default function RosterSection() {
   async function loadRoster() {
     if (!user) return;
     const targets = [{ id: user.id, name: `${user.name} (you)` }, ...reports];
-    const now = Date.now();
     try {
       const lists = await Promise.all(
         targets.map((t) =>
@@ -55,11 +66,7 @@ export default function RosterSection() {
             .then((shifts) => shifts.map((s) => ({ ...s, employeeName: t.name }))),
         ),
       );
-      const merged = lists
-        .flat()
-        .filter((s) => new Date(s.endsAt).getTime() >= now)
-        .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
-      setRoster(merged);
+      setRoster(lists.flat());
     } catch {
       // ignore, keep last known roster
     }
@@ -103,12 +110,40 @@ export default function RosterSection() {
     }
   }
 
-  const groupedRoster = new Map<string, RosterEntry[]>();
-  for (const entry of roster) {
-    const group = groupedRoster.get(entry.employeeName) ?? [];
-    group.push(entry);
-    groupedRoster.set(entry.employeeName, group);
-  }
+  const weekEnd = useMemo(() => {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + 7);
+    return d;
+  }, [weekStart]);
+
+  const weekLabel = `${weekStart.toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${new Date(weekEnd.getTime() - 86400000).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
+
+  const groupedByDay = useMemo(() => {
+    const inWeek = roster
+      .filter((s) => {
+        const start = new Date(s.startsAt);
+        return start >= weekStart && start < weekEnd;
+      })
+      .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
+
+    const groups = new Map<string, { label: string; shifts: RosterEntry[] }>();
+    for (const entry of inWeek) {
+      const day = new Date(entry.startsAt);
+      const key = dateKey(day);
+      if (!groups.has(key)) {
+        groups.set(key, {
+          label: day.toLocaleDateString(undefined, {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+          }),
+          shifts: [],
+        });
+      }
+      groups.get(key)!.shifts.push(entry);
+    }
+    return [...groups.values()];
+  }, [roster, weekStart, weekEnd]);
 
   return (
     <section className="panel">
@@ -160,14 +195,45 @@ export default function RosterSection() {
       {message && <div className="success">{message}</div>}
       {error && <div className="error">{error}</div>}
 
-      {[...groupedRoster.entries()].map(([employeeName, shifts]) => (
-        <div key={employeeName} className="roster-group">
-          <h3>{employeeName}</h3>
+      <div className="calendar-header">
+        <button
+          type="button"
+          onClick={() =>
+            setWeekStart((w) => {
+              const d = new Date(w);
+              d.setDate(d.getDate() - 7);
+              return d;
+            })
+          }
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <button type="button" onClick={() => setWeekStart(startOfWeek(new Date()))}>
+          {weekLabel}
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            setWeekStart((w) => {
+              const d = new Date(w);
+              d.setDate(d.getDate() + 7);
+              return d;
+            })
+          }
+        >
+          <ChevronRight size={18} />
+        </button>
+      </div>
+
+      {groupedByDay.map((group) => (
+        <div key={group.label} className="roster-group">
+          <h3>{group.label}</h3>
           <ul className="list">
-            {shifts.map((s) => (
+            {group.shifts.map((s) => (
               <li key={s.id}>
                 <span>
-                  {formatDateTime(s.startsAt)} → {formatTime(s.endsAt)}
+                  <strong>{s.employeeName}</strong> — {formatTime(s.startsAt)} –{" "}
+                  {formatTime(s.endsAt)}
                   {s.breakMinutes && (
                     <>
                       <br />
@@ -183,7 +249,7 @@ export default function RosterSection() {
           </ul>
         </div>
       ))}
-      {roster.length === 0 && <p className="hint">No upcoming shifts scheduled.</p>}
+      {groupedByDay.length === 0 && <p className="hint">No shifts scheduled this week.</p>}
 
       {removeTarget && (
         <ConfirmDialog
