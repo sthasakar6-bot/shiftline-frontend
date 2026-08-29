@@ -12,6 +12,15 @@ function formatElapsed(ms: number): string {
   return [h, m, s].map((n) => String(n).padStart(2, "0")).join(":");
 }
 
+function formatDuration(ms: number): string {
+  const totalMinutes = Math.max(0, Math.round(ms / 60000));
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
 export default function AttendanceSection() {
   const [records, setRecords] = useState<Attendance[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
@@ -33,7 +42,13 @@ export default function AttendanceSection() {
   }, []);
 
   const openRecord = records.find((r) => !r.clockOut);
-  const pastRecords = records.filter((r) => r.id !== openRecord?.id);
+  const pastRecords = records
+    .filter((r) => r.id !== openRecord?.id)
+    .sort((a, b) => {
+      const aTime = a.clockIn ? new Date(a.clockIn).getTime() : 0;
+      const bTime = b.clockIn ? new Date(b.clockIn).getTime() : 0;
+      return bTime - aTime;
+    });
   const completedShiftIds = new Set(records.filter((r) => r.clockOut).map((r) => r.shiftId));
   const clockableShifts = shifts.filter((s) => !completedShiftIds.has(s.id));
 
@@ -125,8 +140,26 @@ export default function AttendanceSection() {
         {pastRecords.map((r) => (
           <li key={r.id}>
             <span>
-              Shift #{r.shiftId} — in: {r.clockIn ? formatTime(r.clockIn) : "-"}, out:{" "}
-              {r.clockOut ? formatTime(r.clockOut) : "-"}
+              <strong>
+                {r.clockIn
+                  ? new Date(r.clockIn).toLocaleDateString(undefined, {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : "Unknown date"}
+              </strong>
+              <br />
+              {r.clockIn ? formatTime(r.clockIn) : "-"} – {r.clockOut ? formatTime(r.clockOut) : "-"}
+              {r.clockIn && r.clockOut && (
+                <>
+                  {" "}
+                  ·{" "}
+                  {formatDuration(
+                    new Date(r.clockOut).getTime() - new Date(r.clockIn).getTime(),
+                  )}
+                </>
+              )}
             </span>
           </li>
         ))}
