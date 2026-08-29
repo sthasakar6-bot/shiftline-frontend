@@ -3,11 +3,15 @@ import { api } from "../api/client";
 import type { Attendance, UserSummary } from "../api/types";
 import { formatDateTime } from "../lib/formatDate";
 import { mapsUrl } from "../lib/geolocation";
+import { useAuth } from "../auth/AuthContext";
 
 export default function AttendanceTrackingSection() {
+  const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [selected, setSelected] = useState("");
   const [records, setRecords] = useState<Attendance[]>([]);
+
+  const people = user ? [{ id: user.id, name: `${user.name} (you)` }, ...reports] : reports;
 
   useEffect(() => {
     api.listReports().then(setReports).catch(() => {});
@@ -27,7 +31,7 @@ export default function AttendanceTrackingSection() {
       <div className="inline-form">
         <select value={selected} onChange={(e) => setSelected(e.target.value)}>
           <option value="">Select employee</option>
-          {reports.map((r) => (
+          {people.map((r) => (
             <option key={r.id} value={r.id}>
               {r.name}
             </option>

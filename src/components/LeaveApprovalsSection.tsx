@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { api, ApiError } from "../api/client";
 import type { LeaveRequest, UserSummary } from "../api/types";
+import { useAuth } from "../auth/AuthContext";
 
 export default function LeaveApprovalsSection() {
+  const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [selected, setSelected] = useState("");
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const people = user ? [{ id: user.id, name: `${user.name} (you)` }, ...reports] : reports;
 
   useEffect(() => {
     api.listReports().then(setReports).catch(() => {});
@@ -39,8 +43,8 @@ export default function LeaveApprovalsSection() {
       <h2>Leave Approvals</h2>
       <div className="inline-form">
         <select value={selected} onChange={(e) => setSelected(e.target.value)}>
-          <option value="">Select report</option>
-          {reports.map((r) => (
+          <option value="">Select employee</option>
+          {people.map((r) => (
             <option key={r.id} value={r.id}>
               {r.name}
             </option>
