@@ -1,9 +1,12 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { api, ApiError } from "../api/client";
 import type { Contract, UserSummary } from "../api/types";
+import { useAuth } from "../auth/AuthContext";
 
 export default function ManagerSection() {
+  const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
+  const [employees, setEmployees] = useState<UserSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -24,7 +27,34 @@ export default function ManagerSection() {
     api.listReports().then(setReports).catch(() => {});
   }
 
+  function loadEmployees() {
+    api.listEmployees().then(setEmployees).catch(() => {});
+  }
+
   useEffect(loadReports, []);
+  useEffect(loadEmployees, []);
+
+  async function handleAddToTeam(id: number) {
+    setError(null);
+    try {
+      await api.assignManager(id);
+      loadReports();
+      loadEmployees();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to add to team");
+    }
+  }
+
+  async function handleRemoveFromTeam(id: number) {
+    setError(null);
+    try {
+      await api.removeFromTeam(id);
+      loadReports();
+      loadEmployees();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to remove from team");
+    }
+  }
 
   function loadContracts(userId: number) {
     api.listContractsForReport(userId).then(setContracts).catch(() => {});
@@ -114,6 +144,31 @@ export default function ManagerSection() {
         ))}
         {reports.length === 0 && <li className="empty">No direct reports yet.</li>}
       </ul>
+
+      <h3>Manage team</h3>
+      <ul className="list">
+        {employees.map((e) => (
+          <li key={e.id}>
+            <span>
+              {e.name} ({e.email}) —{" "}
+              {e.managerId === user?.id
+                ? "Reports to you"
+                : e.managerId
+                  ? "Managed by someone else"
+                  : "Unassigned"}
+            </span>
+            <span className="actions">
+              {e.managerId === user?.id ? (
+                <button onClick={() => handleRemoveFromTeam(e.id)}>Remove from team</button>
+              ) : (
+                <button onClick={() => handleAddToTeam(e.id)}>Add to my team</button>
+              )}
+            </span>
+          </li>
+        ))}
+        {employees.length === 0 && <li className="empty">No employees registered yet.</li>}
+      </ul>
+      {error && <div className="error">{error}</div>}
 
       {reports.length > 0 && (
         <>

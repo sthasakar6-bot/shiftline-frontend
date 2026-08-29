@@ -74,7 +74,12 @@ export const api = {
 
   listUsers: () => request<User[]>("/api/users"),
   listReports: () => request<UserSummary[]>("/api/users/reports"),
+  listEmployees: () => request<UserSummary[]>("/api/users/employees"),
   promoteUser: (id: number) => request<UserSummary>(`/api/users/${id}/promote`, { method: "POST" }),
+  assignManager: (id: number) =>
+    request<UserSummary>(`/api/users/${id}/manager`, { method: "PATCH" }),
+  removeFromTeam: (id: number) =>
+    request<UserSummary>(`/api/users/${id}/manager`, { method: "DELETE" }),
 
   listContracts: () => request<Contract[]>("/api/contracts"),
 
