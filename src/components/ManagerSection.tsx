@@ -149,69 +149,63 @@ export default function ManagerSection() {
         />
       )}
 
-      {reports.length > 0 && (
+      <h3>Manage contracts</h3>
+      <div className="inline-form">
+        <select value={contractReport} onChange={(e) => setContractReport(e.target.value)}>
+          <option value="">Select employee</option>
+          {user && <option value={user.id}>{user.name} (you)</option>}
+          {reports.map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      {contractReport && (
         <>
-          <h3>Manage contracts</h3>
-          <div className="inline-form">
-            <select value={contractReport} onChange={(e) => setContractReport(e.target.value)}>
-              <option value="">Select employee</option>
-              {reports.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <ul className="list">
+            {contracts.map((c) => (
+              <li key={c.id}>
+                <span>
+                  <strong>{c.role}</strong>
+                  {!c.pdfFilename && " — no PDF uploaded"}
+                </span>
+                <span className="actions">
+                  {c.pdfFilename && <button onClick={() => handleViewPdf(c.id)}>View PDF</button>}
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={(e) =>
+                      setReuploadFiles({
+                        ...reuploadFiles,
+                        [c.id]: e.target.files?.[0] ?? null,
+                      })
+                    }
+                  />
+                  <button onClick={() => handleUploadPdf(c.id)}>
+                    {c.pdfFilename ? "Replace PDF" : "Upload PDF"}
+                  </button>
+                  <button onClick={() => handleDeleteContract(c.id)}>Delete</button>
+                </span>
+              </li>
+            ))}
+            {contracts.length === 0 && <li className="empty">No contracts yet.</li>}
+          </ul>
 
-          {contractReport && (
-            <>
-              <ul className="list">
-                {contracts.map((c) => (
-                  <li key={c.id}>
-                    <span>
-                      <strong>{c.role}</strong>
-                      {!c.pdfFilename && " — no PDF uploaded"}
-                    </span>
-                    <span className="actions">
-                      {c.pdfFilename && (
-                        <button onClick={() => handleViewPdf(c.id)}>View PDF</button>
-                      )}
-                      <input
-                        type="file"
-                        accept="application/pdf"
-                        onChange={(e) =>
-                          setReuploadFiles({
-                            ...reuploadFiles,
-                            [c.id]: e.target.files?.[0] ?? null,
-                          })
-                        }
-                      />
-                      <button onClick={() => handleUploadPdf(c.id)}>
-                        {c.pdfFilename ? "Replace PDF" : "Upload PDF"}
-                      </button>
-                      <button onClick={() => handleDeleteContract(c.id)}>Delete</button>
-                    </span>
-                  </li>
-                ))}
-                {contracts.length === 0 && <li className="empty">No contracts yet.</li>}
-              </ul>
-
-              <form className="inline-form" onSubmit={handleCreateContract}>
-                <input
-                  placeholder="Role"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  required
-                />
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={(e) => setPdfFile(e.target.files?.[0] ?? null)}
-                />
-                <button type="submit">Create contract</button>
-              </form>
-            </>
-          )}
+          <form className="inline-form" onSubmit={handleCreateContract}>
+            <input
+              placeholder="Role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              required
+            />
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => setPdfFile(e.target.files?.[0] ?? null)}
+            />
+            <button type="submit">Create contract</button>
+          </form>
 
           {message && <div className="success">{message}</div>}
           {error && <div className="error">{error}</div>}
