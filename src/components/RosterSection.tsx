@@ -58,7 +58,15 @@ export default function RosterSection() {
     setError(null);
     setMessage(null);
     try {
-      await api.createShiftForReport(Number(assignee), { startsAt, endsAt });
+      // datetime-local gives a plain string with no timezone (e.g.
+      // "2026-09-01T09:00") -- interpreting it via `new Date(...)` reads it
+      // as the browser's local time, and toISOString() converts that to the
+      // correct UTC instant to send, instead of the server assuming UTC for
+      // the naive string and silently shifting the actual time.
+      await api.createShiftForReport(Number(assignee), {
+        startsAt: new Date(startsAt).toISOString(),
+        endsAt: new Date(endsAt).toISOString(),
+      });
       setStartsAt("");
       setEndsAt("");
       setMessage("Shift assigned.");
