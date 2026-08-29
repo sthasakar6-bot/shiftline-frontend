@@ -27,6 +27,16 @@ export default function DashboardPage() {
 
   useEffect(loadNotifications, []);
 
+  // Reacts to ?tab= changes made after the initial mount too (e.g. clicking a
+  // notification that navigates to /?tab=roster while already on this page),
+  // not just the tab picked on first load.
+  useEffect(() => {
+    const requested = searchParams.get("tab");
+    if (requested && tabKeys.includes(requested)) {
+      setActive(requested);
+    }
+  }, [searchParams]);
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const tabs: Tab[] = [
