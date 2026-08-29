@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import type { Attendance, UserSummary } from "../api/types";
+import { formatDateTime } from "../lib/formatDate";
 
 export default function AttendanceTrackingSection() {
   const [reports, setReports] = useState<UserSummary[]>([]);
@@ -37,9 +38,9 @@ export default function AttendanceTrackingSection() {
           {records.map((r) => (
             <li key={r.id}>
               <span>
-                Shift #{r.shiftId} — In: {r.clockIn ? new Date(r.clockIn).toLocaleString() : "-"}
+                Shift #{r.shiftId} — In: {r.clockIn ? formatDateTime(r.clockIn) : "-"}
                 <br />
-                Out: {r.clockOut ? new Date(r.clockOut).toLocaleString() : "Still clocked in"}
+                Out: {r.clockOut ? formatDateTime(r.clockOut) : "Still clocked in"}
               </span>
             </li>
           ))}

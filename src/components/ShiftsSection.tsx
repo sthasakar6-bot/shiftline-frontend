@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "../api/client";
 import type { Shift } from "../api/types";
+import { formatTime } from "../lib/formatDate";
 
 function dateKey(d: Date): string {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
@@ -108,13 +109,11 @@ export default function ShiftsSection() {
             <h3>{selectedDay.toLocaleDateString(undefined, { dateStyle: "full" })}</h3>
             {selectedShifts.map((s) => (
               <p key={s.id}>
-                Shift: {new Date(s.startsAt).toLocaleTimeString()} –{" "}
-                {new Date(s.endsAt).toLocaleTimeString()}
+                Shift: {formatTime(s.startsAt)} – {formatTime(s.endsAt)}
                 {s.breakStart && s.breakEnd && (
                   <>
                     <br />
-                    Break: {new Date(s.breakStart).toLocaleTimeString()} –{" "}
-                    {new Date(s.breakEnd).toLocaleTimeString()}
+                    Break: {formatTime(s.breakStart)} – {formatTime(s.breakEnd)}
                   </>
                 )}
               </p>

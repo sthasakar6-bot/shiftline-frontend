@@ -3,6 +3,7 @@ import { api, ApiError } from "../api/client";
 import type { Shift, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "./ConfirmDialog";
+import { formatDateTime, formatTime } from "../lib/formatDate";
 
 interface RosterEntry extends Shift {
   employeeName: string;
@@ -159,12 +160,11 @@ export default function RosterSection() {
             <span>
               <strong>{s.employeeName}</strong>
               <br />
-              {new Date(s.startsAt).toLocaleString()} → {new Date(s.endsAt).toLocaleString()}
+              {formatDateTime(s.startsAt)} → {formatDateTime(s.endsAt)}
               {s.breakStart && s.breakEnd && (
                 <>
                   <br />
-                  Break: {new Date(s.breakStart).toLocaleTimeString()} –{" "}
-                  {new Date(s.breakEnd).toLocaleTimeString()}
+                  Break: {formatTime(s.breakStart)} – {formatTime(s.breakEnd)}
                 </>
               )}
             </span>

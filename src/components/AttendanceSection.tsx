@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { api, ApiError } from "../api/client";
 import type { Attendance, Shift } from "../api/types";
+import { formatDateTime, formatTime } from "../lib/formatDate";
 
 export default function AttendanceSection() {
   const [records, setRecords] = useState<Attendance[]>([]);
@@ -44,7 +45,7 @@ export default function AttendanceSection() {
           <option value="">Select a shift to clock in</option>
           {shifts.map((s) => (
             <option key={s.id} value={s.id}>
-              {new Date(s.startsAt).toLocaleString()}
+              {formatDateTime(s.startsAt)}
             </option>
           ))}
         </select>
@@ -55,8 +56,8 @@ export default function AttendanceSection() {
         {records.map((r) => (
           <li key={r.id}>
             <span>
-              Shift #{r.shiftId} — in: {r.clockIn ? new Date(r.clockIn).toLocaleTimeString() : "-"},
-              out: {r.clockOut ? new Date(r.clockOut).toLocaleTimeString() : "-"}
+              Shift #{r.shiftId} — in: {r.clockIn ? formatTime(r.clockIn) : "-"}, out:{" "}
+              {r.clockOut ? formatTime(r.clockOut) : "-"}
             </span>
             {!r.clockOut && (
               <span className="actions">
