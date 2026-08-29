@@ -1,29 +1,14 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { api, ApiError } from "../api/client";
-import type { Contract, Invite, UserSummary } from "../api/types";
+import type { Contract, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 
 export default function ManagerSection() {
   const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [employees, setEmployees] = useState<UserSummary[]>([]);
-  const [invites, setInvites] = useState<Invite[]>([]);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [lastInviteToken, setLastInviteToken] = useState<string | null>(null);
-  const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-
-  function inviteLinkFor(token: string) {
-    return `${window.location.origin}/register?token=${token}`;
-  }
-
-  function handleCopyLink(token: string) {
-    navigator.clipboard.writeText(inviteLinkFor(token)).then(() => {
-      setCopiedToken(token);
-      setTimeout(() => setCopiedToken((t) => (t === token ? null : t)), 2000);
-    });
-  }
 
   // Shift assignment
   const [shiftReport, setShiftReport] = useState("");
@@ -46,28 +31,8 @@ export default function ManagerSection() {
     api.listEmployees().then(setEmployees).catch(() => {});
   }
 
-  function loadInvites() {
-    api.listInvites().then(setInvites).catch(() => {});
-  }
-
   useEffect(loadReports, []);
   useEffect(loadEmployees, []);
-  useEffect(loadInvites, []);
-
-  async function handleSendInvite(e: FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setMessage(null);
-    setLastInviteToken(null);
-    try {
-      const invite = await api.createInvite(inviteEmail);
-      setInviteEmail("");
-      setLastInviteToken(invite.token);
-      loadInvites();
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to send invite");
-    }
-  }
 
   async function handleAddToTeam(id: number) {
     setError(null);
@@ -178,47 +143,6 @@ export default function ManagerSection() {
           </li>
         ))}
         {reports.length === 0 && <li className="empty">No direct reports yet.</li>}
-      </ul>
-
-      <h3>Invite an employee</h3>
-      <p className="hint">
-        Create an invite, then copy the link and send it to them yourself (Gmail, WhatsApp, etc).
-        The link lets them create an account under you.
-      </p>
-      <form className="inline-form" onSubmit={handleSendInvite}>
-        <input
-          type="email"
-          placeholder="Employee's email"
-          value={inviteEmail}
-          onChange={(e) => setInviteEmail(e.target.value)}
-          required
-        />
-        <button type="submit">Create invite</button>
-      </form>
-      {lastInviteToken && (
-        <div className="inline-form">
-          <input value={inviteLinkFor(lastInviteToken)} readOnly />
-          <button type="button" onClick={() => handleCopyLink(lastInviteToken)}>
-            {copiedToken === lastInviteToken ? "Copied!" : "Copy link"}
-          </button>
-        </div>
-      )}
-      <ul className="list">
-        {invites.map((i) => (
-          <li key={i.id}>
-            <span>
-              {i.email} — {i.status}
-            </span>
-            {i.status === "pending" && (
-              <span className="actions">
-                <button onClick={() => handleCopyLink(i.token)}>
-                  {copiedToken === i.token ? "Copied!" : "Copy link"}
-                </button>
-              </span>
-            )}
-          </li>
-        ))}
-        {invites.length === 0 && <li className="empty">No invites sent yet.</li>}
       </ul>
 
       <h3>Manage team</h3>
