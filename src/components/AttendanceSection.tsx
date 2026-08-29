@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import { api, ApiError } from "../api/client";
 import type { Attendance, Shift } from "../api/types";
 import { formatDateTime, formatTime } from "../lib/formatDate";
+import { getCurrentCoords } from "../lib/geolocation";
 
 export default function AttendanceSection() {
   const [records, setRecords] = useState<Attendance[]>([]);
@@ -20,7 +21,8 @@ export default function AttendanceSection() {
     e.preventDefault();
     setError(null);
     try {
-      await api.clockIn(Number(shiftId));
+      const coords = await getCurrentCoords();
+      await api.clockIn(Number(shiftId), coords);
       setShiftId("");
       load();
     } catch (err) {
@@ -29,8 +31,10 @@ export default function AttendanceSection() {
   }
 
   async function handleClockOut(id: number) {
+    setError(null);
     try {
-      await api.clockOut(id);
+      const coords = await getCurrentCoords();
+      await api.clockOut(id, coords);
       load();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to clock out");

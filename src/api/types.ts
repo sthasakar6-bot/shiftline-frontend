@@ -34,6 +34,10 @@ export interface Attendance {
   shiftId: number;
   clockIn: string | null;
   clockOut: string | null;
+  clockInLat: number | null;
+  clockInLng: number | null;
+  clockOutLat: number | null;
+  clockOutLng: number | null;
   createdAt: string;
   updatedAt: string;
 }
