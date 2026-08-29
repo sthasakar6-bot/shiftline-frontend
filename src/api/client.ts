@@ -184,4 +184,9 @@ export const api = {
     request<Invite>("/api/invites", { method: "POST", body: JSON.stringify({ email }) }),
   listInvites: () => request<Invite[]>("/api/invites"),
   getInviteByToken: (token: string) => request<{ email: string }>(`/api/invites/${token}`),
+
+  subscribeToPush: (subscription: PushSubscriptionJSON) =>
+    request<void>("/api/push/subscribe", { method: "POST", body: JSON.stringify(subscription) }),
+  unsubscribeFromPush: (endpoint: string) =>
+    request<void>("/api/push/unsubscribe", { method: "POST", body: JSON.stringify({ endpoint }) }),
 };
