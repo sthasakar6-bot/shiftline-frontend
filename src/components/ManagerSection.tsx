@@ -2,11 +2,13 @@ import { type FormEvent, useEffect, useState } from "react";
 import { api, ApiError } from "../api/client";
 import type { Contract, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
+import ConfirmDialog from "./ConfirmDialog";
 
 export default function ManagerSection() {
   const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [employees, setEmployees] = useState<UserSummary[]>([]);
+  const [removeTarget, setRemoveTarget] = useState<UserSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -53,6 +55,8 @@ export default function ManagerSection() {
       loadEmployees();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to remove from team");
+    } finally {
+      setRemoveTarget(null);
     }
   }
 
@@ -80,11 +84,6 @@ export default function ManagerSection() {
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to assign shift");
     }
-  }
-
-  async function handlePromote(id: number) {
-    await api.promoteUser(id);
-    loadReports();
   }
 
   async function handleCreateContract(e: FormEvent) {
@@ -132,14 +131,7 @@ export default function ManagerSection() {
       <ul className="list">
         {reports.map((r) => (
           <li key={r.id}>
-            <span>
-              {r.name} ({r.email}) — {r.role}
-            </span>
-            {r.role === "employee" && (
-              <span className="actions">
-                <button onClick={() => handlePromote(r.id)}>Promote to manager</button>
-              </span>
-            )}
+            <span>{r.name}</span>
           </li>
         ))}
         {reports.length === 0 && <li className="empty">No direct reports yet.</li>}
@@ -150,7 +142,7 @@ export default function ManagerSection() {
         {employees.map((e) => (
           <li key={e.id}>
             <span>
-              {e.name} ({e.email}) —{" "}
+              {e.name} —{" "}
               {e.managerId === user?.id
                 ? "Reports to you"
                 : e.managerId
@@ -159,7 +151,7 @@ export default function ManagerSection() {
             </span>
             <span className="actions">
               {e.managerId === user?.id ? (
-                <button onClick={() => handleRemoveFromTeam(e.id)}>Remove from team</button>
+                <button onClick={() => setRemoveTarget(e)}>Remove from team</button>
               ) : (
                 <button onClick={() => handleAddToTeam(e.id)}>Add to my team</button>
               )}
@@ -169,6 +161,17 @@ export default function ManagerSection() {
         {employees.length === 0 && <li className="empty">No employees registered yet.</li>}
       </ul>
       {error && <div className="error">{error}</div>}
+
+      {removeTarget && (
+        <ConfirmDialog
+          title="Remove from team?"
+          message={`Are you sure you want to remove ${removeTarget.name} from your team?`}
+          confirmLabel="Remove"
+          danger
+          onConfirm={() => handleRemoveFromTeam(removeTarget.id)}
+          onCancel={() => setRemoveTarget(null)}
+        />
+      )}
 
       {reports.length > 0 && (
         <>
