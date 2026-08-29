@@ -1,6 +1,7 @@
 import type {
   Attendance,
   Contract,
+  Invite,
   LeaveRequest,
   LoginResponse,
   Notification,
@@ -58,10 +59,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  register: (name: string, email: string, password: string, managerId?: number) =>
+  register: (name: string, email: string, password: string, token: string) =>
     request<User>("/api/auth/register", {
       method: "POST",
-      body: JSON.stringify({ name, email, password, managerId }),
+      body: JSON.stringify({ name, email, password, token }),
     }),
 
   login: (email: string, password: string) =>
@@ -153,4 +154,9 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify({ status }),
     }),
+
+  createInvite: (email: string) =>
+    request<Invite>("/api/invites", { method: "POST", body: JSON.stringify({ email }) }),
+  listInvites: () => request<Invite[]>("/api/invites"),
+  getInviteByToken: (token: string) => request<{ email: string }>(`/api/invites/${token}`),
 };
