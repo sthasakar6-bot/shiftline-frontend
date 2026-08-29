@@ -9,8 +9,21 @@ export default function ManagerSection() {
   const [employees, setEmployees] = useState<UserSummary[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [lastInviteToken, setLastInviteToken] = useState<string | null>(null);
+  const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+
+  function inviteLinkFor(token: string) {
+    return `${window.location.origin}/register?token=${token}`;
+  }
+
+  function handleCopyLink(token: string) {
+    navigator.clipboard.writeText(inviteLinkFor(token)).then(() => {
+      setCopiedToken(token);
+      setTimeout(() => setCopiedToken((t) => (t === token ? null : t)), 2000);
+    });
+  }
 
   // Shift assignment
   const [shiftReport, setShiftReport] = useState("");
@@ -45,10 +58,11 @@ export default function ManagerSection() {
     e.preventDefault();
     setError(null);
     setMessage(null);
+    setLastInviteToken(null);
     try {
-      await api.createInvite(inviteEmail);
+      const invite = await api.createInvite(inviteEmail);
       setInviteEmail("");
-      setMessage("Invite sent.");
+      setLastInviteToken(invite.token);
       loadInvites();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to send invite");
@@ -167,6 +181,10 @@ export default function ManagerSection() {
       </ul>
 
       <h3>Invite an employee</h3>
+      <p className="hint">
+        Create an invite, then copy the link and send it to them yourself (Gmail, WhatsApp, etc).
+        The link lets them create an account under you.
+      </p>
       <form className="inline-form" onSubmit={handleSendInvite}>
         <input
           type="email"
@@ -175,14 +193,29 @@ export default function ManagerSection() {
           onChange={(e) => setInviteEmail(e.target.value)}
           required
         />
-        <button type="submit">Send invite</button>
+        <button type="submit">Create invite</button>
       </form>
+      {lastInviteToken && (
+        <div className="inline-form">
+          <input value={inviteLinkFor(lastInviteToken)} readOnly />
+          <button type="button" onClick={() => handleCopyLink(lastInviteToken)}>
+            {copiedToken === lastInviteToken ? "Copied!" : "Copy link"}
+          </button>
+        </div>
+      )}
       <ul className="list">
         {invites.map((i) => (
           <li key={i.id}>
             <span>
               {i.email} — {i.status}
             </span>
+            {i.status === "pending" && (
+              <span className="actions">
+                <button onClick={() => handleCopyLink(i.token)}>
+                  {copiedToken === i.token ? "Copied!" : "Copy link"}
+                </button>
+              </span>
+            )}
           </li>
         ))}
         {invites.length === 0 && <li className="empty">No invites sent yet.</li>}
