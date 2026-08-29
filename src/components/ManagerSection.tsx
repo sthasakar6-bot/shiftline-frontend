@@ -12,11 +12,6 @@ export default function ManagerSection() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  // Shift assignment
-  const [shiftReport, setShiftReport] = useState("");
-  const [startsAt, setStartsAt] = useState("");
-  const [endsAt, setEndsAt] = useState("");
-
   // Contract management
   const [contractReport, setContractReport] = useState("");
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -72,20 +67,6 @@ export default function ManagerSection() {
     }
   }, [contractReport]);
 
-  async function handleAssignShift(e: FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setMessage(null);
-    try {
-      await api.createShiftForReport(Number(shiftReport), { startsAt, endsAt });
-      setStartsAt("");
-      setEndsAt("");
-      setMessage("Shift assigned.");
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to assign shift");
-    }
-  }
-
   async function handleCreateContract(e: FormEvent) {
     e.preventDefault();
     setError(null);
@@ -127,17 +108,7 @@ export default function ManagerSection() {
 
   return (
     <section className="panel">
-      <h2>My Team</h2>
-      <ul className="list">
-        {reports.map((r) => (
-          <li key={r.id}>
-            <span>{r.name}</span>
-          </li>
-        ))}
-        {reports.length === 0 && <li className="empty">No direct reports yet.</li>}
-      </ul>
-
-      <h3>Manage team</h3>
+      <h2>Manage team</h2>
       <ul className="list">
         {employees.map((e) => (
           <li key={e.id}>
@@ -175,31 +146,6 @@ export default function ManagerSection() {
 
       {reports.length > 0 && (
         <>
-          <h3>Assign a shift</h3>
-          <form className="inline-form" onSubmit={handleAssignShift}>
-            <select value={shiftReport} onChange={(e) => setShiftReport(e.target.value)} required>
-              <option value="">Select report</option>
-              {reports.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </select>
-            <input
-              type="datetime-local"
-              value={startsAt}
-              onChange={(e) => setStartsAt(e.target.value)}
-              required
-            />
-            <input
-              type="datetime-local"
-              value={endsAt}
-              onChange={(e) => setEndsAt(e.target.value)}
-              required
-            />
-            <button type="submit">Assign</button>
-          </form>
-
           <h3>Manage contracts</h3>
           <div className="inline-form">
             <select value={contractReport} onChange={(e) => setContractReport(e.target.value)}>
