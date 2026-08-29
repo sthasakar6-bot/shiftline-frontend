@@ -66,4 +66,29 @@ select {
   background: var(--panel-bg);
   color: var(--text);
   font-size: 16px;
+  color-scheme: light dark;
+}
+
+/* Some browsers don't inherit `color` into the native date/time text of
+   datetime-local/date/time inputs, leaving it black-on-dark in dark mode. */
+input::-webkit-datetime-edit,
+input::-webkit-datetime-edit-fields-wrapper,
+input::-webkit-datetime-edit-text,
+input::-webkit-datetime-edit-month-field,
+input::-webkit-datetime-edit-day-field,
+input::-webkit-datetime-edit-year-field,
+input::-webkit-datetime-edit-hour-field,
+input::-webkit-datetime-edit-minute-field,
+input::-webkit-datetime-edit-ampm-field {
+  color: var(--text);
+}
+
+input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+  input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
 }

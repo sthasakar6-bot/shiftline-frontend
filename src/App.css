@@ -221,6 +221,24 @@
   min-width: 120px;
 }
 
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.field-label {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.field input,
+.field select {
+  width: 100%;
+}
+
 .list {
   list-style: none;
   padding: 0;
@@ -264,6 +282,82 @@
   color: var(--danger);
   font-size: 13px;
   margin-bottom: 8px;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.calendar-header button {
+  padding: 4px 8px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-size: 11px;
+  opacity: 0.6;
+  padding: 4px 0;
+}
+
+.calendar-day {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+  color: var(--text);
+  font-size: 13px;
+  padding: 0;
+}
+
+.calendar-day:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.calendar-day.empty {
+  visibility: hidden;
+  border: none;
+}
+
+.calendar-day.today {
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.calendar-dot {
+  position: absolute;
+  bottom: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: calendar-dot-blink 1.4s ease-in-out infinite;
+}
+
+@keyframes calendar-dot-blink {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 var(--success);
+  }
+  50% {
+    opacity: 0.4;
+    box-shadow: 0 0 0 4px rgba(21, 128, 61, 0);
+  }
 }
 
 .success {
