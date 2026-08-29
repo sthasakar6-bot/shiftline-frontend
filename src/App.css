@@ -427,6 +427,87 @@
   }
 }
 
+.clock-display {
+  text-align: center;
+  padding: 8px 0 20px;
+}
+
+.clock-time {
+  font-size: 40px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-h);
+  letter-spacing: 1px;
+}
+
+.clock-date {
+  font-size: 13px;
+  opacity: 0.6;
+  margin-top: 2px;
+}
+
+.clock-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--accent-bg);
+  margin-bottom: 16px;
+}
+
+.clock-status.clocked-in {
+  background: var(--success-bg);
+}
+
+.clock-status select {
+  flex: 1;
+  min-width: 160px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: calendar-dot-blink 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.clock-elapsed {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--success);
+}
+
+.clock-action {
+  margin-left: auto;
+  padding: 10px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  border-width: 1px;
+  transition: transform 0.1s ease;
+}
+
+.clock-action:active {
+  transform: scale(0.95);
+}
+
+.clock-action.in {
+  background: var(--success);
+  color: white;
+  border-color: var(--success);
+}
+
+.clock-action.out {
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger);
+}
+
 .success {
   color: var(--success);
   font-size: 13px;
