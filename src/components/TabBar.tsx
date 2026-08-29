@@ -4,6 +4,7 @@ export interface Tab {
   key: string;
   label: string;
   icon: ComponentType<{ size?: number }>;
+  badge?: number;
 }
 
 export default function TabBar({
@@ -17,13 +18,18 @@ export default function TabBar({
 }) {
   return (
     <nav className="tab-bar">
-      {tabs.map(({ key, label, icon: Icon }) => (
+      {tabs.map(({ key, label, icon: Icon, badge }) => (
         <button
           key={key}
           className={key === active ? "active" : ""}
           onClick={() => onChange(key)}
         >
-          <Icon size={22} />
+          <span className="tab-icon">
+            <Icon size={22} />
+            {Boolean(badge) && (
+              <span className="tab-badge">{badge && badge > 99 ? "99+" : badge}</span>
+            )}
+          </span>
           <span>{label}</span>
         </button>
       ))}

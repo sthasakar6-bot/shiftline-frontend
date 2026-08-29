@@ -164,6 +164,10 @@ export const api = {
   listNotifications: () => request<Notification[]>("/api/notifications"),
   markNotificationRead: (id: number) =>
     request<Notification>(`/api/notifications/${id}/read`, { method: "PATCH" }),
+  markAllNotificationsRead: () =>
+    request<void>("/api/notifications/read-all", { method: "PATCH" }),
+  deleteNotification: (id: number) =>
+    request<void>(`/api/notifications/${id}`, { method: "DELETE" }),
 
   listLeaveRequests: () => request<LeaveRequest[]>("/api/leave-requests"),
   createLeaveRequest: (data: {
