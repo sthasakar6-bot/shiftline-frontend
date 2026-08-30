@@ -1,27 +1,21 @@
 .splash-screen {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 2147483647;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 10px;
   background: radial-gradient(circle at 50% 40%, #1b2636, #0a0f1a 75%);
-  animation: splash-fade-in 0.4s ease both;
+  opacity: 1;
 }
 
 .splash-screen.leaving {
   animation: splash-fade-out 0.5s ease both;
-}
-
-@keyframes splash-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 @keyframes splash-fade-out {

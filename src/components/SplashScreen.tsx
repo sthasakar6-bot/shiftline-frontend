@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 const SESSION_KEY = "shiftline_splash_shown";
-const HOLD_MS = 1600;
+const HOLD_MS = 3000;
 const FADE_MS = 500;
 
 type Phase = "hidden" | "visible" | "leaving";
