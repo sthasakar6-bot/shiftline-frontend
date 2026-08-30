@@ -4,10 +4,12 @@ export interface User {
   email: string;
   role: "employee" | "manager";
   hasAvatar: boolean;
+  phone: string | null;
 }
 
 export interface UserSummary extends User {
   managerId: number | null;
+  online: boolean;
 }
 
 export interface Contract {

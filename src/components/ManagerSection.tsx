@@ -4,12 +4,16 @@ import type { Contract, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "./ConfirmDialog";
 import Avatar from "./Avatar";
+import EmployeeDetailModal from "./EmployeeDetailModal";
+
+const PRESENCE_POLL_MS = 15000;
 
 export default function ManagerSection() {
   const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [employees, setEmployees] = useState<UserSummary[]>([]);
   const [removeTarget, setRemoveTarget] = useState<UserSummary | null>(null);
+  const [detailTargetId, setDetailTargetId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -30,6 +34,14 @@ export default function ManagerSection() {
 
   useEffect(loadReports, []);
   useEffect(loadEmployees, []);
+
+  useEffect(() => {
+    if (detailTargetId === null) return;
+    const timer = setInterval(loadEmployees, PRESENCE_POLL_MS);
+    return () => clearInterval(timer);
+  }, [detailTargetId]);
+
+  const detailTarget = employees.find((e) => e.id === detailTargetId) ?? null;
 
   async function handleAddToTeam(id: number) {
     setError(null);
@@ -125,10 +137,15 @@ export default function ManagerSection() {
       <ul className="list">
         {employees.map((e) => (
           <li key={e.id}>
-            <span className="list-row-identity">
+            <button
+              type="button"
+              className="list-row-identity"
+              onClick={() => setDetailTargetId(e.id)}
+            >
               <Avatar userId={e.id} name={e.name} hasAvatar={e.hasAvatar} size={32} />
               {e.name}
-            </span>
+              {e.online && <span className="presence-dot inline" title="Online now" />}
+            </button>
             <span className="actions">
               {e.managerId === user?.id ? (
                 <button onClick={() => setRemoveTarget(e)}>Remove from team</button>
@@ -141,6 +158,10 @@ export default function ManagerSection() {
         {employees.length === 0 && <li className="empty">No employees registered yet.</li>}
       </ul>
       {error && <div className="error">{error}</div>}
+
+      {detailTarget && (
+        <EmployeeDetailModal employee={detailTarget} onClose={() => setDetailTargetId(null)} />
+      )}
 
       {removeTarget && (
         <ConfirmDialog

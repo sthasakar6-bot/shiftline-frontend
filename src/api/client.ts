@@ -222,4 +222,6 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify({ currentPassword, newPassword }),
     }),
+  updatePhone: (phone: string) =>
+    request<void>("/api/auth/phone", { method: "PATCH", body: JSON.stringify({ phone }) }),
 };
