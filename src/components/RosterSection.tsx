@@ -5,8 +5,6 @@ import type { Shift, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "./ConfirmDialog";
 import { formatTime } from "../lib/formatDate";
-import { fetchApprovedLeave, type LeaveEntry } from "../lib/aggregateLeave";
-import { addDays, parseIsoDateLocal } from "../lib/dateOnly";
 
 interface RosterEntry extends Shift {
   employeeName: string;
@@ -42,7 +40,6 @@ export default function RosterSection() {
   const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [roster, setRoster] = useState<RosterEntry[]>([]);
-  const [approvedLeave, setApprovedLeave] = useState<LeaveEntry[]>([]);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [assignee, setAssignee] = useState("");
   const [startsAt, setStartsAt] = useState("");
@@ -83,10 +80,6 @@ export default function RosterSection() {
     loadRoster();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reports, user]);
-
-  useEffect(() => {
-    if (people.length > 0) fetchApprovedLeave(people).then(setApprovedLeave);
-  }, [people]);
 
   async function handleAssign(e: FormEvent) {
     e.preventDefault();
@@ -129,10 +122,7 @@ export default function RosterSection() {
   const weekLabel = `${weekStart.toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${new Date(weekEnd.getTime() - 86400000).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
 
   const groupedByDay = useMemo(() => {
-    const groups = new Map<
-      string,
-      { label: string; date: Date; shifts: RosterEntry[]; leaves: LeaveEntry[] }
-    >();
+    const groups = new Map<string, { label: string; date: Date; shifts: RosterEntry[] }>();
 
     function ensureGroup(day: Date) {
       const key = dateKey(day);
@@ -146,7 +136,6 @@ export default function RosterSection() {
           }),
           date: day,
           shifts: [],
-          leaves: [],
         };
         groups.set(key, g);
       }
@@ -160,19 +149,8 @@ export default function RosterSection() {
       }
     }
 
-    for (const l of approvedLeave) {
-      let cursor = parseIsoDateLocal(l.startDate);
-      const end = parseIsoDateLocal(l.endDate);
-      while (cursor <= end) {
-        if (cursor >= weekStart && cursor < weekEnd) {
-          ensureGroup(cursor).leaves.push(l);
-        }
-        cursor = addDays(cursor, 1);
-      }
-    }
-
     return [...groups.values()].sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [roster, approvedLeave, weekStart, weekEnd]);
+  }, [roster, weekStart, weekEnd]);
 
   const today = dateKey(new Date());
 
@@ -269,21 +247,11 @@ export default function RosterSection() {
           <div key={group.label} className={`roster-day${dateKey(group.date) === today ? " today" : ""}`}>
             <div className="roster-day-header">
               <span className="roster-day-title">{group.label}</span>
-              {group.shifts.length > 0 && (
-                <span className="roster-day-count">
-                  {group.shifts.length} shift{group.shifts.length === 1 ? "" : "s"}
-                </span>
-              )}
+              <span className="roster-day-count">
+                {group.shifts.length} shift{group.shifts.length === 1 ? "" : "s"}
+              </span>
             </div>
             <ul className="roster-rows">
-              {group.leaves.map((l) => (
-                <li key={`leave-${l.id}`} className="roster-row roster-row-leave">
-                  <span className="roster-row-name">{l.employeeName}</span>
-                  <span className={`type-badge ${l.type}`}>
-                    {l.type === "sick" ? "Sick" : "Vacation"}
-                  </span>
-                </li>
-              ))}
               {group.shifts.map((s) => (
                 <li key={s.id} className="roster-row">
                   <div className="roster-row-info">
@@ -304,7 +272,7 @@ export default function RosterSection() {
           </div>
         ))}
         {groupedByDay.length === 0 && (
-          <p className="empty-state">No shifts or leave scheduled this week.</p>
+          <p className="empty-state">No shifts scheduled this week.</p>
         )}
       </div>
 

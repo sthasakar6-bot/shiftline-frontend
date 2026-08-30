@@ -610,10 +610,6 @@
   border-bottom: none;
 }
 
-.roster-row-leave {
-  background: var(--danger-bg);
-}
-
 .roster-row-info {
   display: flex;
   align-items: center;
