@@ -3,6 +3,7 @@ import { api, ApiError } from "../api/client";
 import type { Contract, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "./ConfirmDialog";
+import Avatar from "./Avatar";
 
 export default function ManagerSection() {
   const { user } = useAuth();
@@ -124,7 +125,10 @@ export default function ManagerSection() {
       <ul className="list">
         {employees.map((e) => (
           <li key={e.id}>
-            <span>{e.name}</span>
+            <span className="list-row-identity">
+              <Avatar userId={e.id} name={e.name} hasAvatar={e.hasAvatar} size={32} />
+              {e.name}
+            </span>
             <span className="actions">
               {e.managerId === user?.id ? (
                 <button onClick={() => setRemoveTarget(e)}>Remove from team</button>

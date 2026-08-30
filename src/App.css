@@ -510,6 +510,18 @@
   overflow-wrap: break-word;
 }
 
+.list-row-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.list-row-identity .user-avatar {
+  flex-shrink: 0;
+}
+
 .leave-flag {
   color: var(--danger);
   font-weight: 700;
