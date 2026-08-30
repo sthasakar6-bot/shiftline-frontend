@@ -86,18 +86,29 @@ export default function ShiftsSection() {
       <h2>My Roster</h2>
       <p className="hint">Set by your manager. Contact them for any changes.</p>
 
-      <div className="calendar-header">
+      <div className="roster-week-nav">
         <button
           type="button"
+          className="roster-nav-btn"
           onClick={() =>
             setMonthCursor(new Date(monthCursor.getFullYear(), monthCursor.getMonth() - 1, 1))
           }
         >
           <ChevronLeft size={18} />
         </button>
-        <strong>{monthLabel}</strong>
         <button
           type="button"
+          className="roster-week-label"
+          onClick={() => {
+            const now = new Date();
+            setMonthCursor(new Date(now.getFullYear(), now.getMonth(), 1));
+          }}
+        >
+          {monthLabel}
+        </button>
+        <button
+          type="button"
+          className="roster-nav-btn"
           onClick={() =>
             setMonthCursor(new Date(monthCursor.getFullYear(), monthCursor.getMonth() + 1, 1))
           }
@@ -118,25 +129,39 @@ export default function ShiftsSection() {
           const dayLeave = leaveByDay.get(dateKey(day)) ?? [];
           const hasShift = dayShifts.length > 0;
           const hasLeave = dayLeave.length > 0;
+          const leaveType = dayLeave[0]?.type;
           const hasActiveShift = dayShifts.some((s) => !completedShiftIds.has(s.id));
           const isToday = dateKey(day) === dateKey(new Date());
           return (
             <button
               type="button"
               key={dateKey(day)}
-              className={`calendar-day${isToday ? " today" : ""}`}
+              className={`calendar-day${isToday ? " today" : ""}${hasLeave ? ` has-leave ${leaveType}` : ""}`}
               onClick={() => (hasShift || hasLeave) && setSelectedDay(day)}
               disabled={!hasShift && !hasLeave}
             >
-              {day.getDate()}
-              {hasLeave ? (
-                <span className="calendar-dot leave" />
-              ) : (
-                hasActiveShift && <span className="calendar-dot" />
+              <span className="calendar-day-num">{day.getDate()}</span>
+              {hasLeave && (
+                <span className={`calendar-day-label ${leaveType}`}>
+                  {leaveType === "sick" ? "Sick" : "Vac"}
+                </span>
               )}
+              {!hasLeave && hasActiveShift && <span className="calendar-dot" />}
             </button>
           );
         })}
+      </div>
+
+      <div className="calendar-legend">
+        <span>
+          <span className="calendar-legend-swatch shift" /> Shift
+        </span>
+        <span>
+          <span className="calendar-legend-swatch sick" /> Sick
+        </span>
+        <span>
+          <span className="calendar-legend-swatch vacation" /> Vacation
+        </span>
       </div>
 
       {selectedDay && (
