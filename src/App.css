@@ -1,31 +1,120 @@
 .auth-page {
   min-height: 100svh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 28px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 18% 15%, var(--accent-bg), transparent 45%),
+    radial-gradient(circle at 82% 85%, var(--accent-bg), transparent 45%),
+    var(--bg);
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-brand-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--text-h));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 8px 20px -8px rgba(15, 23, 42, 0.4);
+}
+
+.auth-brand-name {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-h);
 }
 
 .auth-form {
   background: var(--panel-bg);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 32px;
-  width: 320px;
+  border-radius: 16px;
+  padding: 36px 32px;
+  width: 340px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+  box-shadow:
+    0 24px 48px -24px rgba(15, 23, 42, 0.3),
+    0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.auth-form h1 {
+  font-size: 21px;
+  margin-bottom: 2px;
+}
+
+.auth-form .hint {
+  margin-top: -10px;
+  font-size: 13px;
+  opacity: 0.75;
 }
 
 .auth-form label {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 14px;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.auth-form input {
+  padding: 11px 12px;
+  font-size: 15px;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
 }
 
 .auth-form button {
-  margin-top: 8px;
+  margin-top: 0;
   padding: 10px;
+}
+
+.auth-form button[type="submit"] {
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 15px;
+  border-radius: 9px;
+  transition: opacity 0.15s ease;
+}
+
+.auth-form button[type="submit"]:hover {
+  opacity: 0.9;
+  border-color: transparent;
+}
+
+.auth-form button[type="submit"]:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.auth-form p {
+  margin: 0;
+  font-size: 13.5px;
+  text-align: center;
+  color: var(--text);
 }
 
 .mode-toggle {
@@ -33,24 +122,26 @@
   gap: 4px;
   margin-bottom: 4px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 4px;
+  background: var(--bg);
 }
 
 .mode-toggle button {
   flex: 1;
   margin-top: 0;
-  padding: 8px 6px;
+  padding: 9px 6px;
   font-size: 13px;
+  font-weight: 600;
   background: transparent;
   border: none;
-  border-radius: 5px;
+  border-radius: 7px;
+  color: var(--text);
 }
 
 .mode-toggle button.active {
-  background: var(--accent-bg);
-  color: var(--accent);
-  font-weight: 600;
+  background: var(--accent);
+  color: #fff;
 }
 
 .app-shell {

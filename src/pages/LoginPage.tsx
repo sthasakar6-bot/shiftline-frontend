@@ -2,6 +2,7 @@ import { type FormEvent, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../api/client";
+import AuthBrand from "../components/AuthBrand";
 
 export default function LoginPage() {
   const { login, logout } = useAuth();
@@ -33,6 +34,7 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
+      <AuthBrand />
       <form className="auth-form" onSubmit={handleSubmit}>
         <h1>Log in</h1>
         <div className="mode-toggle">

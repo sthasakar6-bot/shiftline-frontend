@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { api, ApiError } from "../api/client";
+import AuthBrand from "../components/AuthBrand";
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -55,6 +56,7 @@ export default function RegisterPage() {
   if (!token || !inviteValid) {
     return (
       <div className="auth-page">
+        <AuthBrand />
         <form className="auth-form">
           <h1>Invite required</h1>
           <p className="hint">
@@ -72,6 +74,7 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-page">
+      <AuthBrand />
       <form className="auth-form" onSubmit={handleSubmit}>
         <h1>Create your account</h1>
         {error && <div className="error">{error}</div>}

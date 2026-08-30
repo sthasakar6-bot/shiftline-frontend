@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { api, ApiError } from "../api/client";
+import AuthBrand from "../components/AuthBrand";
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -53,6 +54,7 @@ export default function ResetPasswordPage() {
   if (done) {
     return (
       <div className="auth-page">
+        <AuthBrand />
         <div className="auth-form">
           <h1>Password updated</h1>
           <p className="hint">You can now log in with your new password.</p>
@@ -65,6 +67,7 @@ export default function ResetPasswordPage() {
   if (!token || !tokenValid) {
     return (
       <div className="auth-page">
+        <AuthBrand />
         <form className="auth-form">
           <h1>Reset link invalid</h1>
           <p className="hint">
@@ -81,6 +84,7 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="auth-page">
+      <AuthBrand />
       <form className="auth-form" onSubmit={handleSubmit}>
         <h1>Set a new password</h1>
         {error && <div className="error">{error}</div>}

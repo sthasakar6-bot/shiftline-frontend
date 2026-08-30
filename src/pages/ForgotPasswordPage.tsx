@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, ApiError } from "../api/client";
+import AuthBrand from "../components/AuthBrand";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -25,6 +26,7 @@ export default function ForgotPasswordPage() {
   if (done) {
     return (
       <div className="auth-page">
+        <AuthBrand />
         <div className="auth-form">
           <h1>Check with your manager</h1>
           <p className="hint">
@@ -40,6 +42,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="auth-page">
+      <AuthBrand />
       <form className="auth-form" onSubmit={handleSubmit}>
         <h1>Forgot password</h1>
         <p className="hint">
