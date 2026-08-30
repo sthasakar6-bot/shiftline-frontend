@@ -9,11 +9,13 @@ import DashboardPage from "./pages/DashboardPage";
 import AdminPage from "./pages/AdminPage";
 import ProfilePage from "./pages/ProfilePage";
 import PullToRefresh from "./components/PullToRefresh";
+import SplashScreen from "./components/SplashScreen";
 import "./App.css";
 
 function App() {
   return (
     <BrowserRouter>
+      <SplashScreen />
       <AuthProvider>
         <PullToRefresh>
           <Routes>

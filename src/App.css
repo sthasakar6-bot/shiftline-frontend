@@ -1,3 +1,119 @@
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: radial-gradient(circle at 50% 40%, #1b2636, #0a0f1a 75%);
+  animation: splash-fade-in 0.4s ease both;
+}
+
+.splash-screen.leaving {
+  animation: splash-fade-out 0.5s ease both;
+}
+
+@keyframes splash-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes splash-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.splash-glow {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.35), transparent 70%);
+  filter: blur(10px);
+  animation: splash-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes splash-pulse {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+.splash-logo {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 22px;
+  box-shadow: 0 0 40px rgba(56, 189, 248, 0.5);
+  animation: splash-logo-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes splash-logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.splash-name {
+  position: relative;
+  font-size: 26px;
+  font-weight: 600;
+  color: #f1f5f9;
+  letter-spacing: -0.01em;
+  margin-top: 8px;
+  animation: splash-text-in 0.5s ease 0.15s both;
+}
+
+.splash-slogan {
+  position: relative;
+  font-size: 14px;
+  color: #7fd8ff;
+  letter-spacing: 0.3px;
+  animation: splash-text-in 0.5s ease 0.3s both;
+}
+
+@keyframes splash-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen,
+  .splash-glow,
+  .splash-logo,
+  .splash-name,
+  .splash-slogan {
+    animation: none !important;
+  }
+}
+
 .auth-page {
   min-height: 100svh;
   display: flex;
