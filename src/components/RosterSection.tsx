@@ -158,7 +158,7 @@ export default function RosterSection() {
     <section className="panel">
       <h2>Roster</h2>
 
-      <div className="roster-assign">
+      <div className="subform">
         <h3>Assign a shift</h3>
         <form className="inline-form" onSubmit={handleAssign}>
           <label className="field">

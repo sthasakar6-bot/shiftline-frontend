@@ -515,7 +515,7 @@
   font-weight: 700;
 }
 
-.roster-assign {
+.subform {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -523,11 +523,11 @@
   margin-bottom: 20px;
 }
 
-.roster-assign h3 {
+.subform h3 {
   margin-bottom: 12px;
 }
 
-.roster-assign .inline-form {
+.subform .inline-form {
   margin-bottom: 0;
 }
 

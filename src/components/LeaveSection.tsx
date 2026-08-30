@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { api, ApiError } from "../api/client";
 import type { LeaveRequest } from "../api/types";
+import { formatDateOnly } from "../lib/dateOnly";
 
 export default function LeaveSection() {
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
@@ -39,43 +40,59 @@ export default function LeaveSection() {
     }
   }
 
+  const sortedRequests = [...requests].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+
   return (
     <section className="panel">
       <h2>Leave Requests</h2>
-      <form className="inline-form" onSubmit={handleCreate}>
-        <select value={type} onChange={(e) => setType(e.target.value as "vacation" | "sick")}>
-          <option value="vacation">Vacation</option>
-          <option value="sick">Sick</option>
-        </select>
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          required
-          title="Start date"
-        />
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          required
-          title="End date"
-        />
-        <input
-          placeholder="Reason (optional)"
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-        />
-        <button type="submit">Request</button>
-      </form>
-      {error && <div className="error">{error}</div>}
+
+      <div className="subform">
+        <h3>Request leave</h3>
+        <form className="inline-form" onSubmit={handleCreate}>
+          <label className="field">
+            <span className="field-label">Type</span>
+            <select value={type} onChange={(e) => setType(e.target.value as "vacation" | "sick")}>
+              <option value="vacation">Vacation</option>
+              <option value="sick">Sick</option>
+            </select>
+          </label>
+          <label className="field">
+            <span className="field-label">Start date</span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              required
+            />
+          </label>
+          <label className="field">
+            <span className="field-label">End date</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              required
+            />
+          </label>
+          <label className="field">
+            <span className="field-label">Reason (optional)</span>
+            <input value={reason} onChange={(e) => setReason(e.target.value)} />
+          </label>
+          <button type="submit">Request</button>
+        </form>
+        {error && <div className="error">{error}</div>}
+      </div>
+
       <ul className="list">
-        {requests.map((r) => (
+        {sortedRequests.map((r) => (
           <li key={r.id}>
             <span>
-              <strong>{r.type}</strong> — {r.status}
+              <span className={`type-badge ${r.type}`}>{r.type}</span>{" "}
+              <span className={`status-badge ${r.status}`}>{r.status}</span>
               <br />
-              {r.startDate.slice(0, 10)} → {r.endDate.slice(0, 10)}
+              {formatDateOnly(r.startDate)} → {formatDateOnly(r.endDate)}
               {r.reason && <> · {r.reason}</>}
             </span>
             {r.status === "pending" && (
@@ -85,7 +102,7 @@ export default function LeaveSection() {
             )}
           </li>
         ))}
-        {requests.length === 0 && <li className="empty">No leave requests yet.</li>}
+        {sortedRequests.length === 0 && <li className="empty">No leave requests yet.</li>}
       </ul>
     </section>
   );
