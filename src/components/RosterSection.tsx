@@ -174,61 +174,64 @@ export default function RosterSection() {
     return [...groups.values()].sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [roster, approvedLeave, weekStart, weekEnd]);
 
+  const today = dateKey(new Date());
+
   return (
     <section className="panel">
       <h2>Roster</h2>
 
-      <h3>Assign a shift</h3>
-      <form className="inline-form" onSubmit={handleAssign}>
-        <label className="field">
-          <span className="field-label">Employee</span>
-          <select value={assignee} onChange={(e) => setAssignee(e.target.value)} required>
-            <option value="">Select employee</option>
-            {people.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span className="field-label">Shift starts</span>
-          <input
-            type="datetime-local"
-            value={startsAt}
-            onChange={(e) => setStartsAt(e.target.value)}
-            required
-          />
-        </label>
-        <label className="field">
-          <span className="field-label">Shift ends</span>
-          <input
-            type="datetime-local"
-            value={endsAt}
-            onChange={(e) => setEndsAt(e.target.value)}
-            required
-          />
-        </label>
-        <label className="field">
-          <span className="field-label">Break</span>
-          <select value={breakMinutes} onChange={(e) => setBreakMinutes(e.target.value)}>
-            {BREAK_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button type="submit">Assign</button>
-      </form>
-      {message && <div className="success">{message}</div>}
-      {error && <div className="error">{error}</div>}
+      <div className="roster-assign">
+        <h3>Assign a shift</h3>
+        <form className="inline-form" onSubmit={handleAssign}>
+          <label className="field">
+            <span className="field-label">Employee</span>
+            <select value={assignee} onChange={(e) => setAssignee(e.target.value)} required>
+              <option value="">Select employee</option>
+              {people.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span className="field-label">Shift starts</span>
+            <input
+              type="datetime-local"
+              value={startsAt}
+              onChange={(e) => setStartsAt(e.target.value)}
+              required
+            />
+          </label>
+          <label className="field">
+            <span className="field-label">Shift ends</span>
+            <input
+              type="datetime-local"
+              value={endsAt}
+              onChange={(e) => setEndsAt(e.target.value)}
+              required
+            />
+          </label>
+          <label className="field">
+            <span className="field-label">Break</span>
+            <select value={breakMinutes} onChange={(e) => setBreakMinutes(e.target.value)}>
+              {BREAK_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button type="submit">Assign</button>
+        </form>
+        {message && <div className="success">{message}</div>}
+        {error && <div className="error">{error}</div>}
+      </div>
 
-      <hr className="section-divider" />
-
-      <div className="calendar-header">
+      <div className="roster-week-nav">
         <button
           type="button"
+          className="roster-nav-btn"
           onClick={() =>
             setWeekStart((w) => {
               const d = new Date(w);
@@ -239,11 +242,16 @@ export default function RosterSection() {
         >
           <ChevronLeft size={18} />
         </button>
-        <button type="button" onClick={() => setWeekStart(startOfWeek(new Date()))}>
+        <button
+          type="button"
+          className="roster-week-label"
+          onClick={() => setWeekStart(startOfWeek(new Date()))}
+        >
           {weekLabel}
         </button>
         <button
           type="button"
+          className="roster-nav-btn"
           onClick={() =>
             setWeekStart((w) => {
               const d = new Date(w);
@@ -256,40 +264,49 @@ export default function RosterSection() {
         </button>
       </div>
 
-      {groupedByDay.map((group) => (
-        <div key={group.label} className="roster-group">
-          <h3>{group.label}</h3>
-          <ul className="list">
-            {group.leaves.map((l) => (
-              <li key={`leave-${l.id}`}>
-                <span className="leave-flag">
-                  {l.employeeName} — {l.type === "sick" ? "Sick" : "Vacation"}
+      <div className="roster-days">
+        {groupedByDay.map((group) => (
+          <div key={group.label} className={`roster-day${dateKey(group.date) === today ? " today" : ""}`}>
+            <div className="roster-day-header">
+              <span className="roster-day-title">{group.label}</span>
+              {group.shifts.length > 0 && (
+                <span className="roster-day-count">
+                  {group.shifts.length} shift{group.shifts.length === 1 ? "" : "s"}
                 </span>
-              </li>
-            ))}
-            {group.shifts.map((s) => (
-              <li key={s.id}>
-                <span>
-                  <strong>{s.employeeName}</strong> — {formatTime(s.startsAt)} –{" "}
-                  {formatTime(s.endsAt)}
-                  {s.breakMinutes && (
-                    <>
-                      <br />
-                      Break: {s.breakMinutes} min
-                    </>
-                  )}
-                </span>
-                <span className="actions">
-                  <button onClick={() => setRemoveTarget(s)}>Remove</button>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-      {groupedByDay.length === 0 && (
-        <p className="empty-state">No shifts or leave scheduled this week.</p>
-      )}
+              )}
+            </div>
+            <ul className="roster-rows">
+              {group.leaves.map((l) => (
+                <li key={`leave-${l.id}`} className="roster-row roster-row-leave">
+                  <span className="roster-row-name">{l.employeeName}</span>
+                  <span className={`type-badge ${l.type}`}>
+                    {l.type === "sick" ? "Sick" : "Vacation"}
+                  </span>
+                </li>
+              ))}
+              {group.shifts.map((s) => (
+                <li key={s.id} className="roster-row">
+                  <div className="roster-row-info">
+                    <span className="roster-row-name">{s.employeeName}</span>
+                    <span className="roster-row-time">
+                      {formatTime(s.startsAt)} – {formatTime(s.endsAt)}
+                    </span>
+                    {s.breakMinutes && (
+                      <span className="roster-break-badge">{s.breakMinutes} min break</span>
+                    )}
+                  </div>
+                  <button className="roster-remove-btn" onClick={() => setRemoveTarget(s)}>
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+        {groupedByDay.length === 0 && (
+          <p className="empty-state">No shifts or leave scheduled this week.</p>
+        )}
+      </div>
 
       {removeTarget && (
         <ConfirmDialog
