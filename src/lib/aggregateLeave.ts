@@ -8,15 +8,18 @@ export interface LeaveEntry extends LeaveRequest {
 export async function fetchApprovedLeave(
   people: { id: number; name: string }[],
 ): Promise<LeaveEntry[]> {
+  const all = await fetchAllLeave(people);
+  return all.filter((r) => r.status === "approved");
+}
+
+export async function fetchAllLeave(
+  people: { id: number; name: string }[],
+): Promise<LeaveEntry[]> {
   const lists = await Promise.all(
     people.map((p) =>
       api
         .listLeaveRequestsForReport(p.id)
-        .then((reqs) =>
-          reqs
-            .filter((r) => r.status === "approved")
-            .map((r) => ({ ...r, employeeName: p.name })),
-        )
+        .then((reqs) => reqs.map((r) => ({ ...r, employeeName: p.name })))
         .catch(() => []),
     ),
   );

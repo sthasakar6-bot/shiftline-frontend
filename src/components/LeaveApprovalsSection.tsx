@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api, ApiError } from "../api/client";
 import type { LeaveRequest, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
-import { fetchApprovedLeave, type LeaveEntry } from "../lib/aggregateLeave";
+import { fetchAllLeave, type LeaveEntry } from "../lib/aggregateLeave";
 import { addDays, formatDateOnly, formatLocalDate, parseIsoDateLocal, todayLocal } from "../lib/dateOnly";
 
 export default function LeaveApprovalsSection() {
@@ -10,7 +10,7 @@ export default function LeaveApprovalsSection() {
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [selected, setSelected] = useState("");
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
-  const [approvedLeave, setApprovedLeave] = useState<LeaveEntry[]>([]);
+  const [allLeave, setAllLeave] = useState<LeaveEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const people = useMemo(
@@ -22,11 +22,11 @@ export default function LeaveApprovalsSection() {
     api.listReports().then(setReports).catch(() => {});
   }, []);
 
-  function loadApprovedLeave() {
-    if (people.length > 0) fetchApprovedLeave(people).then(setApprovedLeave);
+  function loadOverview() {
+    if (people.length > 0) fetchAllLeave(people).then(setAllLeave);
   }
 
-  useEffect(loadApprovedLeave, [people]);
+  useEffect(loadOverview, [people]);
 
   function load(userId: number) {
     api.listLeaveRequestsForReport(userId).then(setRequests).catch(() => {});
@@ -40,25 +40,31 @@ export default function LeaveApprovalsSection() {
     }
   }, [selected]);
 
-  async function decide(requestId: number, status: "approved" | "rejected") {
+  async function decide(userId: number, requestId: number, status: "approved" | "rejected") {
     setError(null);
     try {
-      await api.decideLeaveRequest(Number(selected), requestId, status);
-      load(Number(selected));
-      loadApprovedLeave();
+      await api.decideLeaveRequest(userId, requestId, status);
+      if (selected && Number(selected) === userId) load(userId);
+      loadOverview();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to update request");
     }
   }
 
   const today = todayLocal();
-  const onLeaveNow = approvedLeave
+  const pendingRequests = allLeave
+    .filter((l) => l.status === "pending")
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const onLeaveNow = allLeave
     .filter(
-      (l) => parseIsoDateLocal(l.startDate) <= today && parseIsoDateLocal(l.endDate) >= today,
+      (l) =>
+        l.status === "approved" &&
+        parseIsoDateLocal(l.startDate) <= today &&
+        parseIsoDateLocal(l.endDate) >= today,
     )
     .sort((a, b) => parseIsoDateLocal(a.endDate).getTime() - parseIsoDateLocal(b.endDate).getTime());
-  const upcomingLeave = approvedLeave
-    .filter((l) => parseIsoDateLocal(l.startDate) > today)
+  const upcomingLeave = allLeave
+    .filter((l) => l.status === "approved" && parseIsoDateLocal(l.startDate) > today)
     .sort(
       (a, b) => parseIsoDateLocal(a.startDate).getTime() - parseIsoDateLocal(b.startDate).getTime(),
     );
@@ -66,6 +72,26 @@ export default function LeaveApprovalsSection() {
   return (
     <section className="panel">
       <h2>Leave Approvals</h2>
+
+      <h3>Pending requests</h3>
+      {error && <div className="error">{error}</div>}
+      <ul className="list">
+        {pendingRequests.map((r) => (
+          <li key={r.id}>
+            <span>
+              <strong>{r.employeeName}</strong> <span className={`type-badge ${r.type}`}>{r.type}</span>
+              <br />
+              {formatDateOnly(r.startDate)} → {formatDateOnly(r.endDate)}
+              {r.reason && <> · {r.reason}</>}
+            </span>
+            <span className="actions">
+              <button onClick={() => decide(r.userId, r.id, "approved")}>Approve</button>
+              <button onClick={() => decide(r.userId, r.id, "rejected")}>Reject</button>
+            </span>
+          </li>
+        ))}
+        {pendingRequests.length === 0 && <li className="empty">No pending requests.</li>}
+      </ul>
 
       <h3>On leave now</h3>
       <ul className="list">
@@ -97,7 +123,7 @@ export default function LeaveApprovalsSection() {
 
       <hr className="section-divider" />
 
-      <h3>Review requests</h3>
+      <h3>Leave history by employee</h3>
       <div className="inline-form">
         <select value={selected} onChange={(e) => setSelected(e.target.value)}>
           <option value="">Select employee</option>
@@ -108,7 +134,6 @@ export default function LeaveApprovalsSection() {
           ))}
         </select>
       </div>
-      {error && <div className="error">{error}</div>}
       {selected && (
         <ul className="list">
           {requests.map((r) => (
@@ -122,8 +147,8 @@ export default function LeaveApprovalsSection() {
               </span>
               {r.status === "pending" && (
                 <span className="actions">
-                  <button onClick={() => decide(r.id, "approved")}>Approve</button>
-                  <button onClick={() => decide(r.id, "rejected")}>Reject</button>
+                  <button onClick={() => decide(Number(selected), r.id, "approved")}>Approve</button>
+                  <button onClick={() => decide(Number(selected), r.id, "rejected")}>Reject</button>
                 </span>
               )}
             </li>
