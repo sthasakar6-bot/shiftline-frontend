@@ -67,6 +67,16 @@ export interface Invite {
   createdAt: string;
 }
 
+export interface PasswordResetRequest {
+  id: number;
+  userId: number;
+  employeeName: string;
+  token: string;
+  status: "pending" | "completed";
+  expiresAt: string;
+  createdAt: string;
+}
+
 export interface LeaveRequest {
   id: number;
   userId: number;

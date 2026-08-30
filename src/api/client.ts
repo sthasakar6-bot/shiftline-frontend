@@ -5,6 +5,7 @@ import type {
   LeaveRequest,
   LoginResponse,
   Notification,
+  PasswordResetRequest,
   Shift,
   User,
   UserSummary,
@@ -202,4 +203,23 @@ export const api = {
     request<void>("/api/push/subscribe", { method: "POST", body: JSON.stringify(subscription) }),
   unsubscribeFromPush: (endpoint: string) =>
     request<void>("/api/push/unsubscribe", { method: "POST", body: JSON.stringify({ endpoint }) }),
+
+  requestPasswordReset: (email: string) =>
+    request<{ ok: true }>("/api/password-reset-requests", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+  listPasswordResetRequests: () => request<PasswordResetRequest[]>("/api/password-reset-requests"),
+  getPasswordResetToken: (token: string) =>
+    request<{ email: string }>(`/api/password-reset-requests/${token}`),
+  completePasswordReset: (token: string, password: string) =>
+    request<void>(`/api/password-reset-requests/${token}/complete`, {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<void>("/api/auth/password", {
+      method: "PATCH",
+      body: JSON.stringify({ currentPassword, newPassword }),
+    }),
 };

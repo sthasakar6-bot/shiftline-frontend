@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Users, UserPlus, CalendarDays, Palmtree, Clock, BarChart3 } from "lucide-react";
 import UserBox from "../components/UserBox";
 import TabBar, { type Tab } from "../components/TabBar";
 import ManagerSection from "../components/ManagerSection";
 import InvitesSection from "../components/InvitesSection";
+import PasswordResetsSection from "../components/PasswordResetsSection";
 import RosterSection from "../components/RosterSection";
 import LeaveApprovalsSection from "../components/LeaveApprovalsSection";
 import AttendanceTrackingSection from "../components/AttendanceTrackingSection";
@@ -18,8 +20,21 @@ const tabs: Tab[] = [
   { key: "summary", label: "Summary", icon: BarChart3 },
 ];
 
+const tabKeys = tabs.map((t) => t.key);
+
 export default function AdminPage() {
-  const [active, setActive] = useState("team");
+  const [searchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab");
+  const [active, setActive] = useState(
+    requestedTab && tabKeys.includes(requestedTab) ? requestedTab : "team",
+  );
+
+  useEffect(() => {
+    const requested = searchParams.get("tab");
+    if (requested && tabKeys.includes(requested)) {
+      setActive(requested);
+    }
+  }, [searchParams]);
 
   return (
     <div className="app-shell">
@@ -31,7 +46,12 @@ export default function AdminPage() {
       <main className="app-content">
         {active === "team" && <ManagerSection />}
         {active === "roster" && <RosterSection />}
-        {active === "invite" && <InvitesSection />}
+        {active === "invite" && (
+          <>
+            <InvitesSection />
+            <PasswordResetsSection />
+          </>
+        )}
         {active === "leave" && <LeaveApprovalsSection />}
         {active === "attendance" && <AttendanceTrackingSection />}
         {active === "summary" && <EmployeeSummarySection />}
