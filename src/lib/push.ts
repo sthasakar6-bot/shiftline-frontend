@@ -17,6 +17,17 @@ export function isPushSupported(): boolean {
   return "serviceWorker" in navigator && "PushManager" in window && Boolean(VAPID_PUBLIC_KEY);
 }
 
+function isIos(): boolean {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+function isStandalone(): boolean {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
 export async function getPushSubscriptionState(): Promise<"granted" | "denied" | "default"> {
   if (!isPushSupported()) return "denied";
   return Notification.permission;
@@ -25,6 +36,18 @@ export async function getPushSubscriptionState(): Promise<"granted" | "denied" |
 export async function enablePushNotifications(): Promise<void> {
   if (!isPushSupported()) {
     throw new Error("Push notifications aren't supported on this device or browser.");
+  }
+
+  if (isIos() && !isStandalone()) {
+    throw new Error(
+      "On iPhone/iPad, first add Shiftline to your Home Screen (Share button → Add to Home Screen), then open it from there to enable notifications.",
+    );
+  }
+
+  if (Notification.permission === "denied") {
+    throw new Error(
+      "Notifications are blocked for this app in your browser or device settings. Allow notifications for Shiftline there, then try again.",
+    );
   }
 
   const permission = await Notification.requestPermission();
