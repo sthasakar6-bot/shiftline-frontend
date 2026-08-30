@@ -5,6 +5,8 @@ import type { Shift, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "./ConfirmDialog";
 import { formatTime } from "../lib/formatDate";
+import { fetchApprovedLeave, type LeaveEntry } from "../lib/aggregateLeave";
+import { addDays, parseIsoDateLocal } from "../lib/dateOnly";
 
 interface RosterEntry extends Shift {
   employeeName: string;
@@ -40,6 +42,7 @@ export default function RosterSection() {
   const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [roster, setRoster] = useState<RosterEntry[]>([]);
+  const [approvedLeave, setApprovedLeave] = useState<LeaveEntry[]>([]);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [assignee, setAssignee] = useState("");
   const [startsAt, setStartsAt] = useState("");
@@ -49,7 +52,10 @@ export default function RosterSection() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const people = user ? [{ id: user.id, name: `${user.name} (you)` }, ...reports] : reports;
+  const people = useMemo(
+    () => (user ? [{ id: user.id, name: `${user.name} (you)` }, ...reports] : reports),
+    [user, reports],
+  );
 
   function loadReports() {
     api.listReports().then(setReports).catch(() => {});
@@ -77,6 +83,10 @@ export default function RosterSection() {
     loadRoster();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reports, user]);
+
+  useEffect(() => {
+    if (people.length > 0) fetchApprovedLeave(people).then(setApprovedLeave);
+  }, [people]);
 
   async function handleAssign(e: FormEvent) {
     e.preventDefault();
@@ -119,31 +129,50 @@ export default function RosterSection() {
   const weekLabel = `${weekStart.toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${new Date(weekEnd.getTime() - 86400000).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
 
   const groupedByDay = useMemo(() => {
-    const inWeek = roster
-      .filter((s) => {
-        const start = new Date(s.startsAt);
-        return start >= weekStart && start < weekEnd;
-      })
-      .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
+    const groups = new Map<
+      string,
+      { label: string; date: Date; shifts: RosterEntry[]; leaves: LeaveEntry[] }
+    >();
 
-    const groups = new Map<string, { label: string; shifts: RosterEntry[] }>();
-    for (const entry of inWeek) {
-      const day = new Date(entry.startsAt);
+    function ensureGroup(day: Date) {
       const key = dateKey(day);
-      if (!groups.has(key)) {
-        groups.set(key, {
+      let g = groups.get(key);
+      if (!g) {
+        g = {
           label: day.toLocaleDateString(undefined, {
             weekday: "long",
             month: "long",
             day: "numeric",
           }),
+          date: day,
           shifts: [],
-        });
+          leaves: [],
+        };
+        groups.set(key, g);
       }
-      groups.get(key)!.shifts.push(entry);
+      return g;
     }
-    return [...groups.values()];
-  }, [roster, weekStart, weekEnd]);
+
+    for (const s of roster) {
+      const start = new Date(s.startsAt);
+      if (start >= weekStart && start < weekEnd) {
+        ensureGroup(start).shifts.push(s);
+      }
+    }
+
+    for (const l of approvedLeave) {
+      let cursor = parseIsoDateLocal(l.startDate);
+      const end = parseIsoDateLocal(l.endDate);
+      while (cursor <= end) {
+        if (cursor >= weekStart && cursor < weekEnd) {
+          ensureGroup(cursor).leaves.push(l);
+        }
+        cursor = addDays(cursor, 1);
+      }
+    }
+
+    return [...groups.values()].sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [roster, approvedLeave, weekStart, weekEnd]);
 
   return (
     <section className="panel">
@@ -231,6 +260,13 @@ export default function RosterSection() {
         <div key={group.label} className="roster-group">
           <h3>{group.label}</h3>
           <ul className="list">
+            {group.leaves.map((l) => (
+              <li key={`leave-${l.id}`}>
+                <span className="leave-flag">
+                  {l.employeeName} — {l.type === "sick" ? "Sick" : "Vacation"}
+                </span>
+              </li>
+            ))}
             {group.shifts.map((s) => (
               <li key={s.id}>
                 <span>
@@ -252,7 +288,7 @@ export default function RosterSection() {
         </div>
       ))}
       {groupedByDay.length === 0 && (
-        <p className="empty-state">No shifts scheduled this week.</p>
+        <p className="empty-state">No shifts or leave scheduled this week.</p>
       )}
 
       {removeTarget && (
