@@ -12,6 +12,36 @@ function formatElapsed(ms: number): string {
   return [h, m, s].map((n) => String(n).padStart(2, "0")).join(":");
 }
 
+function ClockFace({ now }: { now: Date }) {
+  const parts = new Intl.DateTimeFormat(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(now);
+
+  return (
+    <div className="clock-time">
+      {parts.map((part, i) => {
+        if (part.type === "literal" && part.value === ":") {
+          return (
+            <span key={i} className="clock-colon">
+              :
+            </span>
+          );
+        }
+        if (part.type === "dayPeriod") {
+          return (
+            <span key={i} className="clock-period">
+              {part.value}
+            </span>
+          );
+        }
+        return <span key={i}>{part.value}</span>;
+      })}
+    </div>
+  );
+}
+
 function formatDuration(ms: number): string {
   const totalMinutes = Math.max(0, Math.round(ms / 60000));
   const h = Math.floor(totalMinutes / 60);
@@ -87,13 +117,7 @@ export default function AttendanceSection() {
       <h2>Attendance</h2>
 
       <div className="clock-display">
-        <div className="clock-time">
-          {now.toLocaleTimeString(undefined, {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          })}
-        </div>
+        <ClockFace now={now} />
         <div className="clock-date">
           {now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
         </div>
