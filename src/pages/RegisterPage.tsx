@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { api, ApiError } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
+import AuthFooter from "../components/AuthFooter";
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -68,6 +69,7 @@ export default function RegisterPage() {
             Already have an account? <Link to="/login">Log in</Link>
           </p>
         </form>
+        <AuthFooter />
       </div>
     );
   }
@@ -103,6 +105,7 @@ export default function RegisterPage() {
           Already have an account? <Link to="/login">Log in</Link>
         </p>
       </form>
+      <AuthFooter />
     </div>
   );
 }

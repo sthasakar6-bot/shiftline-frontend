@@ -2,6 +2,7 @@ import { type FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
+import AuthFooter from "../components/AuthFooter";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -36,6 +37,7 @@ export default function ForgotPasswordPage() {
             <Link to="/login">Back to login</Link>
           </p>
         </div>
+        <AuthFooter />
       </div>
     );
   }
@@ -61,6 +63,7 @@ export default function ForgotPasswordPage() {
           <Link to="/login">Back to login</Link>
         </p>
       </form>
+      <AuthFooter />
     </div>
   );
 }

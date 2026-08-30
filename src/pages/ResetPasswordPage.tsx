@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
+import AuthFooter from "../components/AuthFooter";
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -60,6 +61,7 @@ export default function ResetPasswordPage() {
           <p className="hint">You can now log in with your new password.</p>
           <button onClick={() => navigate("/login")}>Go to login</button>
         </div>
+        <AuthFooter />
       </div>
     );
   }
@@ -78,6 +80,7 @@ export default function ResetPasswordPage() {
             <Link to="/login">Back to login</Link>
           </p>
         </form>
+        <AuthFooter />
       </div>
     );
   }
@@ -106,6 +109,7 @@ export default function ResetPasswordPage() {
           {submitting ? "Saving..." : "Set new password"}
         </button>
       </form>
+      <AuthFooter />
     </div>
   );
 }

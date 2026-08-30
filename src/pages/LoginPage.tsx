@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
+import AuthFooter from "../components/AuthFooter";
 
 export default function LoginPage() {
   const { login, logout } = useAuth();
@@ -35,6 +36,7 @@ export default function LoginPage() {
   return (
     <div className="auth-page">
       <AuthBrand />
+      <p className="auth-welcome">Welcome to Shiftline</p>
       <form className="auth-form" onSubmit={handleSubmit}>
         <h1>Log in</h1>
         <div className="mode-toggle">
@@ -43,7 +45,7 @@ export default function LoginPage() {
             className={mode === "employee" ? "active" : ""}
             onClick={() => setMode("employee")}
           >
-            Employee / Team Member
+            Employee
           </button>
           <button
             type="button"
@@ -81,6 +83,7 @@ export default function LoginPage() {
           No account? <Link to="/register">Register</Link>
         </p>
       </form>
+      <AuthFooter />
     </div>
   );
 }

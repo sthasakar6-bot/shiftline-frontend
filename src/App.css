@@ -33,6 +33,59 @@
   color: var(--text-h);
 }
 
+.auth-welcome {
+  margin: -20px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: center;
+}
+
+.auth-footer {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.55;
+  text-align: center;
+}
+
+@keyframes authFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-page > * {
+  animation: authFadeInUp 0.5s ease both;
+}
+
+.auth-page > *:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.auth-page > *:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.auth-page > *:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.auth-page > *:nth-child(4) {
+  animation-delay: 0.24s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-page > * {
+    animation: none;
+  }
+}
+
 .auth-form {
   background: var(--panel-bg);
   border: 1px solid var(--border);
