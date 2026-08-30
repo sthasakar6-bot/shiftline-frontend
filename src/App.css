@@ -22,11 +22,7 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent), var(--text-h));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
+  object-fit: cover;
   box-shadow: 0 8px 20px -8px rgba(15, 23, 42, 0.4);
 }
 
