@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import OnboardingPrompt from "./OnboardingPrompt";
 import type { ReactNode } from "react";
 
 export default function ProtectedRoute({
@@ -20,5 +21,10 @@ export default function ProtectedRoute({
   if (requireRole && user.role !== requireRole) {
     return <Navigate to="/" replace />;
   }
-  return <>{children}</>;
+  return (
+    <>
+      <OnboardingPrompt />
+      {children}
+    </>
+  );
 }
