@@ -445,18 +445,24 @@
   height: 6px;
   border-radius: 50%;
   background: var(--success);
+  color: var(--success);
   animation: calendar-dot-blink 1.4s ease-in-out infinite;
+}
+
+.calendar-dot.leave {
+  background: var(--danger);
+  color: var(--danger);
 }
 
 @keyframes calendar-dot-blink {
   0%,
   100% {
     opacity: 1;
-    box-shadow: 0 0 0 0 var(--success);
+    box-shadow: 0 0 0 0 currentColor;
   }
   50% {
     opacity: 0.4;
-    box-shadow: 0 0 0 4px rgba(21, 128, 61, 0);
+    box-shadow: 0 0 0 4px transparent;
   }
 }
 
@@ -504,6 +510,7 @@
   height: 10px;
   border-radius: 50%;
   background: var(--success);
+  color: var(--success);
   animation: calendar-dot-blink 1.4s ease-in-out infinite;
   flex-shrink: 0;
 }

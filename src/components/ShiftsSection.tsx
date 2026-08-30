@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "../api/client";
-import type { Attendance, Shift } from "../api/types";
+import type { Attendance, LeaveRequest, Shift } from "../api/types";
 import { formatTime } from "../lib/formatDate";
+import { addDays, parseIsoDateLocal } from "../lib/dateOnly";
 
 function dateKey(d: Date): string {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
@@ -13,6 +14,7 @@ const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export default function ShiftsSection() {
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
   const [monthCursor, setMonthCursor] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -22,6 +24,7 @@ export default function ShiftsSection() {
   useEffect(() => {
     api.listShifts().then(setShifts).catch(() => {});
     api.listAttendance().then(setAttendance).catch(() => {});
+    api.listLeaveRequests().then(setLeaveRequests).catch(() => {});
   }, []);
 
   const completedShiftIds = useMemo(
@@ -39,6 +42,23 @@ export default function ShiftsSection() {
     }
     return map;
   }, [shifts]);
+
+  const leaveByDay = useMemo(() => {
+    const map = new Map<string, LeaveRequest[]>();
+    for (const l of leaveRequests) {
+      if (l.status !== "approved") continue;
+      let cursor = parseIsoDateLocal(l.startDate);
+      const end = parseIsoDateLocal(l.endDate);
+      while (cursor <= end) {
+        const key = dateKey(cursor);
+        const existing = map.get(key) ?? [];
+        existing.push(l);
+        map.set(key, existing);
+        cursor = addDays(cursor, 1);
+      }
+    }
+    return map;
+  }, [leaveRequests]);
 
   const cells = useMemo(() => {
     const year = monthCursor.getFullYear();
@@ -59,6 +79,7 @@ export default function ShiftsSection() {
   });
 
   const selectedShifts = selectedDay ? (shiftsByDay.get(dateKey(selectedDay)) ?? []) : [];
+  const selectedLeave = selectedDay ? (leaveByDay.get(dateKey(selectedDay)) ?? []) : [];
 
   return (
     <section className="panel">
@@ -94,7 +115,9 @@ export default function ShiftsSection() {
         {cells.map((day, i) => {
           if (!day) return <div key={`blank-${i}`} className="calendar-day empty" />;
           const dayShifts = shiftsByDay.get(dateKey(day)) ?? [];
+          const dayLeave = leaveByDay.get(dateKey(day)) ?? [];
           const hasShift = dayShifts.length > 0;
+          const hasLeave = dayLeave.length > 0;
           const hasActiveShift = dayShifts.some((s) => !completedShiftIds.has(s.id));
           const isToday = dateKey(day) === dateKey(new Date());
           return (
@@ -102,11 +125,15 @@ export default function ShiftsSection() {
               type="button"
               key={dateKey(day)}
               className={`calendar-day${isToday ? " today" : ""}`}
-              onClick={() => hasShift && setSelectedDay(day)}
-              disabled={!hasShift}
+              onClick={() => (hasShift || hasLeave) && setSelectedDay(day)}
+              disabled={!hasShift && !hasLeave}
             >
               {day.getDate()}
-              {hasActiveShift && <span className="calendar-dot" />}
+              {hasLeave ? (
+                <span className="calendar-dot leave" />
+              ) : (
+                hasActiveShift && <span className="calendar-dot" />
+              )}
             </button>
           );
         })}
@@ -116,6 +143,12 @@ export default function ShiftsSection() {
         <div className="modal-overlay" onClick={() => setSelectedDay(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>{selectedDay.toLocaleDateString(undefined, { dateStyle: "full" })}</h3>
+            {selectedLeave.map((l) => (
+              <p key={l.id} className="leave-flag">
+                {l.type === "sick" ? "Sick leave" : "Vacation"}
+                {l.reason && ` — ${l.reason}`}
+              </p>
+            ))}
             {selectedShifts.map((s) => (
               <p key={s.id}>
                 Shift: {formatTime(s.startsAt)} – {formatTime(s.endsAt)}
