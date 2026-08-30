@@ -3,6 +3,7 @@ import { api, ApiError } from "../api/client";
 import type { Attendance, Shift } from "../api/types";
 import { formatDateTime, formatTime } from "../lib/formatDate";
 import { getCurrentCoords } from "../lib/geolocation";
+import ConfirmDialog from "./ConfirmDialog";
 
 function formatElapsed(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -58,6 +59,7 @@ export default function AttendanceSection() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(new Date());
+  const [confirmAction, setConfirmAction] = useState<"in" | "out" | null>(null);
 
   function load() {
     api.listAttendance().then(setRecords).catch(() => {});
@@ -82,8 +84,13 @@ export default function AttendanceSection() {
   const completedShiftIds = new Set(records.filter((r) => r.clockOut).map((r) => r.shiftId));
   const clockableShifts = shifts.filter((s) => !completedShiftIds.has(s.id));
 
-  async function handleClockIn(e: FormEvent) {
+  function handleClockInSubmit(e: FormEvent) {
     e.preventDefault();
+    setConfirmAction("in");
+  }
+
+  async function confirmClockIn() {
+    setConfirmAction(null);
     setError(null);
     setBusy(true);
     try {
@@ -98,12 +105,14 @@ export default function AttendanceSection() {
     }
   }
 
-  async function handleClockOut(id: number) {
+  async function confirmClockOut() {
+    if (!openRecord) return;
+    setConfirmAction(null);
     setError(null);
     setBusy(true);
     try {
       const coords = await getCurrentCoords();
-      await api.clockOut(id, coords);
+      await api.clockOut(openRecord.id, coords);
       load();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to clock out");
@@ -111,6 +120,8 @@ export default function AttendanceSection() {
       setBusy(false);
     }
   }
+
+  const selectedShift = clockableShifts.find((s) => String(s.id) === shiftId);
 
   return (
     <section className="panel">
@@ -136,14 +147,14 @@ export default function AttendanceSection() {
           </div>
           <button
             className="clock-action out"
-            onClick={() => handleClockOut(openRecord.id)}
+            onClick={() => setConfirmAction("out")}
             disabled={busy}
           >
             Clock Out
           </button>
         </div>
       ) : (
-        <form className="clock-status" onSubmit={handleClockIn}>
+        <form className="clock-status" onSubmit={handleClockInSubmit}>
           <select value={shiftId} onChange={(e) => setShiftId(e.target.value)} required>
             <option value="">Select a shift</option>
             {clockableShifts.map((s) => (
@@ -189,6 +200,30 @@ export default function AttendanceSection() {
         ))}
         {pastRecords.length === 0 && <li className="empty">No attendance records yet.</li>}
       </ul>
+
+      {confirmAction === "in" && (
+        <ConfirmDialog
+          title="Clock in?"
+          message={
+            selectedShift
+              ? `Clock in to your ${formatDateTime(selectedShift.startsAt)} shift now?`
+              : "Clock in now?"
+          }
+          confirmLabel="Clock In"
+          onConfirm={confirmClockIn}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
+      {confirmAction === "out" && (
+        <ConfirmDialog
+          title="Clock out?"
+          message="Are you sure you want to clock out? This will end your current shift."
+          confirmLabel="Clock Out"
+          danger
+          onConfirm={confirmClockOut}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
     </section>
   );
 }
