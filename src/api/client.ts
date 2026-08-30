@@ -99,6 +99,12 @@ export const api = {
     request<UserSummary>(`/api/users/${id}/manager`, { method: "PATCH" }),
   removeFromTeam: (id: number) =>
     request<UserSummary>(`/api/users/${id}/manager`, { method: "DELETE" }),
+  uploadAvatar: (file: File) => {
+    const formData = new FormData();
+    formData.append("avatar", file);
+    return request<void>("/api/users/me/avatar", { method: "POST", body: formData });
+  },
+  getAvatarBlob: (id: number) => requestBlob(`/api/users/${id}/avatar`),
 
   listContracts: () => request<Contract[]>("/api/contracts"),
   getContractPdf: (contractId: number) => requestBlob(`/api/contracts/${contractId}/pdf`),

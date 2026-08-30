@@ -219,6 +219,7 @@
   font-weight: 600;
   font-size: 14px;
   flex-shrink: 0;
+  object-fit: cover;
 }
 
 .user-box-info {
@@ -621,4 +622,55 @@
   background: var(--danger);
   color: white;
   border-color: var(--danger);
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  padding: 4px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-header h2 {
+  margin-bottom: 2px;
+}
+
+.profile-header .hint {
+  margin: 0 0 6px;
+}
+
+.stat-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat-tile {
+  flex: 1;
+  background: var(--accent-bg);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.stat-label {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 2px;
 }

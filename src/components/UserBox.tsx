@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { LogOut, ShieldCheck, LayoutDashboard, Bell, BellOff } from "lucide-react";
+import { LogOut, ShieldCheck, LayoutDashboard, Bell, BellOff, User as UserIcon } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
+import Avatar from "./Avatar";
 import {
   disablePushNotifications,
   enablePushNotifications,
@@ -52,13 +53,12 @@ export default function UserBox() {
 
   if (!user) return null;
 
-  const initial = user.name.charAt(0).toUpperCase();
   const onAdmin = location.pathname === "/admin";
 
   return (
     <div className="user-box" ref={ref}>
       <button className="user-box-trigger" onClick={() => setOpen(!open)}>
-        <span className="user-avatar">{initial}</span>
+        <Avatar userId={user.id} name={user.name} hasAvatar={user.hasAvatar} size={32} />
         <span className="user-box-info">
           <span className="user-name">{user.name}</span>
           <span className="role-badge">{user.role}</span>
@@ -66,6 +66,15 @@ export default function UserBox() {
       </button>
       {open && (
         <div className="user-box-menu">
+          <button
+            onClick={() => {
+              navigate("/profile");
+              setOpen(false);
+            }}
+          >
+            <UserIcon size={16} />
+            My Profile
+          </button>
           {user.role === "manager" && (
             <button
               onClick={() => {
