@@ -21,7 +21,12 @@ export default function LeaveSection() {
     e.preventDefault();
     setError(null);
     try {
-      await api.createLeaveRequest({ type, startDate, endDate, reason: reason || undefined });
+      await api.createLeaveRequest({
+        type,
+        startDate,
+        endDate: endDate || startDate,
+        reason: reason || undefined,
+      });
       setStartDate("");
       setEndDate("");
       setReason("");
@@ -68,12 +73,15 @@ export default function LeaveSection() {
             />
           </label>
           <label className="field">
-            <span className="field-label">End date</span>
+            <span className="field-label">
+              End date{type === "sick" && " (optional)"}
+            </span>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              required
+              min={startDate || undefined}
+              required={type !== "sick"}
             />
           </label>
           <label className="field">
