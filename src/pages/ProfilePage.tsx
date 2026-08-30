@@ -1,9 +1,10 @@
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Camera, CalendarCheck, Clock, Palmtree, Thermometer } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { api, ApiError } from "../api/client";
 import Avatar from "../components/Avatar";
+import ContractsSection from "../components/ContractsSection";
 import type { Attendance, LeaveRequest } from "../api/types";
 import { parseIsoDateLocal } from "../lib/dateOnly";
 
@@ -90,37 +91,45 @@ export default function ProfilePage() {
       </header>
 
       <main className="app-content">
-        <section className="panel profile-header">
-          <Avatar userId={user.id} name={user.name} hasAvatar={user.hasAvatar} size={88} />
-          <div>
+        <section className="panel profile-card">
+          <div className="profile-banner" />
+          <div className="profile-body">
+            <div className="profile-avatar-wrap">
+              <Avatar userId={user.id} name={user.name} hasAvatar={user.hasAvatar} size={88} />
+              <button
+                className="avatar-edit-btn"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                title="Change photo"
+              >
+                <Camera size={14} />
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                hidden
+              />
+            </div>
             <h2>{user.name}</h2>
             <p className="hint">{user.email}</p>
             <span className="role-badge">{user.role}</span>
+            {uploading && <p className="hint">Uploading photo...</p>}
+            {error && <div className="error">{error}</div>}
           </div>
-        </section>
-
-        <section className="panel">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            hidden
-          />
-          <button onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-            {uploading ? "Uploading..." : "Change photo"}
-          </button>
-          {error && <div className="error">{error}</div>}
         </section>
 
         <section className="panel">
           <h3>This month</h3>
           <div className="stat-row">
             <div className="stat-tile">
+              <CalendarCheck size={20} className="stat-icon" />
               <div className="stat-value">{stats.daysWorked}</div>
               <div className="stat-label">Days worked</div>
             </div>
             <div className="stat-tile">
+              <Clock size={20} className="stat-icon" />
               <div className="stat-value">{stats.hoursWorked.toFixed(1)}</div>
               <div className="stat-label">Hours worked</div>
             </div>
@@ -129,15 +138,19 @@ export default function ProfilePage() {
           <h3>This year</h3>
           <div className="stat-row">
             <div className="stat-tile">
+              <Palmtree size={20} className="stat-icon" />
               <div className="stat-value">{stats.vacationDays}</div>
               <div className="stat-label">Vacation days taken</div>
             </div>
             <div className="stat-tile">
+              <Thermometer size={20} className="stat-icon" />
               <div className="stat-value">{stats.sickDays}</div>
               <div className="stat-label">Sick days taken</div>
             </div>
           </div>
         </section>
+
+        <ContractsSection />
       </main>
     </div>
   );
