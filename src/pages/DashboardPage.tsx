@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CalendarDays, Clock, Palmtree, Bell } from "lucide-react";
 import UserBox from "../components/UserBox";
+import AppLogo from "../components/AppLogo";
 import TabBar, { type Tab } from "../components/TabBar";
 import ShiftsSection from "../components/ShiftsSection";
 import AttendanceSection from "../components/AttendanceSection";
@@ -48,7 +49,7 @@ export default function DashboardPage() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <h1>Shiftline</h1>
+        <AppLogo />
         <UserBox />
       </header>
 
