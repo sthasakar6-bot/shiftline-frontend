@@ -1,19 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
 import { api, ApiError } from "../api/client";
-import { useAuth } from "../auth/AuthContext";
-import Avatar from "../components/Avatar";
 import type { Attendance, Shift } from "../api/types";
 import { formatDateTime, formatTime } from "../lib/formatDate";
 import { getCurrentCoords } from "../lib/geolocation";
 import ConfirmDialog from "./ConfirmDialog";
-
-function greetingForHour(hour: number): string {
-  if (hour < 5) return "Good night";
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-}
 
 function formatElapsed(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -63,7 +54,6 @@ function formatDuration(ms: number): string {
 }
 
 export default function AttendanceSection() {
-  const { user } = useAuth();
   const [records, setRecords] = useState<Attendance[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [shiftId, setShiftId] = useState("");
@@ -147,26 +137,10 @@ export default function AttendanceSection() {
   }
 
   const selectedShift = clockableShifts.find((s) => String(s.id) === effectiveShiftId);
-  const firstName = user?.name.split(" ")[0] ?? "";
 
   return (
     <>
-      {user && (
-        <div className="greeting-header">
-          <Avatar userId={user.id} name={user.name} hasAvatar={user.hasAvatar} size={56} />
-          <div className="greeting-header-text">
-            <span className="greeting-line">{greetingForHour(now.getHours())},</span>
-            <h2 className="greeting-name">
-              {firstName}! <span className="greeting-wave">👋</span>
-            </h2>
-            {openRecord && (
-              <span className="greeting-status-active">
-                <span className="presence-dot" /> Active
-              </span>
-            )}
-          </div>
-        </div>
-      )}
+      <h2>Attendance</h2>
 
       {openRecord ? (
         <section className="panel shift-card">

@@ -57,12 +57,8 @@ export default function UserBox() {
 
   return (
     <div className="user-box" ref={ref}>
-      <button className="user-box-trigger" onClick={() => setOpen(!open)}>
-        <Avatar userId={user.id} name={user.name} hasAvatar={user.hasAvatar} size={32} />
-        <span className="user-box-info">
-          <span className="user-name">{user.name}</span>
-          <span className="role-badge">{user.role}</span>
-        </span>
+      <button className="user-box-trigger" onClick={() => setOpen(!open)} title="Account">
+        <Avatar userId={user.id} name={user.name} hasAvatar={user.hasAvatar} size={36} />
       </button>
       {open && (
         <div className="user-box-menu">

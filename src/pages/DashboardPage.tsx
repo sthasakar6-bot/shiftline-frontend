@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CalendarDays, Watch, Palmtree, Bell } from "lucide-react";
+import { Home, CalendarDays, Watch, Palmtree, Bell } from "lucide-react";
 import UserBox from "../components/UserBox";
 import AppLogo from "../components/AppLogo";
 import TabBar, { type Tab } from "../components/TabBar";
+import DashboardHome from "../components/DashboardHome";
 import ShiftsSection from "../components/ShiftsSection";
 import AttendanceSection from "../components/AttendanceSection";
 import NotificationsSection from "../components/NotificationsSection";
@@ -11,13 +12,13 @@ import LeaveSection from "../components/LeaveSection";
 import { api } from "../api/client";
 import type { Notification } from "../api/types";
 
-const tabKeys = ["roster", "attendance", "leave", "notifications"];
+const tabKeys = ["home", "roster", "attendance", "leave", "notifications"];
 
 export default function DashboardPage() {
   const [searchParams] = useSearchParams();
   const requestedTab = searchParams.get("tab");
   const [active, setActive] = useState(
-    requestedTab && tabKeys.includes(requestedTab) ? requestedTab : "attendance",
+    requestedTab && tabKeys.includes(requestedTab) ? requestedTab : "home",
   );
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
@@ -40,6 +41,7 @@ export default function DashboardPage() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const tabs: Tab[] = [
+    { key: "home", label: "Home", icon: Home },
     { key: "roster", label: "Roster", icon: CalendarDays },
     { key: "attendance", label: "Attendance", icon: Watch },
     { key: "leave", label: "Leave", icon: Palmtree },
@@ -54,6 +56,7 @@ export default function DashboardPage() {
       </header>
 
       <main className="app-content">
+        {active === "home" && <DashboardHome />}
         {active === "roster" && <ShiftsSection />}
         {active === "attendance" && <AttendanceSection />}
         {active === "leave" && <LeaveSection />}
