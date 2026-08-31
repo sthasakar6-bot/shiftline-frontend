@@ -8,6 +8,7 @@ import {
   Palmtree,
   Thermometer,
   Phone,
+  Mail,
   Check,
 } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
@@ -120,7 +121,9 @@ export default function ProfilePage() {
 
       <main className="app-content">
         <section className="panel profile-card">
-          <div className="profile-banner" />
+          <div className="profile-banner">
+            <div className="profile-banner-glow" />
+          </div>
           <div className="profile-body">
             <div className="profile-avatar-wrap">
               <Avatar userId={user.id} name={user.name} hasAvatar={user.hasAvatar} size={88} />
@@ -141,56 +144,68 @@ export default function ProfilePage() {
               />
             </div>
             <h2>{user.name}</h2>
-            <p className="hint">{user.email}</p>
             <span className="role-badge">{user.role}</span>
             {uploading && <p className="hint">Uploading photo...</p>}
-
-            <form className="profile-phone-form" onSubmit={handleSavePhone}>
-              <label className="field">
-                <span className="field-label">Phone number</span>
-                <div className="profile-phone-row">
-                  <Phone size={15} className="profile-phone-icon" />
-                  <input
-                    type="tel"
-                    placeholder="Add a phone number"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
-                </div>
-              </label>
-              <button type="submit" disabled={savingPhone}>
-                {phoneSaved ? <Check size={15} /> : savingPhone ? "Saving..." : "Save"}
-              </button>
-            </form>
-
             {error && <div className="error">{error}</div>}
+
+            <div className="profile-contact">
+              <div className="profile-contact-row">
+                <Mail size={16} className="profile-contact-icon" />
+                <span className="profile-contact-value">{user.email}</span>
+              </div>
+              <form className="profile-contact-row" onSubmit={handleSavePhone}>
+                <Phone size={16} className="profile-contact-icon" />
+                <input
+                  type="tel"
+                  className="profile-contact-input"
+                  placeholder="Add a phone number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+                {phone !== (user.phone ?? "") && (
+                  <button type="submit" className="profile-contact-save" disabled={savingPhone}>
+                    {phoneSaved ? <Check size={14} /> : savingPhone ? "Saving..." : "Save"}
+                  </button>
+                )}
+              </form>
+            </div>
           </div>
         </section>
 
         <section className="panel">
-          <h3>This month</h3>
+          <span className="profile-section-kicker">This month</span>
           <div className="stat-row">
             <div className="stat-tile">
-              <CalendarCheck size={20} className="stat-icon" />
+              <span className="stat-icon-circle">
+                <CalendarCheck size={18} />
+              </span>
               <div className="stat-value">{stats.daysWorked}</div>
               <div className="stat-label">Days worked</div>
             </div>
             <div className="stat-tile">
-              <Clock size={20} className="stat-icon" />
+              <span className="stat-icon-circle">
+                <Clock size={18} />
+              </span>
               <div className="stat-value">{stats.hoursWorked.toFixed(1)}</div>
               <div className="stat-label">Hours worked</div>
             </div>
           </div>
 
-          <h3>This year</h3>
+          <hr className="section-divider" />
+
+          <span className="profile-section-kicker">This year</span>
           <div className="stat-row">
             <div className="stat-tile">
-              <Palmtree size={20} className="stat-icon" />
+              <span className="stat-icon-circle success">
+                <Palmtree size={18} />
+              </span>
               <div className="stat-value">{stats.vacationDays}</div>
               <div className="stat-label">Vacation days taken</div>
             </div>
             <div className="stat-tile">
-              <Thermometer size={20} className="stat-icon" />
+              <span className="stat-icon-circle danger">
+                <Thermometer size={18} />
+              </span>
               <div className="stat-value">{stats.sickDays}</div>
               <div className="stat-label">Sick days taken</div>
             </div>
