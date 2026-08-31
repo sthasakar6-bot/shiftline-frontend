@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CalendarDays, Fingerprint, Palmtree, Bell } from "lucide-react";
+import { CalendarDays, Watch, Palmtree, Bell } from "lucide-react";
 import UserBox from "../components/UserBox";
 import AppLogo from "../components/AppLogo";
 import TabBar, { type Tab } from "../components/TabBar";
@@ -41,7 +41,7 @@ export default function DashboardPage() {
 
   const tabs: Tab[] = [
     { key: "roster", label: "Roster", icon: CalendarDays },
-    { key: "attendance", label: "Attendance", icon: Fingerprint },
+    { key: "attendance", label: "Attendance", icon: Watch },
     { key: "leave", label: "Leave", icon: Palmtree },
     { key: "notifications", label: "Alerts", icon: Bell, badge: unreadCount },
   ];
