@@ -426,7 +426,8 @@
   color: var(--success);
 }
 
-.status-badge.rejected {
+.status-badge.rejected,
+.status-badge.cancelled {
   background: var(--danger-bg);
   color: var(--danger);
 }

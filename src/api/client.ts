@@ -201,6 +201,10 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify({ status }),
     }),
+  revokeApprovedLeave: (userId: number, requestId: number) =>
+    request<LeaveRequest>(`/api/users/${userId}/leave-requests/${requestId}`, {
+      method: "DELETE",
+    }),
 
   createInvite: (email: string) =>
     request<Invite>("/api/invites", { method: "POST", body: JSON.stringify({ email }) }),

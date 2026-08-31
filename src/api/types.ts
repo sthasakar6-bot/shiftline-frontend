@@ -87,7 +87,7 @@ export interface LeaveRequest {
   startDate: string;
   endDate: string;
   reason: string | null;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "cancelled";
   createdAt: string;
   updatedAt: string;
 }

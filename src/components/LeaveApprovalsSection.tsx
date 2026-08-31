@@ -4,6 +4,7 @@ import type { LeaveRequest, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { fetchAllLeave, type LeaveEntry } from "../lib/aggregateLeave";
 import { addDays, formatDateOnly, formatLocalDate, parseIsoDateLocal, todayLocal } from "../lib/dateOnly";
+import ConfirmDialog from "./ConfirmDialog";
 
 export default function LeaveApprovalsSection() {
   const { user } = useAuth();
@@ -12,6 +13,9 @@ export default function LeaveApprovalsSection() {
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [allLeave, setAllLeave] = useState<LeaveEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [revokeTarget, setRevokeTarget] = useState<{ userId: number; id: number; employeeName: string } | null>(
+    null,
+  );
 
   const people = useMemo(
     () => (user ? [{ id: user.id, name: `${user.name} (you)` }, ...reports] : reports),
@@ -48,6 +52,20 @@ export default function LeaveApprovalsSection() {
       loadOverview();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to update request");
+    }
+  }
+
+  async function handleRevoke() {
+    if (!revokeTarget) return;
+    setError(null);
+    try {
+      await api.revokeApprovedLeave(revokeTarget.userId, revokeTarget.id);
+      if (selected && Number(selected) === revokeTarget.userId) load(revokeTarget.userId);
+      loadOverview();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to cancel leave");
+    } finally {
+      setRevokeTarget(null);
     }
   }
 
@@ -102,6 +120,15 @@ export default function LeaveApprovalsSection() {
               <br />
               Back {formatLocalDate(addDays(parseIsoDateLocal(l.endDate), 1))}
             </span>
+            <span className="actions">
+              <button
+                onClick={() =>
+                  setRevokeTarget({ userId: l.userId, id: l.id, employeeName: l.employeeName })
+                }
+              >
+                Cancel
+              </button>
+            </span>
           </li>
         ))}
         {onLeaveNow.length === 0 && <li className="empty">Nobody is on leave today.</li>}
@@ -115,6 +142,15 @@ export default function LeaveApprovalsSection() {
               <strong>{l.employeeName}</strong> <span className={`type-badge ${l.type}`}>{l.type}</span>
               <br />
               {formatDateOnly(l.startDate)} → {formatDateOnly(l.endDate)}
+            </span>
+            <span className="actions">
+              <button
+                onClick={() =>
+                  setRevokeTarget({ userId: l.userId, id: l.id, employeeName: l.employeeName })
+                }
+              >
+                Cancel
+              </button>
             </span>
           </li>
         ))}
@@ -151,10 +187,33 @@ export default function LeaveApprovalsSection() {
                   <button onClick={() => decide(Number(selected), r.id, "rejected")}>Reject</button>
                 </span>
               )}
+              {r.status === "approved" && (
+                <span className="actions">
+                  <button
+                    onClick={() => {
+                      const name = people.find((p) => p.id === Number(selected))?.name ?? "them";
+                      setRevokeTarget({ userId: Number(selected), id: r.id, employeeName: name });
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </span>
+              )}
             </li>
           ))}
           {requests.length === 0 && <li className="empty">No leave requests.</li>}
         </ul>
+      )}
+
+      {revokeTarget && (
+        <ConfirmDialog
+          title="Cancel this leave?"
+          message={`${revokeTarget.employeeName} will no longer be marked as on approved leave for this period, and their shifts can be scheduled normally again.`}
+          confirmLabel="Cancel Leave"
+          danger
+          onConfirm={handleRevoke}
+          onCancel={() => setRevokeTarget(null)}
+        />
       )}
     </section>
   );
