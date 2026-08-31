@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { parseIsoDateLocal, toIsoDateOnly, todayLocal } from "../lib/dateOnly";
 
@@ -32,13 +32,12 @@ export default function DateRangePicker({
     return new Date(base.getFullYear(), base.getMonth(), 1);
   });
 
-  useEffect(() => {
-    if (open) {
-      setPendingStart(null);
-      const base = startDate ? parseIsoDateLocal(startDate) : todayLocal();
-      setMonthCursor(new Date(base.getFullYear(), base.getMonth(), 1));
-    }
-  }, [open, startDate]);
+  function openPicker() {
+    setPendingStart(null);
+    const base = startDate ? parseIsoDateLocal(startDate) : todayLocal();
+    setMonthCursor(new Date(base.getFullYear(), base.getMonth(), 1));
+    setOpen(true);
+  }
 
   const start = startDate ? parseIsoDateLocal(startDate) : null;
   const end = endDate ? parseIsoDateLocal(endDate) : null;
@@ -80,11 +79,7 @@ export default function DateRangePicker({
 
   return (
     <>
-      <button
-        type="button"
-        className="date-range-trigger"
-        onClick={() => setOpen(true)}
-      >
+      <button type="button" className="date-range-trigger" onClick={openPicker}>
         <CalendarDays size={15} />
         <span className={startDate ? "" : "date-range-placeholder"}>{label}</span>
       </button>
