@@ -1,6 +1,18 @@
+import { type ComponentType } from "react";
 import { useNavigate } from "react-router-dom";
+import { CalendarDays, Palmtree, Watch, KeyRound, Bell, X } from "lucide-react";
 import { api } from "../api/client";
 import type { Notification } from "../api/types";
+import { formatRelativeTime } from "../lib/formatDate";
+
+function iconForNotification(n: Notification): ComponentType<{ size?: number }> {
+  const text = `${n.message} ${n.url ?? ""}`.toLowerCase();
+  if (text.includes("shift")) return CalendarDays;
+  if (text.includes("leave") || text.includes("vacation") || text.includes("sick")) return Palmtree;
+  if (text.includes("clock")) return Watch;
+  if (text.includes("password")) return KeyRound;
+  return Bell;
+}
 
 export default function NotificationsSection({
   notifications,
@@ -11,11 +23,6 @@ export default function NotificationsSection({
 }) {
   const navigate = useNavigate();
 
-  async function markRead(id: number) {
-    await api.markNotificationRead(id);
-    onReload();
-  }
-
   async function markAllRead() {
     await api.markAllNotificationsRead();
     onReload();
@@ -23,6 +30,11 @@ export default function NotificationsSection({
 
   async function remove(id: number) {
     await api.deleteNotification(id);
+    onReload();
+  }
+
+  async function removeAll() {
+    await Promise.all(notifications.map((n) => api.deleteNotification(n.id)));
     onReload();
   }
 
@@ -36,47 +48,53 @@ export default function NotificationsSection({
     }
   }
 
-  const hasUnread = notifications.some((n) => !n.read);
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <section className="panel">
-      <h2>Notifications</h2>
-      {hasUnread && (
-        <div className="inline-form">
-          <button onClick={markAllRead}>Mark all as read</button>
+      <div className="notif-banner">
+        <div className="notif-banner-title">
+          <h2>Notifications</h2>
+          {unreadCount > 0 && <span className="notif-count-badge">{unreadCount}</span>}
         </div>
-      )}
-      <ul className="list">
-        {notifications.map((n) => (
-          <li
-            key={n.id}
-            className={n.read ? "read" : "unread"}
-            onClick={() => handleOpen(n)}
-            style={{ cursor: "pointer" }}
-          >
-            <span>{n.message}</span>
-            <span className="actions">
-              {!n.read && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    markRead(n.id);
-                  }}
-                >
-                  Mark read
-                </button>
-              )}
+        {notifications.length > 0 && (
+          <div className="notif-banner-actions">
+            {unreadCount > 0 && <button onClick={markAllRead}>Mark all read</button>}
+            <button onClick={removeAll}>Clear all</button>
+          </div>
+        )}
+      </div>
+
+      <ul className="notif-list">
+        {notifications.map((n) => {
+          const Icon = iconForNotification(n);
+          return (
+            <li
+              key={n.id}
+              className={`notif-row${n.read ? "" : " unread"}`}
+              onClick={() => handleOpen(n)}
+            >
+              <span className="notif-icon">
+                <Icon size={18} />
+              </span>
+              <div className="notif-body">
+                <span className="notif-message">{n.message}</span>
+                <span className="notif-time">{formatRelativeTime(n.createdAt)}</span>
+              </div>
+              {!n.read && <span className="notif-dot" />}
               <button
+                className="notif-delete"
                 onClick={(e) => {
                   e.stopPropagation();
                   remove(n.id);
                 }}
+                title="Delete"
               >
-                Delete
+                <X size={14} />
               </button>
-            </span>
-          </li>
-        ))}
+            </li>
+          );
+        })}
         {notifications.length === 0 && <li className="empty">No notifications.</li>}
       </ul>
     </section>
