@@ -210,6 +210,20 @@
     0 2px 8px rgba(15, 23, 42, 0.06);
 }
 
+.auth-form.wide {
+  width: 400px;
+}
+
+.auth-form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.auth-form-row .field {
+  flex: 1;
+  min-width: 0;
+}
+
 .auth-form h1 {
   font-size: 21px;
   margin-bottom: 2px;

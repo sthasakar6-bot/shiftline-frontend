@@ -78,10 +78,18 @@ async function requestBlob(path: string): Promise<Blob> {
 }
 
 export const api = {
-  register: (name: string, email: string, password: string, token: string) =>
+  register: (data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    token: string;
+    phone?: string;
+    address?: string;
+  }) =>
     request<User>("/api/auth/register", {
       method: "POST",
-      body: JSON.stringify({ name, email, password, token }),
+      body: JSON.stringify(data),
     }),
 
   login: (email: string, password: string) =>

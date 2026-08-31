@@ -2,11 +2,21 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { api, clearToken, getToken, setToken } from "../api/client";
 import type { User } from "../api/types";
 
+export interface RegisterInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  token: string;
+  phone?: string;
+  address?: string;
+}
+
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
-  register: (name: string, email: string, password: string, token: string) => Promise<User>;
+  register: (data: RegisterInput) => Promise<User>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -36,9 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res.user;
   }
 
-  async function register(name: string, email: string, password: string, token: string) {
-    await api.register(name, email, password, token);
-    return login(email, password);
+  async function register(data: RegisterInput) {
+    await api.register(data);
+    return login(data.email, data.password);
   }
 
   function logout() {

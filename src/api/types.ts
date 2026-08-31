@@ -5,6 +5,7 @@ export interface User {
   role: "employee" | "manager";
   hasAvatar: boolean;
   phone: string | null;
+  address: string | null;
 }
 
 export interface UserSummary extends User {

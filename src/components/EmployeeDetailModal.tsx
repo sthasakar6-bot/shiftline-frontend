@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, Mail, Phone } from "lucide-react";
+import { Copy, Check, Mail, Phone, MapPin } from "lucide-react";
 import Avatar from "./Avatar";
 import type { UserSummary } from "../api/types";
 
@@ -10,9 +10,9 @@ export default function EmployeeDetailModal({
   employee: UserSummary;
   onClose: () => void;
 }) {
-  const [copied, setCopied] = useState<"email" | "phone" | null>(null);
+  const [copied, setCopied] = useState<"email" | "phone" | "address" | null>(null);
 
-  function handleCopy(field: "email" | "phone", value: string) {
+  function handleCopy(field: "email" | "phone" | "address", value: string) {
     navigator.clipboard.writeText(value).then(() => {
       setCopied(field);
       setTimeout(() => setCopied((c) => (c === field ? null : c)), 1500);
@@ -60,6 +60,24 @@ export default function EmployeeDetailModal({
               </>
             ) : (
               <span className="employee-detail-value muted">No phone number on file</span>
+            )}
+          </div>
+          <div className="employee-detail-row">
+            <MapPin size={16} className="employee-detail-icon" />
+            {employee.address ? (
+              <>
+                <span className="employee-detail-value">{employee.address}</span>
+                <button
+                  type="button"
+                  className="employee-detail-copy"
+                  onClick={() => handleCopy("address", employee.address as string)}
+                  title="Copy address"
+                >
+                  {copied === "address" ? <Check size={14} /> : <Copy size={14} />}
+                </button>
+              </>
+            ) : (
+              <span className="employee-detail-value muted">No address on file</span>
             )}
           </div>
         </div>

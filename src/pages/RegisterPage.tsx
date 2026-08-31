@@ -11,8 +11,11 @@ export default function RegisterPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") ?? "";
 
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -41,7 +44,15 @@ export default function RegisterPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await register(name, email, password, token);
+      await register({
+        firstName,
+        lastName,
+        email,
+        password,
+        token,
+        phone: phone || undefined,
+        address: address || undefined,
+      });
       navigate("/");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Registration failed");
@@ -77,17 +88,39 @@ export default function RegisterPage() {
   return (
     <div className="auth-page">
       <AuthBrand />
-      <form className="auth-form" onSubmit={handleSubmit}>
+      <form className="auth-form wide" onSubmit={handleSubmit}>
         <h1>Create your account</h1>
+        <p className="hint">Tell us a bit about yourself so your manager has your details on file.</p>
         {error && <div className="error">{error}</div>}
-        <label>
-          Name
-          <input value={name} onChange={(e) => setName(e.target.value)} required />
-        </label>
+
+        <div className="auth-form-row">
+          <label className="field">
+            <span className="field-label">First name</span>
+            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+          </label>
+          <label className="field">
+            <span className="field-label">Last name</span>
+            <input value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+          </label>
+        </div>
+
         <label>
           Email
           <input type="email" value={email} readOnly />
         </label>
+
+        <div className="auth-form-row">
+          <label className="field">
+            <span className="field-label">Phone number (optional)</span>
+            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          </label>
+        </div>
+
+        <label>
+          Address (optional)
+          <input value={address} onChange={(e) => setAddress(e.target.value)} />
+        </label>
+
         <label>
           Password
           <input
