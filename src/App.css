@@ -1173,10 +1173,11 @@
   background: var(--accent);
 }
 
-.greeting-card {
-  background: linear-gradient(135deg, var(--accent), var(--text-h));
-  color: #fff;
-  border: none;
+.greeting-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
   animation: greeting-in 0.5s ease both;
 }
 
@@ -1191,69 +1192,168 @@
   }
 }
 
-.greeting-kicker {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  opacity: 0.75;
-  margin-bottom: 4px;
-}
-
-.greeting-title {
-  margin: 0 0 16px;
-  font-size: 22px;
-  color: #fff;
-}
-
-.greeting-upcoming {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 10px;
-  padding: 10px 12px;
-}
-
-.greeting-upcoming-icon {
-  flex-shrink: 0;
-  opacity: 0.9;
-}
-
-.greeting-upcoming-text {
+.greeting-header-text {
   display: flex;
   flex-direction: column;
-  gap: 1px;
   min-width: 0;
 }
 
-.greeting-upcoming-label {
-  font-size: 11px;
+.greeting-line {
+  font-size: 13px;
+  color: var(--text);
   opacity: 0.75;
 }
 
-.greeting-upcoming-value {
-  font-size: 13.5px;
+.greeting-name {
+  margin: 0 0 6px;
+  font-size: 22px;
+  color: var(--text-h);
+}
+
+.greeting-wave {
+  display: inline-block;
+  animation: greeting-wave 1.6s ease-in-out infinite;
+  transform-origin: 70% 70%;
+}
+
+@keyframes greeting-wave {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  30% {
+    transform: rotate(14deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+
+.greeting-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.greeting-status-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
   font-weight: 600;
+  color: var(--success);
 }
 
-.greeting-upcoming-more {
-  margin-left: auto;
-  flex-shrink: 0;
-  font-size: 11px;
-  opacity: 0.8;
-  white-space: nowrap;
+.shift-card {
+  animation: greeting-in 0.5s ease 0.05s both;
 }
 
-.greeting-upcoming-empty {
-  margin: 0;
+.shift-card-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.shift-card-date {
   font-size: 13px;
-  opacity: 0.8;
+  color: var(--text);
+  opacity: 0.7;
+  margin-bottom: 10px;
+}
+
+.shift-card-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-h);
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.shift-card-row svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.shift-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+
+.shift-status-pill.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+@media (prefers-color-scheme: dark) {
+  .shift-status-pill.pending {
+    background: rgba(217, 119, 6, 0.22);
+    color: #fbbf24;
+  }
+}
+
+.shift-status-pill.in {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.shift-status-pill.in .presence-dot {
+  background: var(--success);
+}
+
+.shift-card-select {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.shift-clock-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  border: none;
+  transition: transform 0.1s ease, opacity 0.15s ease;
+}
+
+.shift-clock-btn:active {
+  transform: scale(0.98);
+}
+
+.shift-clock-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.shift-clock-btn.in {
+  background: var(--success);
+}
+
+.shift-clock-btn.out {
+  background: var(--danger);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .greeting-card {
+  .greeting-header,
+  .greeting-wave,
+  .shift-card {
     animation: none;
   }
 }

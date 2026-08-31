@@ -1,7 +1,8 @@
-import { type FormEvent, useEffect, useState } from "react";
-import { CalendarClock } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Clock } from "lucide-react";
 import { api, ApiError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import Avatar from "../components/Avatar";
 import type { Attendance, Shift } from "../api/types";
 import { formatDateTime, formatTime } from "../lib/formatDate";
 import { getCurrentCoords } from "../lib/geolocation";
@@ -92,10 +93,24 @@ export default function AttendanceSection() {
       return bTime - aTime;
     });
   const completedShiftIds = new Set(records.filter((r) => r.clockOut).map((r) => r.shiftId));
-  const clockableShifts = shifts.filter((s) => !completedShiftIds.has(s.id));
+  const clockableShifts = shifts
+    .filter((s) => !completedShiftIds.has(s.id))
+    .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
 
-  function handleClockInSubmit(e: FormEvent) {
-    e.preventDefault();
+  const todaysShifts = clockableShifts.filter(
+    (s) => new Date(s.startsAt).toDateString() === now.toDateString(),
+  );
+  const featuredShift = todaysShifts[0] ?? clockableShifts[0];
+  const isFeaturedToday = featuredShift
+    ? new Date(featuredShift.startsAt).toDateString() === now.toDateString()
+    : false;
+  const needsShiftPicker = clockableShifts.length > 1;
+  const effectiveShiftId =
+    shiftId || (!needsShiftPicker && featuredShift ? String(featuredShift.id) : "");
+
+  function handleClockInClick() {
+    if (!effectiveShiftId) return;
+    setShiftId(effectiveShiftId);
     setConfirmAction("in");
   }
 
@@ -105,7 +120,7 @@ export default function AttendanceSection() {
     setBusy(true);
     try {
       const coords = await getCurrentCoords();
-      await api.clockIn(Number(shiftId), coords);
+      await api.clockIn(Number(effectiveShiftId), coords);
       setShiftId("");
       load();
     } catch (err) {
@@ -131,117 +146,140 @@ export default function AttendanceSection() {
     }
   }
 
-  const selectedShift = clockableShifts.find((s) => String(s.id) === shiftId);
-
-  const upcomingShifts = shifts
-    .filter((s) => new Date(s.startsAt).getTime() > now.getTime())
-    .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
-  const nextShift = upcomingShifts[0];
-  const moreUpcoming = upcomingShifts.length - 1;
+  const selectedShift = clockableShifts.find((s) => String(s.id) === effectiveShiftId);
   const firstName = user?.name.split(" ")[0] ?? "";
 
   return (
     <>
-      <section className="panel greeting-card">
-        <span className="greeting-kicker">
-          {now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
-        </span>
-        <h2 className="greeting-title">
-          {greetingForHour(now.getHours())}
-          {firstName ? `, ${firstName}` : ""}
-        </h2>
-        {nextShift ? (
-          <div className="greeting-upcoming">
-            <CalendarClock size={16} className="greeting-upcoming-icon" />
-            <div className="greeting-upcoming-text">
-              <span className="greeting-upcoming-label">Next shift</span>
-              <span className="greeting-upcoming-value">{formatDateTime(nextShift.startsAt)}</span>
-            </div>
-            {moreUpcoming > 0 && (
-              <span className="greeting-upcoming-more">
-                +{moreUpcoming} more upcoming
-              </span>
-            )}
+      {user && (
+        <div className="greeting-header">
+          <Avatar userId={user.id} name={user.name} hasAvatar={user.hasAvatar} size={56} />
+          <div className="greeting-header-text">
+            <span className="greeting-line">{greetingForHour(now.getHours())},</span>
+            <h2 className="greeting-name">
+              {firstName}! <span className="greeting-wave">👋</span>
+            </h2>
+            <span className="greeting-status">
+              <span className="role-badge">{user.role}</span>
+              {openRecord && (
+                <span className="greeting-status-active">
+                  <span className="presence-dot" /> Clocked in
+                </span>
+              )}
+            </span>
           </div>
-        ) : (
-          <p className="greeting-upcoming-empty">No upcoming shifts scheduled yet.</p>
-        )}
-      </section>
-
-      <section className="panel">
-      <div className="clock-display">
-        <ClockFace now={now} />
-        <div className="clock-date">
-          {now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
         </div>
-      </div>
+      )}
 
       {openRecord ? (
-        <div className="clock-status clocked-in">
-          <span className="status-dot" />
-          <div>
-            <strong>You're clocked in</strong>
-            <div className="clock-elapsed">
-              {formatElapsed(
-                now.getTime() - (openRecord.clockIn ? new Date(openRecord.clockIn).getTime() : now.getTime()),
-              )}
-            </div>
+        <section className="panel shift-card">
+          <h3 className="shift-card-title">Current Shift</h3>
+          <div className="shift-card-date">
+            {now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
           </div>
+          <div className="shift-card-row">
+            <Clock size={16} />
+            <span>
+              Since {openRecord.clockIn ? formatTime(openRecord.clockIn) : "--"} ·{" "}
+              {formatElapsed(
+                now.getTime() -
+                  (openRecord.clockIn ? new Date(openRecord.clockIn).getTime() : now.getTime()),
+              )}
+            </span>
+          </div>
+          <span className="shift-status-pill in">
+            <span className="presence-dot" /> Clocked in
+          </span>
           <button
-            className="clock-action out"
+            className="shift-clock-btn out"
             onClick={() => setConfirmAction("out")}
             disabled={busy}
           >
             Clock Out
           </button>
-        </div>
-      ) : (
-        <form className="clock-status" onSubmit={handleClockInSubmit}>
-          <select value={shiftId} onChange={(e) => setShiftId(e.target.value)} required>
-            <option value="">Select a shift</option>
-            {clockableShifts.map((s) => (
-              <option key={s.id} value={s.id}>
-                {formatDateTime(s.startsAt)}
-              </option>
-            ))}
-          </select>
-          <button type="submit" className="clock-action in" disabled={busy}>
+        </section>
+      ) : featuredShift ? (
+        <section className="panel shift-card">
+          <h3 className="shift-card-title">{isFeaturedToday ? "Today's Shift" : "Next Shift"}</h3>
+          <div className="shift-card-date">
+            {new Date(featuredShift.startsAt).toLocaleDateString(undefined, {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}
+          </div>
+          <div className="shift-card-row">
+            <Clock size={16} />
+            <span>
+              {formatTime(featuredShift.startsAt)} – {formatTime(featuredShift.endsAt)}
+            </span>
+          </div>
+          <span className="shift-status-pill pending">Not clocked in yet</span>
+
+          {needsShiftPicker && (
+            <select
+              className="shift-card-select"
+              value={shiftId}
+              onChange={(e) => setShiftId(e.target.value)}
+            >
+              <option value="">Select a shift</option>
+              {clockableShifts.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {formatDateTime(s.startsAt)}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <button
+            className="shift-clock-btn in"
+            onClick={handleClockInClick}
+            disabled={busy || !effectiveShiftId}
+          >
             Clock In
           </button>
-        </form>
+        </section>
+      ) : (
+        <p className="hint">No upcoming shifts scheduled yet.</p>
       )}
       {error && <div className="error">{error}</div>}
 
-      <h3>History</h3>
-      <ul className="list">
-        {pastRecords.map((r) => (
-          <li key={r.id}>
-            <span>
-              <strong>
-                {r.clockIn
-                  ? new Date(r.clockIn).toLocaleDateString(undefined, {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                    })
-                  : "Unknown date"}
-              </strong>
-              <br />
-              {r.clockIn ? formatTime(r.clockIn) : "-"} – {r.clockOut ? formatTime(r.clockOut) : "-"}
-              {r.clockIn && r.clockOut && (
-                <>
-                  {" "}
-                  ·{" "}
-                  {formatDuration(
-                    new Date(r.clockOut).getTime() - new Date(r.clockIn).getTime(),
-                  )}
-                </>
-              )}
-            </span>
-          </li>
-        ))}
-        {pastRecords.length === 0 && <li className="empty">No attendance records yet.</li>}
-      </ul>
+      <section className="panel">
+        <div className="clock-display">
+          <ClockFace now={now} />
+          <div className="clock-date">
+            {now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+          </div>
+        </div>
+
+        <h3>History</h3>
+        <ul className="list">
+          {pastRecords.map((r) => (
+            <li key={r.id}>
+              <span>
+                <strong>
+                  {r.clockIn
+                    ? new Date(r.clockIn).toLocaleDateString(undefined, {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : "Unknown date"}
+                </strong>
+                <br />
+                {r.clockIn ? formatTime(r.clockIn) : "-"} – {r.clockOut ? formatTime(r.clockOut) : "-"}
+                {r.clockIn && r.clockOut && (
+                  <>
+                    {" "}
+                    ·{" "}
+                    {formatDuration(new Date(r.clockOut).getTime() - new Date(r.clockIn).getTime())}
+                  </>
+                )}
+              </span>
+            </li>
+          ))}
+          {pastRecords.length === 0 && <li className="empty">No attendance records yet.</li>}
+        </ul>
       </section>
 
       {confirmAction === "in" && (
