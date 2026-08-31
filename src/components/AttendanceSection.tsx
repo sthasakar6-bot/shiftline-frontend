@@ -159,14 +159,11 @@ export default function AttendanceSection() {
             <h2 className="greeting-name">
               {firstName}! <span className="greeting-wave">👋</span>
             </h2>
-            <span className="greeting-status">
-              <span className="role-badge">{user.role}</span>
-              {openRecord && (
-                <span className="greeting-status-active">
-                  <span className="presence-dot" /> Clocked in
-                </span>
-              )}
-            </span>
+            {openRecord && (
+              <span className="greeting-status-active">
+                <span className="presence-dot" /> Clocked in
+              </span>
+            )}
           </div>
         </div>
       )}
