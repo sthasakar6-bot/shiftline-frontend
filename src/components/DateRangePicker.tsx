@@ -145,7 +145,9 @@ export default function DateRangePicker({
             </div>
 
             <div className="modal-actions">
-              <button onClick={() => setOpen(false)}>Done</button>
+              <button type="button" onClick={() => setOpen(false)}>
+                Done
+              </button>
             </div>
           </div>
         </div>
