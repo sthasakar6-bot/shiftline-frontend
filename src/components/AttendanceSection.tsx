@@ -161,7 +161,7 @@ export default function AttendanceSection() {
             </h2>
             {openRecord && (
               <span className="greeting-status-active">
-                <span className="presence-dot" /> Clocked in
+                <span className="presence-dot" /> Active
               </span>
             )}
           </div>
