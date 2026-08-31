@@ -400,7 +400,7 @@
 .app-content {
   flex: 1;
   padding: 16px;
-  padding-bottom: 88px;
+  padding-bottom: 96px;
   max-width: 700px;
   width: 100%;
   margin: 0 auto;
@@ -491,6 +491,108 @@
   opacity: 1;
   color: var(--accent);
   background: var(--accent-bg);
+}
+
+.tab-bar-arched {
+  padding-top: 0;
+  align-items: flex-start;
+  overflow: visible;
+  animation: tabbar-in 0.4s ease-out both;
+}
+
+@keyframes tabbar-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.tab-bar-arched .tab-bar-group {
+  display: flex;
+  flex: 1;
+}
+
+.tab-bar-arched .tab-bar-group button {
+  padding-top: 10px;
+}
+
+.tab-fab-wrap {
+  position: relative;
+  width: 86px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tab-fab-halo {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--bg);
+  pointer-events: none;
+}
+
+.tab-fab {
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--accent), var(--text-h));
+  color: #fff;
+  border: 4px solid var(--bg);
+  box-shadow: 0 10px 24px -6px rgba(30, 58, 95, 0.5);
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  animation: tab-fab-pulse 2.6s ease-in-out infinite;
+}
+
+.tab-fab:active {
+  transform: translateX(-50%) scale(0.92);
+}
+
+.tab-fab.active {
+  animation: none;
+  box-shadow:
+    0 0 0 4px var(--accent-bg),
+    0 10px 24px -6px rgba(30, 58, 95, 0.5);
+}
+
+@keyframes tab-fab-pulse {
+  0%,
+  100% {
+    box-shadow: 0 10px 24px -6px rgba(30, 58, 95, 0.5), 0 0 0 0 rgba(30, 58, 95, 0.28);
+  }
+  50% {
+    box-shadow: 0 10px 24px -6px rgba(30, 58, 95, 0.5), 0 0 0 8px rgba(30, 58, 95, 0);
+  }
+}
+
+.tab-fab-label {
+  margin-top: 32px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-bar-arched,
+  .tab-fab {
+    animation: none;
+  }
 }
 
 .tab-icon {
@@ -1061,6 +1163,91 @@
 
 .calendar-legend-swatch.vacation {
   background: var(--accent);
+}
+
+.greeting-card {
+  background: linear-gradient(135deg, var(--accent), var(--text-h));
+  color: #fff;
+  border: none;
+  animation: greeting-in 0.5s ease both;
+}
+
+@keyframes greeting-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.greeting-kicker {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  opacity: 0.75;
+  margin-bottom: 4px;
+}
+
+.greeting-title {
+  margin: 0 0 16px;
+  font-size: 22px;
+  color: #fff;
+}
+
+.greeting-upcoming {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.greeting-upcoming-icon {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.greeting-upcoming-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.greeting-upcoming-label {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.greeting-upcoming-value {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.greeting-upcoming-more {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 11px;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+.greeting-upcoming-empty {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .greeting-card {
+    animation: none;
+  }
 }
 
 .clock-display {

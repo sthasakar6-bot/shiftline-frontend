@@ -1,9 +1,18 @@
 import { type FormEvent, useEffect, useState } from "react";
+import { CalendarClock } from "lucide-react";
 import { api, ApiError } from "../api/client";
+import { useAuth } from "../auth/AuthContext";
 import type { Attendance, Shift } from "../api/types";
 import { formatDateTime, formatTime } from "../lib/formatDate";
 import { getCurrentCoords } from "../lib/geolocation";
 import ConfirmDialog from "./ConfirmDialog";
+
+function greetingForHour(hour: number): string {
+  if (hour < 5) return "Good night";
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
 
 function formatElapsed(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -53,6 +62,7 @@ function formatDuration(ms: number): string {
 }
 
 export default function AttendanceSection() {
+  const { user } = useAuth();
   const [records, setRecords] = useState<Attendance[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [shiftId, setShiftId] = useState("");
@@ -123,10 +133,42 @@ export default function AttendanceSection() {
 
   const selectedShift = clockableShifts.find((s) => String(s.id) === shiftId);
 
-  return (
-    <section className="panel">
-      <h2>Attendance</h2>
+  const upcomingShifts = shifts
+    .filter((s) => new Date(s.startsAt).getTime() > now.getTime())
+    .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
+  const nextShift = upcomingShifts[0];
+  const moreUpcoming = upcomingShifts.length - 1;
+  const firstName = user?.name.split(" ")[0] ?? "";
 
+  return (
+    <>
+      <section className="panel greeting-card">
+        <span className="greeting-kicker">
+          {now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+        </span>
+        <h2 className="greeting-title">
+          {greetingForHour(now.getHours())}
+          {firstName ? `, ${firstName}` : ""}
+        </h2>
+        {nextShift ? (
+          <div className="greeting-upcoming">
+            <CalendarClock size={16} className="greeting-upcoming-icon" />
+            <div className="greeting-upcoming-text">
+              <span className="greeting-upcoming-label">Next shift</span>
+              <span className="greeting-upcoming-value">{formatDateTime(nextShift.startsAt)}</span>
+            </div>
+            {moreUpcoming > 0 && (
+              <span className="greeting-upcoming-more">
+                +{moreUpcoming} more upcoming
+              </span>
+            )}
+          </div>
+        ) : (
+          <p className="greeting-upcoming-empty">No upcoming shifts scheduled yet.</p>
+        )}
+      </section>
+
+      <section className="panel">
       <div className="clock-display">
         <ClockFace now={now} />
         <div className="clock-date">
@@ -200,6 +242,7 @@ export default function AttendanceSection() {
         ))}
         {pastRecords.length === 0 && <li className="empty">No attendance records yet.</li>}
       </ul>
+      </section>
 
       {confirmAction === "in" && (
         <ConfirmDialog
@@ -224,6 +267,6 @@ export default function AttendanceSection() {
           onCancel={() => setConfirmAction(null)}
         />
       )}
-    </section>
+    </>
   );
 }
