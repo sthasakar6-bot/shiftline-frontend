@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Home, CalendarDays, Watch, Palmtree, Bell } from "lucide-react";
 import UserBox from "../components/UserBox";
 import AppLogo from "../components/AppLogo";
+import QuickAccessSearch from "../components/QuickAccessSearch";
 import TabBar, { type Tab } from "../components/TabBar";
 import DashboardHome from "../components/DashboardHome";
 import ShiftsSection from "../components/ShiftsSection";
@@ -52,7 +53,10 @@ export default function DashboardPage() {
     <div className="app-shell">
       <header className="app-header">
         <AppLogo />
-        <UserBox />
+        <div className="app-header-actions">
+          <QuickAccessSearch />
+          <UserBox />
+        </div>
       </header>
 
       <main className="app-content">

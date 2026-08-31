@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Users, UserPlus, CalendarDays, Palmtree, Clock, BarChart3 } from "lucide-react";
 import UserBox from "../components/UserBox";
+import QuickAccessSearch from "../components/QuickAccessSearch";
 import TabBar, { type Tab } from "../components/TabBar";
 import ManagerSection from "../components/ManagerSection";
 import InvitesSection from "../components/InvitesSection";
@@ -40,7 +41,10 @@ export default function AdminPage() {
     <div className="app-shell">
       <header className="app-header">
         <h1>Administration</h1>
-        <UserBox />
+        <div className="app-header-actions">
+          <QuickAccessSearch />
+          <UserBox />
+        </div>
       </header>
 
       <main className="app-content">
