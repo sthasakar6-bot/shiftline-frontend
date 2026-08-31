@@ -1243,7 +1243,23 @@
   background: var(--accent);
 }
 
+.calendar-day-label.shift {
+  background: var(--success);
+  font-size: 7.5px;
+  letter-spacing: 0;
+  padding: 1px 5px;
+}
+
+.calendar-day-label.shift.done {
+  background: var(--border);
+  color: var(--text);
+  opacity: 0.75;
+}
+
 .calendar-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
   width: 6px;
   height: 6px;
   border-radius: 50%;

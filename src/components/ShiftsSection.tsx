@@ -9,6 +9,15 @@ function dateKey(d: Date): string {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 
+function compactTime(iso: string): string {
+  const d = new Date(iso);
+  const h = d.getHours();
+  const displayHour = h % 12 === 0 ? 12 : h % 12;
+  const period = h < 12 ? "a" : "p";
+  const minutes = d.getMinutes();
+  return minutes === 0 ? `${displayHour}${period}` : `${displayHour}:${String(minutes).padStart(2, "0")}${period}`;
+}
+
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function ShiftsSection() {
@@ -141,12 +150,19 @@ export default function ShiftsSection() {
               disabled={!hasShift && !hasLeave}
             >
               <span className="calendar-day-num">{day.getDate()}</span>
-              {hasLeave && (
+              {hasLeave ? (
                 <span className={`calendar-day-label ${leaveType}`}>
                   {leaveType === "sick" ? "Sick" : "Vac"}
                 </span>
+              ) : (
+                hasShift && (
+                  <span className={`calendar-day-label shift${hasActiveShift ? "" : " done"}`}>
+                    {compactTime(dayShifts[0].startsAt)}-{compactTime(dayShifts[0].endsAt)}
+                    {dayShifts.length > 1 && ` +${dayShifts.length - 1}`}
+                  </span>
+                )
               )}
-              {!hasLeave && hasActiveShift && <span className="calendar-dot" />}
+              {hasActiveShift && !hasLeave && <span className="calendar-dot" />}
             </button>
           );
         })}
