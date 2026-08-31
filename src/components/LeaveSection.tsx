@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import { api, ApiError } from "../api/client";
 import type { LeaveRequest } from "../api/types";
 import { formatDateOnly } from "../lib/dateOnly";
+import DateRangePicker from "./DateRangePicker";
 
 export default function LeaveSection() {
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
@@ -64,31 +65,23 @@ export default function LeaveSection() {
             </select>
           </label>
           <label className="field">
-            <span className="field-label">Start date</span>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              required
-            />
-          </label>
-          <label className="field">
-            <span className="field-label">
-              End date{type === "sick" && " (optional)"}
-            </span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              min={startDate || undefined}
-              required={type !== "sick"}
+            <span className="field-label">Date{type === "vacation" && "s"}</span>
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onChange={(start, end) => {
+                setStartDate(start);
+                setEndDate(end);
+              }}
             />
           </label>
           <label className="field">
             <span className="field-label">Reason (optional)</span>
             <input value={reason} onChange={(e) => setReason(e.target.value)} />
           </label>
-          <button type="submit">Request</button>
+          <button type="submit" disabled={!startDate}>
+            Request
+          </button>
         </form>
         {error && <div className="error">{error}</div>}
       </div>

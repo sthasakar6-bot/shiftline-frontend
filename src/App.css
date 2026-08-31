@@ -1592,6 +1592,48 @@
   opacity: 0.75;
 }
 
+.calendar-day.in-range {
+  background: var(--accent-bg);
+  border-radius: 0;
+  border-color: transparent;
+}
+
+.calendar-day.range-endpoint {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.calendar-day.range-endpoint .calendar-day-num {
+  color: #fff;
+}
+
+.date-range-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 14px;
+  color: var(--text-h);
+  text-align: left;
+}
+
+.date-range-placeholder {
+  opacity: 0.6;
+}
+
+.date-range-modal {
+  max-width: 360px;
+}
+
+.date-range-hint {
+  margin: 0 0 14px;
+  text-align: center;
+}
+
 .calendar-dot {
   position: absolute;
   top: 5px;
