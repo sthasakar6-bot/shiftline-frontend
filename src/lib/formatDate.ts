@@ -20,6 +20,15 @@ export function compactTime(iso: string): string {
     : `${displayHour}:${String(minutes).padStart(2, "0")}${period}`;
 }
 
+export function formatDuration(ms: number): string {
+  const totalMinutes = Math.max(0, Math.round(ms / 60000));
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
 export function formatRelativeTime(iso: string): string {
   const diffSec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
   if (diffSec < 60) return "Just now";

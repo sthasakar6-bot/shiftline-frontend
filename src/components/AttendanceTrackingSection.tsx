@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { MapPin } from "lucide-react";
 import { api } from "../api/client";
 import type { Attendance, UserSummary } from "../api/types";
-import { formatDateTime } from "../lib/formatDate";
+import { formatTime, formatDuration } from "../lib/formatDate";
 import { mapsUrl } from "../lib/geolocation";
 import { useAuth } from "../auth/AuthContext";
+import Avatar from "./Avatar";
 
 export default function AttendanceTrackingSection() {
   const { user } = useAuth();
@@ -11,7 +13,9 @@ export default function AttendanceTrackingSection() {
   const [selected, setSelected] = useState("");
   const [records, setRecords] = useState<Attendance[]>([]);
 
-  const people = user ? [{ id: user.id, name: `${user.name} (you)` }, ...reports] : reports;
+  const people = user
+    ? [{ id: user.id, name: `${user.name} (you)`, hasAvatar: user.hasAvatar }, ...reports]
+    : reports;
 
   useEffect(() => {
     api.listReports().then(setReports).catch(() => {});
@@ -24,6 +28,13 @@ export default function AttendanceTrackingSection() {
       setRecords([]);
     }
   }, [selected]);
+
+  const selectedPerson = people.find((p) => p.id === Number(selected));
+  const sortedRecords = [...records].sort((a, b) => {
+    const aTime = a.clockIn ? new Date(a.clockIn).getTime() : 0;
+    const bTime = b.clockIn ? new Date(b.clockIn).getTime() : 0;
+    return bTime - aTime;
+  });
 
   return (
     <section className="panel">
@@ -38,46 +49,77 @@ export default function AttendanceTrackingSection() {
           ))}
         </select>
       </div>
+
+      {selected && selectedPerson && (
+        <div className="attendance-track-header">
+          <Avatar
+            userId={selectedPerson.id}
+            name={selectedPerson.name}
+            hasAvatar={selectedPerson.hasAvatar}
+            size={30}
+          />
+          <span className="attendance-track-header-name">{selectedPerson.name}</span>
+          <span className="attendance-track-header-count">
+            {sortedRecords.length} record{sortedRecords.length === 1 ? "" : "s"}
+          </span>
+        </div>
+      )}
+
       {selected && (
-        <ul className="list">
-          {records.map((r) => (
-            <li key={r.id}>
-              <span>
-                Shift #{r.shiftId} — In: {r.clockIn ? formatDateTime(r.clockIn) : "-"}
-                {r.clockInLat != null && r.clockInLng != null && (
-                  <>
-                    {" "}
-                    (
+        <ul className="attendance-track-rows">
+          {sortedRecords.map((r) => (
+            <li key={r.id} className="attendance-track-row">
+              <div className="attendance-track-main">
+                <span className="attendance-track-date">
+                  {r.clockIn
+                    ? new Date(r.clockIn).toLocaleDateString(undefined, {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : "Unknown date"}
+                </span>
+                <span className="attendance-track-range">
+                  {r.clockIn ? formatTime(r.clockIn) : "-"} –{" "}
+                  {r.clockOut ? (
+                    formatTime(r.clockOut)
+                  ) : (
+                    <span className="status-badge pending">Active</span>
+                  )}
+                  {r.clockIn && r.clockOut && (
+                    <> · {formatDuration(new Date(r.clockOut).getTime() - new Date(r.clockIn).getTime())}</>
+                  )}
+                </span>
+              </div>
+              {(r.clockInLat != null || r.clockOutLat != null) && (
+                <div className="attendance-track-links">
+                  {r.clockInLat != null && r.clockInLng != null && (
                     <a
+                      className="attendance-track-map"
                       href={mapsUrl(r.clockInLat, r.clockInLng)}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      map
+                      <MapPin size={11} /> In
                     </a>
-                    )
-                  </>
-                )}
-                <br />
-                Out: {r.clockOut ? formatDateTime(r.clockOut) : "Still clocked in"}
-                {r.clockOutLat != null && r.clockOutLng != null && (
-                  <>
-                    {" "}
-                    (
+                  )}
+                  {r.clockOutLat != null && r.clockOutLng != null && (
                     <a
+                      className="attendance-track-map"
                       href={mapsUrl(r.clockOutLat, r.clockOutLng)}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      map
+                      <MapPin size={11} /> Out
                     </a>
-                    )
-                  </>
-                )}
-              </span>
+                  )}
+                </div>
+              )}
             </li>
           ))}
-          {records.length === 0 && <li className="empty">No attendance records.</li>}
+          {sortedRecords.length === 0 && (
+            <li className="leave-empty">No attendance records.</li>
+          )}
         </ul>
       )}
     </section>
