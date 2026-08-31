@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { Hourglass, Palmtree, CalendarClock, History } from "lucide-react";
 import { api, ApiError } from "../api/client";
 import type { LeaveRequest, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { fetchAllLeave, type LeaveEntry } from "../lib/aggregateLeave";
 import { addDays, formatDateOnly, formatLocalDate, parseIsoDateLocal, todayLocal } from "../lib/dateOnly";
 import ConfirmDialog from "./ConfirmDialog";
+import Avatar from "./Avatar";
 
 export default function LeaveApprovalsSection() {
   const { user } = useAuth();
@@ -18,7 +20,10 @@ export default function LeaveApprovalsSection() {
   );
 
   const people = useMemo(
-    () => (user ? [{ id: user.id, name: `${user.name} (you)` }, ...reports] : reports),
+    () =>
+      user
+        ? [{ id: user.id, name: `${user.name} (you)`, hasAvatar: user.hasAvatar }, ...reports]
+        : reports,
     [user, reports],
   );
 
@@ -90,76 +95,113 @@ export default function LeaveApprovalsSection() {
   return (
     <section className="panel">
       <h2>Leave Approvals</h2>
-
-      <h3>Pending requests</h3>
       {error && <div className="error">{error}</div>}
-      <ul className="list">
-        {pendingRequests.map((r) => (
-          <li key={r.id}>
-            <span>
-              <strong>{r.employeeName}</strong> <span className={`type-badge ${r.type}`}>{r.type}</span>
-              <br />
-              {formatDateOnly(r.startDate)} → {formatDateOnly(r.endDate)}
-              {r.reason && <> · {r.reason}</>}
-            </span>
-            <span className="actions">
-              <button onClick={() => decide(r.userId, r.id, "approved")}>Approve</button>
-              <button onClick={() => decide(r.userId, r.id, "rejected")}>Reject</button>
-            </span>
-          </li>
-        ))}
-        {pendingRequests.length === 0 && <li className="empty">No pending requests.</li>}
-      </ul>
 
-      <h3>On leave now</h3>
-      <ul className="list">
-        {onLeaveNow.map((l) => (
-          <li key={l.id}>
-            <span>
-              <strong>{l.employeeName}</strong> <span className={`type-badge ${l.type}`}>{l.type}</span>
-              <br />
-              Back {formatLocalDate(addDays(parseIsoDateLocal(l.endDate), 1))}
-            </span>
-            <span className="actions">
-              <button
-                onClick={() =>
-                  setRevokeTarget({ userId: l.userId, id: l.id, employeeName: l.employeeName })
-                }
-              >
-                Cancel
-              </button>
-            </span>
-          </li>
-        ))}
-        {onLeaveNow.length === 0 && <li className="empty">Nobody is on leave today.</li>}
-      </ul>
+      <div className="leave-group">
+        <div className="leave-group-header">
+          <Hourglass size={15} />
+          <span>Pending requests</span>
+          {pendingRequests.length > 0 && (
+            <span className="leave-group-count">{pendingRequests.length}</span>
+          )}
+        </div>
+        <ul className="leave-rows">
+          {pendingRequests.map((r) => (
+            <li key={r.id} className="leave-row">
+              <Avatar userId={r.userId} name={r.employeeName} hasAvatar={r.employeeHasAvatar} size={32} />
+              <div className="leave-row-body">
+                <span className="leave-row-name">
+                  {r.employeeName} <span className={`type-badge ${r.type}`}>{r.type}</span>
+                </span>
+                <span className="leave-row-dates">
+                  {formatDateOnly(r.startDate)} → {formatDateOnly(r.endDate)}
+                  {r.reason && <> · {r.reason}</>}
+                </span>
+              </div>
+              <span className="actions">
+                <button onClick={() => decide(r.userId, r.id, "approved")}>Approve</button>
+                <button onClick={() => decide(r.userId, r.id, "rejected")}>Reject</button>
+              </span>
+            </li>
+          ))}
+          {pendingRequests.length === 0 && <li className="leave-empty">No pending requests.</li>}
+        </ul>
+      </div>
 
-      <h3>Upcoming leave</h3>
-      <ul className="list">
-        {upcomingLeave.map((l) => (
-          <li key={l.id}>
-            <span>
-              <strong>{l.employeeName}</strong> <span className={`type-badge ${l.type}`}>{l.type}</span>
-              <br />
-              {formatDateOnly(l.startDate)} → {formatDateOnly(l.endDate)}
-            </span>
-            <span className="actions">
-              <button
-                onClick={() =>
-                  setRevokeTarget({ userId: l.userId, id: l.id, employeeName: l.employeeName })
-                }
-              >
-                Cancel
-              </button>
-            </span>
-          </li>
-        ))}
-        {upcomingLeave.length === 0 && <li className="empty">No upcoming leave scheduled.</li>}
-      </ul>
+      <div className="leave-group">
+        <div className="leave-group-header">
+          <Palmtree size={15} />
+          <span>On leave now</span>
+          {onLeaveNow.length > 0 && <span className="leave-group-count">{onLeaveNow.length}</span>}
+        </div>
+        <ul className="leave-rows">
+          {onLeaveNow.map((l) => (
+            <li key={l.id} className="leave-row">
+              <Avatar userId={l.userId} name={l.employeeName} hasAvatar={l.employeeHasAvatar} size={32} />
+              <div className="leave-row-body">
+                <span className="leave-row-name">
+                  {l.employeeName} <span className={`type-badge ${l.type}`}>{l.type}</span>
+                </span>
+                <span className="leave-row-dates">
+                  Back {formatLocalDate(addDays(parseIsoDateLocal(l.endDate), 1))}
+                </span>
+              </div>
+              <span className="actions">
+                <button
+                  onClick={() =>
+                    setRevokeTarget({ userId: l.userId, id: l.id, employeeName: l.employeeName })
+                  }
+                >
+                  Cancel
+                </button>
+              </span>
+            </li>
+          ))}
+          {onLeaveNow.length === 0 && <li className="leave-empty">Nobody is on leave today.</li>}
+        </ul>
+      </div>
+
+      <div className="leave-group">
+        <div className="leave-group-header">
+          <CalendarClock size={15} />
+          <span>Upcoming leave</span>
+          {upcomingLeave.length > 0 && (
+            <span className="leave-group-count">{upcomingLeave.length}</span>
+          )}
+        </div>
+        <ul className="leave-rows">
+          {upcomingLeave.map((l) => (
+            <li key={l.id} className="leave-row">
+              <Avatar userId={l.userId} name={l.employeeName} hasAvatar={l.employeeHasAvatar} size={32} />
+              <div className="leave-row-body">
+                <span className="leave-row-name">
+                  {l.employeeName} <span className={`type-badge ${l.type}`}>{l.type}</span>
+                </span>
+                <span className="leave-row-dates">
+                  {formatDateOnly(l.startDate)} → {formatDateOnly(l.endDate)}
+                </span>
+              </div>
+              <span className="actions">
+                <button
+                  onClick={() =>
+                    setRevokeTarget({ userId: l.userId, id: l.id, employeeName: l.employeeName })
+                  }
+                >
+                  Cancel
+                </button>
+              </span>
+            </li>
+          ))}
+          {upcomingLeave.length === 0 && <li className="leave-empty">No upcoming leave scheduled.</li>}
+        </ul>
+      </div>
 
       <hr className="section-divider" />
 
-      <h3>Leave history by employee</h3>
+      <div className="leave-group-header">
+        <History size={15} />
+        <span>Leave history by employee</span>
+      </div>
       <div className="inline-form">
         <select value={selected} onChange={(e) => setSelected(e.target.value)}>
           <option value="">Select employee</option>
@@ -171,16 +213,19 @@ export default function LeaveApprovalsSection() {
         </select>
       </div>
       {selected && (
-        <ul className="list">
+        <ul className="leave-rows">
           {requests.map((r) => (
-            <li key={r.id}>
-              <span>
-                <span className={`type-badge ${r.type}`}>{r.type}</span>{" "}
-                <span className={`status-badge ${r.status}`}>{r.status}</span>
-                <br />
-                {formatDateOnly(r.startDate)} → {formatDateOnly(r.endDate)}
-                {r.reason && <> · {r.reason}</>}
-              </span>
+            <li key={r.id} className="leave-row">
+              <div className="leave-row-body">
+                <span className="leave-row-name">
+                  <span className={`type-badge ${r.type}`}>{r.type}</span>{" "}
+                  <span className={`status-badge ${r.status}`}>{r.status}</span>
+                </span>
+                <span className="leave-row-dates">
+                  {formatDateOnly(r.startDate)} → {formatDateOnly(r.endDate)}
+                  {r.reason && <> · {r.reason}</>}
+                </span>
+              </div>
               {r.status === "pending" && (
                 <span className="actions">
                   <button onClick={() => decide(Number(selected), r.id, "approved")}>Approve</button>
@@ -201,7 +246,7 @@ export default function LeaveApprovalsSection() {
               )}
             </li>
           ))}
-          {requests.length === 0 && <li className="empty">No leave requests.</li>}
+          {requests.length === 0 && <li className="leave-empty">No leave requests.</li>}
         </ul>
       )}
 
