@@ -1,16 +1,6 @@
-import { type ChangeEvent, type FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  Camera,
-  CalendarCheck,
-  Clock,
-  Palmtree,
-  Thermometer,
-  Phone,
-  Mail,
-  Check,
-} from "lucide-react";
+import { ArrowLeft, Camera, CalendarCheck, Clock, Palmtree, Thermometer } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { api, ApiError } from "../api/client";
 import Avatar from "../components/Avatar";
@@ -32,30 +22,11 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
-  const [phone, setPhone] = useState(user?.phone ?? "");
-  const [savingPhone, setSavingPhone] = useState(false);
-  const [phoneSaved, setPhoneSaved] = useState(false);
 
   useEffect(() => {
     api.listAttendance().then(setAttendance).catch(() => {});
     api.listLeaveRequests().then(setLeaveRequests).catch(() => {});
   }, []);
-
-  async function handleSavePhone(e: FormEvent) {
-    e.preventDefault();
-    setSavingPhone(true);
-    setError(null);
-    try {
-      await api.updatePhone(phone);
-      await refreshUser();
-      setPhoneSaved(true);
-      setTimeout(() => setPhoneSaved(false), 2000);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to save phone number");
-    } finally {
-      setSavingPhone(false);
-    }
-  }
 
   async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -147,28 +118,6 @@ export default function ProfilePage() {
             <span className="role-badge">{user.role}</span>
             {uploading && <p className="hint">Uploading photo...</p>}
             {error && <div className="error">{error}</div>}
-
-            <div className="profile-contact">
-              <div className="profile-contact-row">
-                <Mail size={16} className="profile-contact-icon" />
-                <span className="profile-contact-value">{user.email}</span>
-              </div>
-              <form className="profile-contact-row" onSubmit={handleSavePhone}>
-                <Phone size={16} className="profile-contact-icon" />
-                <input
-                  type="tel"
-                  className="profile-contact-input"
-                  placeholder="Add a phone number"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-                {phone !== (user.phone ?? "") && (
-                  <button type="submit" className="profile-contact-save" disabled={savingPhone}>
-                    {phoneSaved ? <Check size={14} /> : savingPhone ? "Saving..." : "Save"}
-                  </button>
-                )}
-              </form>
-            </div>
           </div>
         </section>
 
