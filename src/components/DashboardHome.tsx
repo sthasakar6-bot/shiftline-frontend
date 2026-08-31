@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Clock } from "lucide-react";
+import { Clock, Palmtree } from "lucide-react";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import Avatar from "./Avatar";
-import type { Attendance, Shift } from "../api/types";
+import type { Attendance, LeaveRequest, Shift } from "../api/types";
 import { formatTime } from "../lib/formatDate";
+import { formatLocalDate, parseIsoDateLocal, todayLocal } from "../lib/dateOnly";
 
 function greetingForHour(hour: number): string {
   if (hour < 5) return "Good night";
@@ -25,11 +26,13 @@ export default function DashboardHome() {
   const { user } = useAuth();
   const [records, setRecords] = useState<Attendance[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
     api.listAttendance().then(setRecords).catch(() => {});
     api.listShifts().then(setShifts).catch(() => {});
+    api.listLeaveRequests().then(setLeaveRequests).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -51,6 +54,15 @@ export default function DashboardHome() {
     : false;
 
   const firstName = user?.name.split(" ")[0] ?? "";
+
+  const today = todayLocal();
+  const upcomingLeave = leaveRequests
+    .filter((l) => l.status === "approved" && parseIsoDateLocal(l.endDate) >= today)
+    .sort(
+      (a, b) => parseIsoDateLocal(a.startDate).getTime() - parseIsoDateLocal(b.startDate).getTime(),
+    );
+  const nextLeave = upcomingLeave[0];
+  const isLeaveActive = nextLeave ? parseIsoDateLocal(nextLeave.startDate) <= today : false;
 
   return (
     <>
@@ -111,6 +123,23 @@ export default function DashboardHome() {
         </section>
       ) : (
         <p className="hint">No upcoming shifts scheduled yet.</p>
+      )}
+
+      {nextLeave && (
+        <section className="panel shift-card">
+          <h3 className="shift-card-title">
+            {isLeaveActive ? "On Leave" : "Upcoming"} · {nextLeave.type === "sick" ? "Sick" : "Vacation"}
+          </h3>
+          <div className="shift-card-date">
+            {formatLocalDate(parseIsoDateLocal(nextLeave.startDate))} –{" "}
+            {formatLocalDate(parseIsoDateLocal(nextLeave.endDate))}
+          </div>
+          <div className="shift-card-row">
+            <Palmtree size={16} />
+            <span className={`type-badge ${nextLeave.type}`}>{nextLeave.type}</span>
+            <span className="status-badge approved">approved</span>
+          </div>
+        </section>
       )}
     </>
   );
