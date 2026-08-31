@@ -1212,7 +1212,7 @@
 
 .greeting-wave {
   display: inline-block;
-  animation: greeting-wave 1.6s ease-in-out infinite;
+  animation: greeting-wave 1.6s ease-in-out 1;
   transform-origin: 70% 70%;
 }
 
@@ -1246,6 +1246,10 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--success);
+}
+
+.greeting-status-active .presence-dot {
+  animation: none;
 }
 
 .shift-card {
