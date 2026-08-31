@@ -9,6 +9,17 @@ export function formatDateTime(iso: string): string {
   });
 }
 
+export function compactTime(iso: string): string {
+  const d = new Date(iso);
+  const h = d.getHours();
+  const displayHour = h % 12 === 0 ? 12 : h % 12;
+  const period = h < 12 ? "a" : "p";
+  const minutes = d.getMinutes();
+  return minutes === 0
+    ? `${displayHour}${period}`
+    : `${displayHour}:${String(minutes).padStart(2, "0")}${period}`;
+}
+
 export function formatRelativeTime(iso: string): string {
   const diffSec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
   if (diffSec < 60) return "Just now";

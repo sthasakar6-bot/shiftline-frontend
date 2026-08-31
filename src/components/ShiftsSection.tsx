@@ -2,20 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "../api/client";
 import type { Attendance, LeaveRequest, Shift } from "../api/types";
-import { formatTime } from "../lib/formatDate";
+import { formatTime, compactTime } from "../lib/formatDate";
 import { addDays, parseIsoDateLocal } from "../lib/dateOnly";
 
 function dateKey(d: Date): string {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-}
-
-function compactTime(iso: string): string {
-  const d = new Date(iso);
-  const h = d.getHours();
-  const displayHour = h % 12 === 0 ? 12 : h % 12;
-  const period = h < 12 ? "a" : "p";
-  const minutes = d.getMinutes();
-  return minutes === 0 ? `${displayHour}${period}` : `${displayHour}:${String(minutes).padStart(2, "0")}${period}`;
 }
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

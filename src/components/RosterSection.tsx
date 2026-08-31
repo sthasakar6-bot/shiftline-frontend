@@ -4,7 +4,8 @@ import { api, ApiError } from "../api/client";
 import type { Shift, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "./ConfirmDialog";
-import { formatTime } from "../lib/formatDate";
+import Avatar from "./Avatar";
+import { formatTime, compactTime } from "../lib/formatDate";
 
 interface RosterEntry extends Shift {
   employeeName: string;
@@ -50,7 +51,10 @@ export default function RosterSection() {
   const [message, setMessage] = useState<string | null>(null);
 
   const people = useMemo(
-    () => (user ? [{ id: user.id, name: `${user.name} (you)` }, ...reports] : reports),
+    () =>
+      user
+        ? [{ id: user.id, name: `${user.name} (you)`, hasAvatar: user.hasAvatar }, ...reports]
+        : reports,
     [user, reports],
   );
 
@@ -121,36 +125,34 @@ export default function RosterSection() {
 
   const weekLabel = `${weekStart.toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${new Date(weekEnd.getTime() - 86400000).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
 
-  const groupedByDay = useMemo(() => {
-    const groups = new Map<string, { label: string; date: Date; shifts: RosterEntry[] }>();
-
-    function ensureGroup(day: Date) {
-      const key = dateKey(day);
-      let g = groups.get(key);
-      if (!g) {
-        g = {
-          label: day.toLocaleDateString(undefined, {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          }),
-          date: day,
-          shifts: [],
-        };
-        groups.set(key, g);
-      }
-      return g;
+  const weekDays = useMemo(() => {
+    const days: Date[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStart);
+      d.setDate(d.getDate() + i);
+      days.push(d);
     }
+    return days;
+  }, [weekStart]);
 
+  const shiftsByPersonAndDay = useMemo(() => {
+    const map = new Map<string, RosterEntry[]>();
     for (const s of roster) {
       const start = new Date(s.startsAt);
       if (start >= weekStart && start < weekEnd) {
-        ensureGroup(start).shifts.push(s);
+        const key = `${s.userId}_${dateKey(start)}`;
+        const existing = map.get(key) ?? [];
+        existing.push(s);
+        map.set(key, existing);
       }
     }
-
-    return [...groups.values()].sort((a, b) => a.date.getTime() - b.date.getTime());
+    return map;
   }, [roster, weekStart, weekEnd]);
+
+  const shiftsThisWeek = [...shiftsByPersonAndDay.values()].reduce(
+    (sum, list) => sum + list.length,
+    0,
+  );
 
   const today = dateKey(new Date());
 
@@ -242,39 +244,61 @@ export default function RosterSection() {
         </button>
       </div>
 
-      <div className="roster-days">
-        {groupedByDay.map((group) => (
-          <div key={group.label} className={`roster-day${dateKey(group.date) === today ? " today" : ""}`}>
-            <div className="roster-day-header">
-              <span className="roster-day-title">{group.label}</span>
-              <span className="roster-day-count">
-                {group.shifts.length} shift{group.shifts.length === 1 ? "" : "s"}
-              </span>
-            </div>
-            <ul className="roster-rows">
-              {group.shifts.map((s) => (
-                <li key={s.id} className="roster-row">
-                  <div className="roster-row-info">
-                    <span className="roster-row-name">{s.employeeName}</span>
-                    <span className="roster-row-time">
-                      {formatTime(s.startsAt)} – {formatTime(s.endsAt)}
+      {people.length === 0 ? (
+        <p className="empty-state">No employees on your team yet.</p>
+      ) : shiftsThisWeek === 0 ? (
+        <p className="empty-state">No shifts scheduled this week.</p>
+      ) : (
+        <div className="roster-grid-wrap">
+          <table className="roster-grid">
+            <thead>
+              <tr>
+                <th className="roster-grid-corner" />
+                {weekDays.map((d) => (
+                  <th
+                    key={dateKey(d)}
+                    className={dateKey(d) === today ? "today" : ""}
+                  >
+                    <span className="roster-grid-day-name">
+                      {d.toLocaleDateString(undefined, { weekday: "short" })}
                     </span>
-                    {s.breakMinutes && (
-                      <span className="roster-break-badge">{s.breakMinutes} min break</span>
-                    )}
-                  </div>
-                  <button className="roster-remove-btn" onClick={() => setRemoveTarget(s)}>
-                    Remove
-                  </button>
-                </li>
+                    <span className="roster-grid-day-num">{d.getDate()}</span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {people.map((p) => (
+                <tr key={p.id}>
+                  <th className="roster-grid-person">
+                    <span className="roster-grid-person-inner">
+                      <Avatar userId={p.id} name={p.name} hasAvatar={p.hasAvatar} size={26} />
+                      <span className="roster-grid-person-name">{p.name}</span>
+                    </span>
+                  </th>
+                  {weekDays.map((d) => {
+                    const cellShifts = shiftsByPersonAndDay.get(`${p.id}_${dateKey(d)}`) ?? [];
+                    return (
+                      <td key={dateKey(d)} className={dateKey(d) === today ? "today" : ""}>
+                        {cellShifts.map((s) => (
+                          <button
+                            key={s.id}
+                            className="roster-grid-chip"
+                            onClick={() => setRemoveTarget(s)}
+                            title={`${formatTime(s.startsAt)} – ${formatTime(s.endsAt)}${s.breakMinutes ? ` · ${s.breakMinutes} min break` : ""}`}
+                          >
+                            {compactTime(s.startsAt)}-{compactTime(s.endsAt)}
+                          </button>
+                        ))}
+                      </td>
+                    );
+                  })}
+                </tr>
               ))}
-            </ul>
-          </div>
-        ))}
-        {groupedByDay.length === 0 && (
-          <p className="empty-state">No shifts scheduled this week.</p>
-        )}
-      </div>
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {removeTarget && (
         <ConfirmDialog
