@@ -873,13 +873,6 @@
   border-radius: 50%;
   background: transparent;
   border: 1px solid var(--border);
-  font-size: 17px;
-  line-height: 1;
-}
-
-.lang-flag {
-  font-size: 17px;
-  line-height: 1;
 }
 
 .lang-switcher-menu {

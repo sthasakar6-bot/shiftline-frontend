@@ -2,12 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Check } from "lucide-react";
 import { setLanguage, SUPPORTED_LANGUAGES, type SupportedLanguage } from "../i18n";
-
-const FLAGS: Record<SupportedLanguage, string> = {
-  en: "🇬🇧",
-  ne: "🇳🇵",
-  nl: "🇳🇱",
-};
+import FlagIcon from "./FlagIcon";
 
 const NAME_KEYS: Record<SupportedLanguage, string> = {
   en: "language.english",
@@ -39,7 +34,7 @@ export default function LanguageSwitcher() {
         onClick={() => setOpen(!open)}
         title={t("language.label")}
       >
-        <span className="lang-flag">{FLAGS[current] ?? FLAGS.en}</span>
+        <FlagIcon lang={current} size={19} />
       </button>
       {open && (
         <div className="lang-switcher-menu">
@@ -52,7 +47,7 @@ export default function LanguageSwitcher() {
                 setOpen(false);
               }}
             >
-              <span className="lang-flag">{FLAGS[lang]}</span>
+              <FlagIcon lang={lang} size={19} />
               {t(NAME_KEYS[lang])}
               {lang === current && <Check size={15} className="lang-check" />}
             </button>
