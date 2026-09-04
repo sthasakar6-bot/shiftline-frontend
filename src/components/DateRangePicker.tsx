@@ -20,10 +20,12 @@ export default function DateRangePicker({
   startDate,
   endDate,
   onChange,
+  singleDay,
 }: {
   startDate: string;
   endDate: string;
   onChange: (start: string, end: string) => void;
+  singleDay?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [pendingStart, setPendingStart] = useState<Date | null>(null);
@@ -57,6 +59,11 @@ export default function DateRangePicker({
   const monthLabel = monthCursor.toLocaleDateString(undefined, { month: "long", year: "numeric" });
 
   function handlePick(day: Date) {
+    if (singleDay) {
+      onChange(toIsoDateOnly(day), toIsoDateOnly(day));
+      setOpen(false);
+      return;
+    }
     if (!pendingStart) {
       setPendingStart(day);
       onChange(toIsoDateOnly(day), toIsoDateOnly(day));
@@ -75,7 +82,9 @@ export default function DateRangePicker({
   const label =
     startDate && endDate
       ? formatRangeLabel(startDate, endDate)
-      : "Select date or date range";
+      : singleDay
+        ? "Select date"
+        : "Select date or date range";
 
   return (
     <>
@@ -88,7 +97,11 @@ export default function DateRangePicker({
         <div className="modal-overlay" onClick={() => setOpen(false)}>
           <div className="modal date-range-modal" onClick={(e) => e.stopPropagation()}>
             <p className="hint date-range-hint">
-              {pendingStart ? "Tap the last day of your leave" : "Tap the first day of your leave"}
+              {singleDay
+                ? "Tap the day of your leave"
+                : pendingStart
+                  ? "Tap the last day of your leave"
+                  : "Tap the first day of your leave"}
             </p>
 
             <div className="roster-week-nav">

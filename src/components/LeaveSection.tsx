@@ -59,7 +59,14 @@ export default function LeaveSection() {
         <form className="inline-form" onSubmit={handleCreate}>
           <label className="field">
             <span className="field-label">Type</span>
-            <select value={type} onChange={(e) => setType(e.target.value as "vacation" | "sick")}>
+            <select
+              value={type}
+              onChange={(e) => {
+                const next = e.target.value as "vacation" | "sick";
+                setType(next);
+                if (next === "sick" && startDate) setEndDate(startDate);
+              }}
+            >
               <option value="vacation">Vacation</option>
               <option value="sick">Sick</option>
             </select>
@@ -69,6 +76,7 @@ export default function LeaveSection() {
             <DateRangePicker
               startDate={startDate}
               endDate={endDate}
+              singleDay={type === "sick"}
               onChange={(start, end) => {
                 setStartDate(start);
                 setEndDate(end);
