@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Users, UserPlus, CalendarDays, Palmtree, Clock, BarChart3, Bell } from "lucide-react";
 import UserBox from "../components/UserBox";
 import QuickAccessSearch from "../components/QuickAccessSearch";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import TabBar, { type Tab } from "../components/TabBar";
 import ManagerSection from "../components/ManagerSection";
 import InvitesSection from "../components/InvitesSection";
@@ -16,19 +18,10 @@ import { api } from "../api/client";
 import type { Notification } from "../api/types";
 import { updateAppBadge } from "../lib/appBadge";
 
-const baseTabs: Tab[] = [
-  { key: "team", label: "Team", icon: Users },
-  { key: "roster", label: "Roster", icon: CalendarDays },
-  { key: "invite", label: "Invite", icon: UserPlus },
-  { key: "leave", label: "Leave", icon: Palmtree },
-  { key: "attendance", label: "Attendance", icon: Clock },
-  { key: "summary", label: "Summary", icon: BarChart3 },
-  { key: "alerts", label: "Alerts", icon: Bell },
-];
-
-const tabKeys = baseTabs.map((t) => t.key);
+const tabKeys = ["team", "roster", "invite", "leave", "attendance", "summary", "alerts"];
 
 export default function AdminPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const requestedTab = searchParams.get("tab");
   const [active, setActive] = useState(
@@ -55,14 +48,23 @@ export default function AdminPage() {
     updateAppBadge(unreadCount);
   }, [unreadCount]);
 
-  const tabs = baseTabs.map((t) => (t.key === "alerts" ? { ...t, badge: unreadCount } : t));
+  const tabs: Tab[] = [
+    { key: "team", label: t("nav.team"), icon: Users },
+    { key: "roster", label: t("nav.roster"), icon: CalendarDays },
+    { key: "invite", label: t("nav.invite"), icon: UserPlus },
+    { key: "leave", label: t("nav.leave"), icon: Palmtree },
+    { key: "attendance", label: t("nav.attendance"), icon: Clock },
+    { key: "summary", label: t("nav.summary"), icon: BarChart3 },
+    { key: "alerts", label: t("nav.alerts"), icon: Bell, badge: unreadCount },
+  ];
 
   return (
     <div className="app-shell">
       <header className="app-header">
-        <h1>Administration</h1>
+        <h1>{t("nav.administration")}</h1>
         <div className="app-header-actions">
           <QuickAccessSearch />
+          <LanguageSwitcher />
           <UserBox />
         </div>
       </header>

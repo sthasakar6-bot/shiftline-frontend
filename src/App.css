@@ -109,6 +109,7 @@
 }
 
 .auth-page {
+  position: relative;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -120,6 +121,12 @@
     radial-gradient(circle at 18% 15%, var(--accent-bg), transparent 45%),
     radial-gradient(circle at 82% 85%, var(--accent-bg), transparent 45%),
     var(--bg);
+}
+
+.auth-lang-switcher {
+  position: absolute;
+  top: 16px;
+  right: 16px;
 }
 
 .auth-brand {
@@ -850,6 +857,71 @@
 
 .user-box-menu button:hover {
   background: var(--accent-bg);
+}
+
+.lang-switcher {
+  position: relative;
+}
+
+.lang-switcher-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--border);
+  font-size: 17px;
+  line-height: 1;
+}
+
+.lang-flag {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.lang-switcher-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+  overflow: hidden;
+  z-index: 20;
+}
+
+.lang-switcher-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--text-h);
+}
+
+.lang-switcher-menu button:hover {
+  background: var(--accent-bg);
+}
+
+.lang-switcher-menu button.active {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.lang-check {
+  margin-left: auto;
+  color: var(--accent);
 }
 
 .panel {

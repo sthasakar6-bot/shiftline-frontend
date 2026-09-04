@@ -1,10 +1,13 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { api, ApiError } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") ?? "";
@@ -29,10 +32,10 @@ export default function ResetPasswordPage() {
         setTokenValid(true);
       })
       .catch((err) => {
-        setError(err instanceof ApiError ? err.message : "This reset link is invalid");
+        setError(err instanceof ApiError ? err.message : t("auth.resetLinkTokenInvalid"));
       })
       .finally(() => setChecking(false));
-  }, [token]);
+  }, [token, t]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -42,24 +45,27 @@ export default function ResetPasswordPage() {
       await api.completePasswordReset(token, password);
       setDone(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to reset password");
+      setError(err instanceof ApiError ? err.message : t("auth.resetFailed"));
     } finally {
       setSubmitting(false);
     }
   }
 
   if (checking) {
-    return <div className="loading">Checking reset link...</div>;
+    return <div className="loading">{t("auth.checkingResetLink")}</div>;
   }
 
   if (done) {
     return (
       <div className="auth-page">
+        <div className="auth-lang-switcher">
+          <LanguageSwitcher />
+        </div>
         <AuthBrand />
         <div className="auth-form">
-          <h1>Password updated</h1>
-          <p className="hint">You can now log in with your new password.</p>
-          <button onClick={() => navigate("/login")}>Go to login</button>
+          <h1>{t("auth.passwordUpdated")}</h1>
+          <p className="hint">{t("auth.passwordUpdatedHint")}</p>
+          <button onClick={() => navigate("/login")}>{t("auth.goToLogin")}</button>
         </div>
         <AuthFooter />
       </div>
@@ -69,15 +75,16 @@ export default function ResetPasswordPage() {
   if (!token || !tokenValid) {
     return (
       <div className="auth-page">
+        <div className="auth-lang-switcher">
+          <LanguageSwitcher />
+        </div>
         <AuthBrand />
         <form className="auth-form">
-          <h1>Reset link invalid</h1>
-          <p className="hint">
-            This link may have expired or already been used. Ask your manager to send a new one.
-          </p>
+          <h1>{t("auth.resetLinkInvalid")}</h1>
+          <p className="hint">{t("auth.resetLinkInvalidHint")}</p>
           {error && <div className="error">{error}</div>}
           <p>
-            <Link to="/login">Back to login</Link>
+            <Link to="/login">{t("auth.backToLogin")}</Link>
           </p>
         </form>
         <AuthFooter />
@@ -87,16 +94,19 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="auth-page">
+      <div className="auth-lang-switcher">
+        <LanguageSwitcher />
+      </div>
       <AuthBrand />
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h1>Set a new password</h1>
+        <h1>{t("auth.setNewPassword")}</h1>
         {error && <div className="error">{error}</div>}
         <label>
-          Email
+          {t("auth.email")}
           <input type="email" value={email} readOnly />
         </label>
         <label>
-          New password
+          {t("auth.newPassword")}
           <input
             type="password"
             value={password}
@@ -106,7 +116,7 @@ export default function ResetPasswordPage() {
           />
         </label>
         <button type="submit" disabled={submitting}>
-          {submitting ? "Saving..." : "Set new password"}
+          {submitting ? t("auth.saving") : t("auth.setNewPasswordBtn")}
         </button>
       </form>
       <AuthFooter />

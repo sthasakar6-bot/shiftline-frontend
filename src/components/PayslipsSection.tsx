@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api, ApiError } from "../api/client";
 import type { Payslip } from "../api/types";
 
 export default function PayslipsSection() {
+  const { t } = useTranslation();
   const [payslips, setPayslips] = useState<Payslip[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,7 +19,7 @@ export default function PayslipsSection() {
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to open payslip");
+      setError(err instanceof ApiError ? err.message : t("payslips.openFailed"));
     }
   }
 
@@ -27,8 +29,8 @@ export default function PayslipsSection() {
 
   return (
     <section className="panel">
-      <h2>My Payslips</h2>
-      <p className="hint">Issued by your manager. Contact them for any questions.</p>
+      <h2>{t("payslips.title")}</h2>
+      <p className="hint">{t("payslips.hint")}</p>
       {error && <div className="error">{error}</div>}
       <ul className="list">
         {sorted.map((p) => (
@@ -36,12 +38,12 @@ export default function PayslipsSection() {
             <span>{p.period}</span>
             {p.pdfFilename && (
               <span className="actions">
-                <button onClick={() => handleView(p.id)}>View payslip</button>
+                <button onClick={() => handleView(p.id)}>{t("payslips.viewPayslip")}</button>
               </span>
             )}
           </li>
         ))}
-        {sorted.length === 0 && <li className="empty">No payslips yet.</li>}
+        {sorted.length === 0 && <li className="empty">{t("payslips.empty")}</li>}
       </ul>
     </section>
   );

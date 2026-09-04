@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Clock } from "lucide-react";
 import { api, ApiError } from "../api/client";
 import type { Attendance, Shift } from "../api/types";
 import { formatDateTime, formatTime, formatDuration } from "../lib/formatDate";
+import { getDateLocale } from "../i18n";
 import { getCurrentCoords } from "../lib/geolocation";
 import ConfirmDialog from "./ConfirmDialog";
 
@@ -15,7 +17,7 @@ function formatElapsed(ms: number): string {
 }
 
 function ClockFace({ now }: { now: Date }) {
-  const parts = new Intl.DateTimeFormat(undefined, {
+  const parts = new Intl.DateTimeFormat(getDateLocale(), {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
@@ -45,6 +47,7 @@ function ClockFace({ now }: { now: Date }) {
 }
 
 export default function AttendanceSection() {
+  const { t } = useTranslation();
   const [records, setRecords] = useState<Attendance[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [shiftId, setShiftId] = useState("");
@@ -105,7 +108,7 @@ export default function AttendanceSection() {
       setShiftId("");
       load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to clock in");
+      setError(err instanceof ApiError ? err.message : t("attendance.clockInFailed"));
     } finally {
       setBusy(false);
     }
@@ -121,7 +124,7 @@ export default function AttendanceSection() {
       await api.clockOut(openRecord.id, coords);
       load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to clock out");
+      setError(err instanceof ApiError ? err.message : t("attendance.clockOutFailed"));
     } finally {
       setBusy(false);
     }
@@ -131,18 +134,22 @@ export default function AttendanceSection() {
 
   return (
     <>
-      <h2>Attendance</h2>
+      <h2>{t("attendance.title")}</h2>
 
       {openRecord ? (
         <section className="panel shift-card">
-          <h3 className="shift-card-title">Current Shift</h3>
+          <h3 className="shift-card-title">{t("home.currentShift")}</h3>
           <div className="shift-card-date">
-            {now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+            {now.toLocaleDateString(getDateLocale(), {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}
           </div>
           <div className="shift-card-row">
             <Clock size={16} />
             <span>
-              Since {openRecord.clockIn ? formatTime(openRecord.clockIn) : "--"} ·{" "}
+              {t("home.since")} {openRecord.clockIn ? formatTime(openRecord.clockIn) : "--"} ·{" "}
               {formatElapsed(
                 now.getTime() -
                   (openRecord.clockIn ? new Date(openRecord.clockIn).getTime() : now.getTime()),
@@ -150,21 +157,23 @@ export default function AttendanceSection() {
             </span>
           </div>
           <span className="shift-status-pill in">
-            <span className="presence-dot" /> Clocked in
+            <span className="presence-dot" /> {t("home.clockedIn")}
           </span>
           <button
             className="shift-clock-btn out"
             onClick={() => setConfirmAction("out")}
             disabled={busy}
           >
-            Clock Out
+            {t("attendance.clockOut")}
           </button>
         </section>
       ) : featuredShift ? (
         <section className="panel shift-card">
-          <h3 className="shift-card-title">{isFeaturedToday ? "Today's Shift" : "Next Shift"}</h3>
+          <h3 className="shift-card-title">
+            {isFeaturedToday ? t("home.todaysShift") : t("home.nextShift")}
+          </h3>
           <div className="shift-card-date">
-            {new Date(featuredShift.startsAt).toLocaleDateString(undefined, {
+            {new Date(featuredShift.startsAt).toLocaleDateString(getDateLocale(), {
               weekday: "long",
               month: "long",
               day: "numeric",
@@ -176,7 +185,7 @@ export default function AttendanceSection() {
               {formatTime(featuredShift.startsAt)} – {formatTime(featuredShift.endsAt)}
             </span>
           </div>
-          <span className="shift-status-pill pending">Not clocked in yet</span>
+          <span className="shift-status-pill pending">{t("home.notClockedInYet")}</span>
 
           {needsShiftPicker && (
             <select
@@ -184,7 +193,7 @@ export default function AttendanceSection() {
               value={shiftId}
               onChange={(e) => setShiftId(e.target.value)}
             >
-              <option value="">Select a shift</option>
+              <option value="">{t("attendance.selectShift")}</option>
               {clockableShifts.map((s) => (
                 <option key={s.id} value={s.id}>
                   {formatDateTime(s.startsAt)}
@@ -198,11 +207,11 @@ export default function AttendanceSection() {
             onClick={handleClockInClick}
             disabled={busy || !effectiveShiftId}
           >
-            Clock In
+            {t("attendance.clockIn")}
           </button>
         </section>
       ) : (
-        <p className="hint">No upcoming shifts scheduled yet.</p>
+        <p className="hint">{t("home.noUpcomingShifts")}</p>
       )}
       {error && <div className="error">{error}</div>}
 
@@ -210,23 +219,27 @@ export default function AttendanceSection() {
         <div className="clock-display">
           <ClockFace now={now} />
           <div className="clock-date">
-            {now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+            {now.toLocaleDateString(getDateLocale(), {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}
           </div>
         </div>
 
-        <h3>History</h3>
+        <h3>{t("attendance.history")}</h3>
         <ul className="list">
           {pastRecords.map((r) => (
             <li key={r.id}>
               <span>
                 <strong>
                   {r.clockIn
-                    ? new Date(r.clockIn).toLocaleDateString(undefined, {
+                    ? new Date(r.clockIn).toLocaleDateString(getDateLocale(), {
                         weekday: "short",
                         month: "short",
                         day: "numeric",
                       })
-                    : "Unknown date"}
+                    : t("attendance.unknownDate")}
                 </strong>
                 <br />
                 {r.clockIn ? formatTime(r.clockIn) : "-"} – {r.clockOut ? formatTime(r.clockOut) : "-"}
@@ -240,28 +253,28 @@ export default function AttendanceSection() {
               </span>
             </li>
           ))}
-          {pastRecords.length === 0 && <li className="empty">No attendance records yet.</li>}
+          {pastRecords.length === 0 && <li className="empty">{t("attendance.noHistory")}</li>}
         </ul>
       </section>
 
       {confirmAction === "in" && (
         <ConfirmDialog
-          title="Clock in?"
+          title={t("attendance.clockInQuestion")}
           message={
             selectedShift
-              ? `Clock in to your ${formatDateTime(selectedShift.startsAt)} shift now?`
-              : "Clock in now?"
+              ? t("attendance.clockInToShift", { time: formatDateTime(selectedShift.startsAt) })
+              : t("attendance.clockInNow")
           }
-          confirmLabel="Clock In"
+          confirmLabel={t("attendance.clockIn")}
           onConfirm={confirmClockIn}
           onCancel={() => setConfirmAction(null)}
         />
       )}
       {confirmAction === "out" && (
         <ConfirmDialog
-          title="Clock out?"
-          message="Are you sure you want to clock out? This will end your current shift."
-          confirmLabel="Clock Out"
+          title={t("attendance.clockOutQuestion")}
+          message={t("attendance.clockOutConfirmMessage")}
+          confirmLabel={t("attendance.clockOut")}
           danger
           onConfirm={confirmClockOut}
           onCancel={() => setConfirmAction(null)}

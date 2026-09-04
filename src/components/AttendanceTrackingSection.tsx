@@ -1,20 +1,24 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { MapPin } from "lucide-react";
 import { api } from "../api/client";
 import type { Attendance, UserSummary } from "../api/types";
 import { formatTime, formatDuration } from "../lib/formatDate";
 import { mapsUrl } from "../lib/geolocation";
 import { useAuth } from "../auth/AuthContext";
+import { getDateLocale } from "../i18n";
 import Avatar from "./Avatar";
 
 export default function AttendanceTrackingSection() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [selected, setSelected] = useState("");
   const [records, setRecords] = useState<Attendance[]>([]);
 
+  const youLabel = `(${t("common.you")})`;
   const people = user
-    ? [{ id: user.id, name: `${user.name} (you)`, hasAvatar: user.hasAvatar }, ...reports]
+    ? [{ id: user.id, name: `${user.name} ${youLabel}`, hasAvatar: user.hasAvatar }, ...reports]
     : reports;
 
   useEffect(() => {
@@ -38,10 +42,10 @@ export default function AttendanceTrackingSection() {
 
   return (
     <section className="panel">
-      <h2>Attendance Tracking</h2>
+      <h2>{t("attendanceTracking.title")}</h2>
       <div className="inline-form">
         <select value={selected} onChange={(e) => setSelected(e.target.value)}>
-          <option value="">Select employee</option>
+          <option value="">{t("team.selectEmployee")}</option>
           {people.map((r) => (
             <option key={r.id} value={r.id}>
               {r.name}
@@ -60,7 +64,7 @@ export default function AttendanceTrackingSection() {
           />
           <span className="attendance-track-header-name">{selectedPerson.name}</span>
           <span className="attendance-track-header-count">
-            {sortedRecords.length} record{sortedRecords.length === 1 ? "" : "s"}
+            {t("attendanceTracking.record", { count: sortedRecords.length })}
           </span>
         </div>
       )}
@@ -72,19 +76,19 @@ export default function AttendanceTrackingSection() {
               <div className="attendance-track-main">
                 <span className="attendance-track-date">
                   {r.clockIn
-                    ? new Date(r.clockIn).toLocaleDateString(undefined, {
+                    ? new Date(r.clockIn).toLocaleDateString(getDateLocale(), {
                         weekday: "short",
                         month: "short",
                         day: "numeric",
                       })
-                    : "Unknown date"}
+                    : t("attendance.unknownDate")}
                 </span>
                 <span className="attendance-track-range">
                   {r.clockIn ? formatTime(r.clockIn) : "-"} –{" "}
                   {r.clockOut ? (
                     formatTime(r.clockOut)
                   ) : (
-                    <span className="status-badge pending">Active</span>
+                    <span className="status-badge pending">{t("attendanceTracking.active")}</span>
                   )}
                   {r.clockIn && r.clockOut && (
                     <> · {formatDuration(new Date(r.clockOut).getTime() - new Date(r.clockIn).getTime())}</>
@@ -100,7 +104,7 @@ export default function AttendanceTrackingSection() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <MapPin size={11} /> In
+                      <MapPin size={11} /> {t("attendanceTracking.in")}
                     </a>
                   )}
                   {r.clockOutLat != null && r.clockOutLng != null && (
@@ -110,7 +114,7 @@ export default function AttendanceTrackingSection() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <MapPin size={11} /> Out
+                      <MapPin size={11} /> {t("attendanceTracking.out")}
                     </a>
                   )}
                 </div>
@@ -118,7 +122,7 @@ export default function AttendanceTrackingSection() {
             </li>
           ))}
           {sortedRecords.length === 0 && (
-            <li className="leave-empty">No attendance records.</li>
+            <li className="leave-empty">{t("attendanceTracking.noRecords")}</li>
           )}
         </ul>
       )}

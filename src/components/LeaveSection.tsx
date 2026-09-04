@@ -1,10 +1,12 @@
 import { type FormEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api, ApiError } from "../api/client";
 import type { LeaveRequest } from "../api/types";
 import { formatDateOnly } from "../lib/dateOnly";
 import DateRangePicker from "./DateRangePicker";
 
 export default function LeaveSection() {
+  const { t } = useTranslation();
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [type, setType] = useState<"vacation" | "sick">("vacation");
   const [startDate, setStartDate] = useState("");
@@ -33,7 +35,7 @@ export default function LeaveSection() {
       setReason("");
       load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to request leave");
+      setError(err instanceof ApiError ? err.message : t("leave.requestFailed"));
     }
   }
 
@@ -42,7 +44,7 @@ export default function LeaveSection() {
       await api.cancelLeaveRequest(id);
       load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to cancel");
+      setError(err instanceof ApiError ? err.message : t("leave.cancelFailed"));
     }
   }
 
@@ -52,13 +54,13 @@ export default function LeaveSection() {
 
   return (
     <section className="panel">
-      <h2>Leave Requests</h2>
+      <h2>{t("leave.title")}</h2>
 
       <div className="subform">
-        <h3>Request leave</h3>
+        <h3>{t("leave.requestLeave")}</h3>
         <form className="inline-form" onSubmit={handleCreate}>
           <label className="field">
-            <span className="field-label">Type</span>
+            <span className="field-label">{t("leave.type")}</span>
             <select
               value={type}
               onChange={(e) => {
@@ -67,12 +69,12 @@ export default function LeaveSection() {
                 if (next === "sick" && startDate) setEndDate(startDate);
               }}
             >
-              <option value="vacation">Vacation</option>
-              <option value="sick">Sick</option>
+              <option value="vacation">{t("leave.vacation")}</option>
+              <option value="sick">{t("leave.sick")}</option>
             </select>
           </label>
           <label className="field">
-            <span className="field-label">Date{type === "vacation" && "s"}</span>
+            <span className="field-label">{type === "vacation" ? t("leave.dates") : t("leave.date")}</span>
             <DateRangePicker
               startDate={startDate}
               endDate={endDate}
@@ -84,11 +86,13 @@ export default function LeaveSection() {
             />
           </label>
           <label className="field">
-            <span className="field-label">Reason (optional)</span>
+            <span className="field-label">
+              {t("leave.reason")} ({t("common.optional")})
+            </span>
             <input value={reason} onChange={(e) => setReason(e.target.value)} />
           </label>
           <button type="submit" disabled={!startDate}>
-            Request
+            {t("leave.request")}
           </button>
         </form>
         {error && <div className="error">{error}</div>}
@@ -98,20 +102,20 @@ export default function LeaveSection() {
         {sortedRequests.map((r) => (
           <li key={r.id}>
             <span>
-              <span className={`type-badge ${r.type}`}>{r.type}</span>{" "}
-              <span className={`status-badge ${r.status}`}>{r.status}</span>
+              <span className={`type-badge ${r.type}`}>{t(`leave.${r.type}`)}</span>{" "}
+              <span className={`status-badge ${r.status}`}>{t(`leave.${r.status}`)}</span>
               <br />
               {formatDateOnly(r.startDate)} → {formatDateOnly(r.endDate)}
               {r.reason && <> · {r.reason}</>}
             </span>
             {r.status === "pending" && (
               <span className="actions">
-                <button onClick={() => handleCancel(r.id)}>Cancel</button>
+                <button onClick={() => handleCancel(r.id)}>{t("common.cancel")}</button>
               </span>
             )}
           </li>
         ))}
-        {sortedRequests.length === 0 && <li className="empty">No leave requests yet.</li>}
+        {sortedRequests.length === 0 && <li className="empty">{t("leave.noRequests")}</li>}
       </ul>
     </section>
   );

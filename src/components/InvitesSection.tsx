@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api, ApiError } from "../api/client";
 import type { Invite } from "../api/types";
 
@@ -7,6 +8,7 @@ function inviteLinkFor(token: string) {
 }
 
 export default function InvitesSection() {
+  const { t } = useTranslation();
   const [invites, setInvites] = useState<Invite[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
   const [lastInviteToken, setLastInviteToken] = useState<string | null>(null);
@@ -36,31 +38,31 @@ export default function InvitesSection() {
       setLastInviteToken(invite.token);
       loadInvites();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to send invite");
+      setError(err instanceof ApiError ? err.message : t("invites.sendFailed"));
     }
   }
 
   return (
     <section className="panel">
-      <h2>Invite an employee</h2>
+      <h2>{t("invites.title")}</h2>
       <form className="inline-form" onSubmit={handleSendInvite}>
         <input
           type="email"
-          placeholder="Employee's email"
+          placeholder={t("invites.emailPlaceholder")}
           value={inviteEmail}
           onChange={(e) => setInviteEmail(e.target.value)}
           required
         />
-        <button type="submit">Create invite</button>
+        <button type="submit">{t("invites.createInvite")}</button>
       </form>
       {error && <div className="error">{error}</div>}
       {lastInviteToken && (
         <div className="invite-link-callout">
-          <span className="field-label">Invite link — copy and send it to them</span>
+          <span className="field-label">{t("invites.linkCallout")}</span>
           <div className="inline-form">
             <input value={inviteLinkFor(lastInviteToken)} readOnly />
             <button type="button" onClick={() => handleCopyLink(lastInviteToken)}>
-              {copiedToken === lastInviteToken ? "Copied!" : "Copy link"}
+              {copiedToken === lastInviteToken ? t("invites.copied") : t("invites.copyLink")}
             </button>
           </div>
         </div>
@@ -69,18 +71,21 @@ export default function InvitesSection() {
         {invites.map((i) => (
           <li key={i.id}>
             <span>
-              {i.email} <span className={`status-badge ${i.status}`}>{i.status}</span>
+              {i.email}{" "}
+              <span className={`status-badge ${i.status}`}>
+                {i.status === "accepted" ? t("invites.statusAccepted") : t("invites.statusPending")}
+              </span>
             </span>
             {i.status === "pending" && (
               <span className="actions">
                 <button onClick={() => handleCopyLink(i.token)}>
-                  {copiedToken === i.token ? "Copied!" : "Copy link"}
+                  {copiedToken === i.token ? t("invites.copied") : t("invites.copyLink")}
                 </button>
               </span>
             )}
           </li>
         ))}
-        {invites.length === 0 && <li className="empty">No invites sent yet.</li>}
+        {invites.length === 0 && <li className="empty">{t("invites.noInvites")}</li>}
       </ul>
     </section>
   );

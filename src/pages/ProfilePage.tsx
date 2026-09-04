@@ -1,5 +1,6 @@
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Camera, CalendarCheck, Clock, Palmtree, Thermometer } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { api, ApiError } from "../api/client";
@@ -16,6 +17,7 @@ function countLeaveDays(l: LeaveRequest): number {
 }
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -38,7 +40,7 @@ export default function ProfilePage() {
       await api.uploadAvatar(file);
       await refreshUser();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to upload photo");
+      setError(err instanceof ApiError ? err.message : t("profile.uploadPhotoFailed"));
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -86,9 +88,9 @@ export default function ProfilePage() {
       <header className="app-header">
         <button className="back-button" onClick={() => navigate(-1)}>
           <ArrowLeft size={18} />
-          Back
+          {t("common.back")}
         </button>
-        <h1>Profile</h1>
+        <h1>{t("profile.title")}</h1>
       </header>
 
       <main className="app-content">
@@ -103,7 +105,7 @@ export default function ProfilePage() {
                 className="avatar-edit-btn"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                title="Change photo"
+                title={t("profile.changePhoto")}
               >
                 <Camera size={14} />
               </button>
@@ -116,48 +118,50 @@ export default function ProfilePage() {
               />
             </div>
             <h2>{user.name}</h2>
-            <span className="role-badge">{user.role}</span>
-            {uploading && <p className="hint">Uploading photo...</p>}
+            <span className="role-badge">
+              {user.role === "manager" ? t("common.roleManager") : t("common.roleEmployee")}
+            </span>
+            {uploading && <p className="hint">{t("profile.uploadingPhoto")}</p>}
             {error && <div className="error">{error}</div>}
           </div>
         </section>
 
         <section className="panel">
-          <span className="profile-section-kicker">This month</span>
+          <span className="profile-section-kicker">{t("profile.thisMonth")}</span>
           <div className="stat-row">
             <div className="stat-tile">
               <span className="stat-icon-circle">
                 <CalendarCheck size={18} />
               </span>
               <div className="stat-value">{stats.daysWorked}</div>
-              <div className="stat-label">Days worked</div>
+              <div className="stat-label">{t("profile.daysWorked")}</div>
             </div>
             <div className="stat-tile">
               <span className="stat-icon-circle">
                 <Clock size={18} />
               </span>
               <div className="stat-value">{stats.hoursWorked.toFixed(1)}</div>
-              <div className="stat-label">Hours worked</div>
+              <div className="stat-label">{t("profile.hoursWorked")}</div>
             </div>
           </div>
 
           <hr className="section-divider" />
 
-          <span className="profile-section-kicker">This year</span>
+          <span className="profile-section-kicker">{t("profile.thisYear")}</span>
           <div className="stat-row">
             <div className="stat-tile">
               <span className="stat-icon-circle success">
                 <Palmtree size={18} />
               </span>
               <div className="stat-value">{stats.vacationDays}</div>
-              <div className="stat-label">Vacation days taken</div>
+              <div className="stat-label">{t("profile.vacationDaysTaken")}</div>
             </div>
             <div className="stat-tile">
               <span className="stat-icon-circle danger">
                 <Thermometer size={18} />
               </span>
               <div className="stat-value">{stats.sickDays}</div>
-              <div className="stat-label">Sick days taken</div>
+              <div className="stat-label">{t("profile.sickDaysTaken")}</div>
             </div>
           </div>
         </section>

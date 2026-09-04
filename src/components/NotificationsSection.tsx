@@ -1,5 +1,6 @@
 import { type ComponentType } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { CalendarDays, Palmtree, Watch, KeyRound, Bell, X } from "lucide-react";
 import { api } from "../api/client";
 import type { Notification } from "../api/types";
@@ -22,6 +23,7 @@ export default function NotificationsSection({
   onReload: () => void;
 }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   async function markAllRead() {
     await api.markAllNotificationsRead();
@@ -54,13 +56,13 @@ export default function NotificationsSection({
     <section className="panel">
       <div className="notif-banner">
         <div className="notif-banner-title">
-          <h2>Notifications</h2>
+          <h2>{t("notifications.title")}</h2>
           {unreadCount > 0 && <span className="notif-count-badge">{unreadCount}</span>}
         </div>
         {notifications.length > 0 && (
           <div className="notif-banner-actions">
-            {unreadCount > 0 && <button onClick={markAllRead}>Mark all read</button>}
-            <button onClick={removeAll}>Clear all</button>
+            {unreadCount > 0 && <button onClick={markAllRead}>{t("notifications.markAllRead")}</button>}
+            <button onClick={removeAll}>{t("notifications.clearAll")}</button>
           </div>
         )}
       </div>
@@ -88,14 +90,14 @@ export default function NotificationsSection({
                   e.stopPropagation();
                   remove(n.id);
                 }}
-                title="Delete"
+                title={t("notifications.delete")}
               >
                 <X size={14} />
               </button>
             </li>
           );
         })}
-        {notifications.length === 0 && <li className="empty">No notifications.</li>}
+        {notifications.length === 0 && <li className="empty">{t("notifications.empty")}</li>}
       </ul>
     </section>
   );

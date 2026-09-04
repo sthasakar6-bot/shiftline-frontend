@@ -1,3 +1,5 @@
+import { getDateLocale } from "../i18n";
+
 // Leave requests store plain calendar dates ("2026-08-31"), not instants.
 // Parsing that through `new Date(isoString)` reads it as UTC midnight, which
 // can then display as the previous/next day depending on the viewer's local
@@ -21,7 +23,7 @@ export function addDays(date: Date, days: number): Date {
 }
 
 export function formatLocalDate(date: Date): string {
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(getDateLocale(), { month: "short", day: "numeric", year: "numeric" });
 }
 
 export function formatDateOnly(iso: string): string {

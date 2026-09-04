@@ -1,9 +1,11 @@
+import i18n, { getDateLocale } from "../i18n";
+
 export function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString(getDateLocale(), { hour: "numeric", minute: "2-digit" });
 }
 
 export function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString(undefined, {
+  return new Date(iso).toLocaleString(getDateLocale(), {
     dateStyle: "medium",
     timeStyle: "short",
   });
@@ -31,12 +33,12 @@ export function formatDuration(ms: number): string {
 
 export function formatRelativeTime(iso: string): string {
   const diffSec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (diffSec < 60) return "Just now";
+  if (diffSec < 60) return i18n.t("common.justNow");
   const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 60) return i18n.t("common.minAgo", { n: diffMin });
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
+  if (diffHr < 24) return i18n.t("common.hourAgo", { n: diffHr });
   const diffDay = Math.floor(diffHr / 24);
-  if (diffDay < 7) return `${diffDay}d ago`;
-  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (diffDay < 7) return i18n.t("common.dayAgo", { n: diffDay });
+  return new Date(iso).toLocaleDateString(getDateLocale(), { month: "short", day: "numeric" });
 }

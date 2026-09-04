@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Search,
   X,
@@ -25,101 +26,103 @@ interface QuickAccessItem {
   managerOnly?: boolean;
 }
 
-const ITEMS: QuickAccessItem[] = [
-  { label: "Home", description: "Greeting and today's shift", icon: Home, path: "/?tab=home" },
-  {
-    label: "My Roster",
-    description: "Your monthly schedule",
-    icon: CalendarDays,
-    path: "/?tab=roster",
-  },
-  {
-    label: "Attendance",
-    description: "Clock in/out and history",
-    icon: Watch,
-    path: "/?tab=attendance",
-  },
-  { label: "Leave Requests", description: "Request time off", icon: Palmtree, path: "/?tab=leave" },
-  {
-    label: "Notifications",
-    description: "Alerts and updates",
-    icon: Bell,
-    path: "/?tab=notifications",
-  },
-  {
-    label: "My Profile",
-    description: "Photo, stats, contracts, payslips",
-    icon: UserIcon,
-    path: "/profile",
-  },
-  {
-    label: "Administration",
-    description: "Manager dashboard",
-    icon: ShieldCheck,
-    path: "/admin",
-    managerOnly: true,
-  },
-  {
-    label: "Manage Team",
-    description: "Add/remove employees, contracts, payslips",
-    icon: Users,
-    path: "/admin?tab=team",
-    managerOnly: true,
-  },
-  {
-    label: "Team Roster",
-    description: "Assign and view shifts",
-    icon: CalendarDays,
-    path: "/admin?tab=roster",
-    managerOnly: true,
-  },
-  {
-    label: "Invite Employee",
-    description: "Send an invite link",
-    icon: UserPlus,
-    path: "/admin?tab=invite",
-    managerOnly: true,
-  },
-  {
-    label: "Leave Approvals",
-    description: "Approve or reject requests",
-    icon: Palmtree,
-    path: "/admin?tab=leave",
-    managerOnly: true,
-  },
-  {
-    label: "Attendance Tracking",
-    description: "Clock records per employee",
-    icon: Clock,
-    path: "/admin?tab=attendance",
-    managerOnly: true,
-  },
-  {
-    label: "Employee Summary",
-    description: "Hours worked and CSV export",
-    icon: BarChart3,
-    path: "/admin?tab=summary",
-    managerOnly: true,
-  },
-  {
-    label: "Admin Alerts",
-    description: "Leave requests and other manager notifications",
-    icon: Bell,
-    path: "/admin?tab=alerts",
-    managerOnly: true,
-  },
-];
-
 export default function QuickAccessSearch() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const allItems: QuickAccessItem[] = [
+    { label: t("qa.home"), description: t("qa.homeDesc"), icon: Home, path: "/?tab=home" },
+    {
+      label: t("qa.roster"),
+      description: t("qa.rosterDesc"),
+      icon: CalendarDays,
+      path: "/?tab=roster",
+    },
+    {
+      label: t("qa.attendance"),
+      description: t("qa.attendanceDesc"),
+      icon: Watch,
+      path: "/?tab=attendance",
+    },
+    { label: t("qa.leave"), description: t("qa.leaveDesc"), icon: Palmtree, path: "/?tab=leave" },
+    {
+      label: t("qa.notifications"),
+      description: t("qa.notificationsDesc"),
+      icon: Bell,
+      path: "/?tab=notifications",
+    },
+    {
+      label: t("qa.profile"),
+      description: t("qa.profileDesc"),
+      icon: UserIcon,
+      path: "/profile",
+    },
+    {
+      label: t("qa.admin"),
+      description: t("qa.adminDesc"),
+      icon: ShieldCheck,
+      path: "/admin",
+      managerOnly: true,
+    },
+    {
+      label: t("qa.team"),
+      description: t("qa.teamDesc"),
+      icon: Users,
+      path: "/admin?tab=team",
+      managerOnly: true,
+    },
+    {
+      label: t("qa.teamRoster"),
+      description: t("qa.teamRosterDesc"),
+      icon: CalendarDays,
+      path: "/admin?tab=roster",
+      managerOnly: true,
+    },
+    {
+      label: t("qa.invite"),
+      description: t("qa.inviteDesc"),
+      icon: UserPlus,
+      path: "/admin?tab=invite",
+      managerOnly: true,
+    },
+    {
+      label: t("qa.leaveApprovals"),
+      description: t("qa.leaveApprovalsDesc"),
+      icon: Palmtree,
+      path: "/admin?tab=leave",
+      managerOnly: true,
+    },
+    {
+      label: t("qa.attendanceTracking"),
+      description: t("qa.attendanceTrackingDesc"),
+      icon: Clock,
+      path: "/admin?tab=attendance",
+      managerOnly: true,
+    },
+    {
+      label: t("qa.summary"),
+      description: t("qa.summaryDesc"),
+      icon: BarChart3,
+      path: "/admin?tab=summary",
+      managerOnly: true,
+    },
+    {
+      label: t("qa.adminAlerts"),
+      description: t("qa.adminAlertsDesc"),
+      icon: Bell,
+      path: "/admin?tab=alerts",
+      managerOnly: true,
+    },
+  ];
+
   const items = useMemo(
-    () => ITEMS.filter((i) => !i.managerOnly || user?.role === "manager"),
-    [user],
+    () => allItems.filter((i) => !i.managerOnly || user?.role === "manager"),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [user, t],
   );
 
   const results = useMemo(() => {
@@ -148,7 +151,7 @@ export default function QuickAccessSearch() {
         type="button"
         className="quick-access-trigger"
         onClick={() => setOpen(true)}
-        title="Quick access"
+        title={t("quickAccess.title")}
       >
         <Search size={18} />
       </button>
@@ -161,7 +164,7 @@ export default function QuickAccessSearch() {
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search everything..."
+                placeholder={t("quickAccess.placeholder")}
               />
               <button
                 type="button"
@@ -188,7 +191,9 @@ export default function QuickAccessSearch() {
                   </li>
                 );
               })}
-              {results.length === 0 && <li className="quick-access-empty">No matches.</li>}
+              {results.length === 0 && (
+                <li className="quick-access-empty">{t("quickAccess.noResults")}</li>
+              )}
             </ul>
           </div>
         </div>

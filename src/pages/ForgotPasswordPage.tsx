@@ -1,10 +1,13 @@
 import { type FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { api, ApiError } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -18,7 +21,7 @@ export default function ForgotPasswordPage() {
       await api.requestPasswordReset(email);
       setDone(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to request a reset");
+      setError(err instanceof ApiError ? err.message : t("auth.resetRequestFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -27,14 +30,15 @@ export default function ForgotPasswordPage() {
   if (done) {
     return (
       <div className="auth-page">
+        <div className="auth-lang-switcher">
+          <LanguageSwitcher />
+        </div>
         <AuthBrand />
         <div className="auth-form">
-          <h1>Check with your manager</h1>
-          <p className="hint">
-            Your manager has been notified and can send you a link to set a new password.
-          </p>
+          <h1>{t("auth.checkWithManager")}</h1>
+          <p className="hint">{t("auth.checkWithManagerHint")}</p>
           <p>
-            <Link to="/login">Back to login</Link>
+            <Link to="/login">{t("auth.backToLogin")}</Link>
           </p>
         </div>
         <AuthFooter />
@@ -44,23 +48,23 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="auth-page">
+      <div className="auth-lang-switcher">
+        <LanguageSwitcher />
+      </div>
       <AuthBrand />
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h1>Forgot password</h1>
-        <p className="hint">
-          Enter your account email. Your manager will be notified and can send you a link to set
-          a new password.
-        </p>
+        <h1>{t("auth.forgotPageTitle")}</h1>
+        <p className="hint">{t("auth.forgotHint")}</p>
         {error && <div className="error">{error}</div>}
         <label>
-          Email
+          {t("auth.email")}
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
         <button type="submit" disabled={submitting}>
-          {submitting ? "Requesting..." : "Request reset"}
+          {submitting ? t("auth.requesting") : t("auth.requestReset")}
         </button>
         <p>
-          <Link to="/login">Back to login</Link>
+          <Link to="/login">{t("auth.backToLogin")}</Link>
         </p>
       </form>
       <AuthFooter />

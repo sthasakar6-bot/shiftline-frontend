@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Clock, Palmtree } from "lucide-react";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
@@ -6,13 +7,6 @@ import Avatar from "./Avatar";
 import type { Attendance, LeaveRequest, Shift } from "../api/types";
 import { formatTime } from "../lib/formatDate";
 import { formatLocalDate, parseIsoDateLocal, todayLocal } from "../lib/dateOnly";
-
-function greetingForHour(hour: number): string {
-  if (hour < 5) return "Good night";
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-}
 
 function formatElapsed(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -23,6 +17,7 @@ function formatElapsed(ms: number): string {
 }
 
 export default function DashboardHome() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [records, setRecords] = useState<Attendance[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
@@ -39,6 +34,13 @@ export default function DashboardHome() {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  function greetingForHour(hour: number): string {
+    if (hour < 5) return t("home.goodNight");
+    if (hour < 12) return t("home.goodMorning");
+    if (hour < 18) return t("home.goodAfternoon");
+    return t("home.goodEvening");
+  }
 
   const openRecord = records.find((r) => !r.clockOut);
   const completedShiftIds = new Set(records.filter((r) => r.clockOut).map((r) => r.shiftId));
@@ -76,7 +78,7 @@ export default function DashboardHome() {
             </h2>
             {openRecord && (
               <span className="greeting-status-active">
-                <span className="presence-dot" /> Active
+                <span className="presence-dot" /> {t("home.active")}
               </span>
             )}
           </div>
@@ -85,14 +87,14 @@ export default function DashboardHome() {
 
       {openRecord ? (
         <section className="panel shift-card">
-          <h3 className="shift-card-title">Current Shift</h3>
+          <h3 className="shift-card-title">{t("home.currentShift")}</h3>
           <div className="shift-card-date">
             {now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
           </div>
           <div className="shift-card-row">
             <Clock size={16} />
             <span>
-              Since {openRecord.clockIn ? formatTime(openRecord.clockIn) : "--"} ·{" "}
+              {t("home.since")} {openRecord.clockIn ? formatTime(openRecord.clockIn) : "--"} ·{" "}
               {formatElapsed(
                 now.getTime() -
                   (openRecord.clockIn ? new Date(openRecord.clockIn).getTime() : now.getTime()),
@@ -100,12 +102,14 @@ export default function DashboardHome() {
             </span>
           </div>
           <span className="shift-status-pill in">
-            <span className="presence-dot" /> Clocked in
+            <span className="presence-dot" /> {t("home.clockedIn")}
           </span>
         </section>
       ) : featuredShift ? (
         <section className="panel shift-card">
-          <h3 className="shift-card-title">{isFeaturedToday ? "Today's Shift" : "Next Shift"}</h3>
+          <h3 className="shift-card-title">
+            {isFeaturedToday ? t("home.todaysShift") : t("home.nextShift")}
+          </h3>
           <div className="shift-card-date">
             {new Date(featuredShift.startsAt).toLocaleDateString(undefined, {
               weekday: "long",
@@ -119,16 +123,17 @@ export default function DashboardHome() {
               {formatTime(featuredShift.startsAt)} – {formatTime(featuredShift.endsAt)}
             </span>
           </div>
-          <span className="shift-status-pill pending">Not clocked in yet</span>
+          <span className="shift-status-pill pending">{t("home.notClockedInYet")}</span>
         </section>
       ) : (
-        <p className="hint">No upcoming shifts scheduled yet.</p>
+        <p className="hint">{t("home.noUpcomingShifts")}</p>
       )}
 
       {nextLeave && (
         <section className="panel shift-card">
           <h3 className="shift-card-title">
-            {isLeaveActive ? "On Leave" : "Upcoming"} · {nextLeave.type === "sick" ? "Sick" : "Vacation"}
+            {isLeaveActive ? t("home.onLeave") : t("home.upcoming")} ·{" "}
+            {nextLeave.type === "sick" ? t("leave.sick") : t("leave.vacation")}
           </h3>
           <div className="shift-card-date">
             {formatLocalDate(parseIsoDateLocal(nextLeave.startDate))} –{" "}
@@ -136,8 +141,8 @@ export default function DashboardHome() {
           </div>
           <div className="shift-card-row">
             <Palmtree size={16} />
-            <span className={`type-badge ${nextLeave.type}`}>{nextLeave.type}</span>
-            <span className="status-badge approved">approved</span>
+            <span className={`type-badge ${nextLeave.type}`}>{t(`leave.${nextLeave.type}`)}</span>
+            <span className="status-badge approved">{t("leave.approved")}</span>
           </div>
         </section>
       )}

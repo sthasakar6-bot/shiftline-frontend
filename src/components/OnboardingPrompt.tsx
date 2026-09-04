@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Share, PlusSquare } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { enablePushNotifications, isPushSupported } from "../lib/push";
@@ -13,6 +14,7 @@ function storageKey(userId: number) {
 type Step = "install-android" | "install-ios" | "permissions";
 
 export default function OnboardingPrompt() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [visible, setVisible] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -87,15 +89,12 @@ export default function OnboardingPrompt() {
     return (
       <div className="modal-overlay" onClick={dismiss}>
         <div className="modal" onClick={(e) => e.stopPropagation()}>
-          <h3>Add Shiftline to your Home Screen</h3>
-          <p>
-            Install Shiftline as an app for quick access, offline support, and notifications that
-            work like any other app on your phone.
-          </p>
+          <h3>{t("onboarding.addToHomeScreen")}</h3>
+          <p>{t("onboarding.installBody")}</p>
           <div className="modal-actions">
-            <button onClick={() => setStep("permissions")}>Not now</button>
+            <button onClick={() => setStep("permissions")}>{t("onboarding.notNow")}</button>
             <button onClick={handleInstall} disabled={busy}>
-              {busy ? "Installing..." : "Install"}
+              {busy ? t("onboarding.installing") : t("onboarding.install")}
             </button>
           </div>
         </div>
@@ -107,20 +106,19 @@ export default function OnboardingPrompt() {
     return (
       <div className="modal-overlay" onClick={() => setStep("permissions")}>
         <div className="modal" onClick={(e) => e.stopPropagation()}>
-          <h3>Add Shiftline to your Home Screen</h3>
-          <p>For quick access and notifications, add Shiftline to your Home Screen:</p>
+          <h3>{t("onboarding.addToHomeScreen")}</h3>
+          <p>{t("onboarding.iosBody")}</p>
           <ol className="install-steps">
             <li>
-              Tap the Share icon <Share size={14} className="install-step-icon" /> in Safari's
-              toolbar
+              {t("onboarding.iosStep1")} <Share size={14} className="install-step-icon" />
             </li>
             <li>
-              Scroll down and tap <strong>Add to Home Screen</strong>{" "}
+              {t("onboarding.iosStep2")} <strong>{t("onboarding.addToHomeScreenAction")}</strong>{" "}
               <PlusSquare size={14} className="install-step-icon" />
             </li>
           </ol>
           <div className="modal-actions">
-            <button onClick={() => setStep("permissions")}>Got it</button>
+            <button onClick={() => setStep("permissions")}>{t("onboarding.gotIt")}</button>
           </div>
         </div>
       </div>
@@ -130,16 +128,12 @@ export default function OnboardingPrompt() {
   return (
     <div className="modal-overlay" onClick={dismiss}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h3>Stay in the loop</h3>
-        <p>
-          Turn on notifications so you know right away when a shift is assigned, and allow
-          location so clock-in/out can record where you were. You can change either later from
-          your profile menu.
-        </p>
+        <h3>{t("onboarding.stayInLoop")}</h3>
+        <p>{t("onboarding.permissionsBody")}</p>
         <div className="modal-actions">
-          <button onClick={dismiss}>Not now</button>
+          <button onClick={dismiss}>{t("onboarding.notNow")}</button>
           <button onClick={handleEnable} disabled={busy}>
-            {busy ? "Requesting..." : "Enable"}
+            {busy ? t("onboarding.requesting") : t("onboarding.enable")}
           </button>
         </div>
       </div>

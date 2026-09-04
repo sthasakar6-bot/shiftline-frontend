@@ -1,11 +1,14 @@
 import { type FormEvent, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const { login, logout } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"employee" | "administration">("employee");
@@ -22,12 +25,12 @@ export default function LoginPage() {
       const user = await login(email, password);
       if (mode === "administration" && user.role !== "manager") {
         logout();
-        setError("This account doesn't have administrator access.");
+        setError(t("auth.notAdminAccount"));
         return;
       }
       navigate(mode === "administration" ? "/admin" : "/");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Login failed");
+      setError(err instanceof ApiError ? err.message : t("auth.loginFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -35,33 +38,36 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
+      <div className="auth-lang-switcher">
+        <LanguageSwitcher />
+      </div>
       <AuthBrand />
-      <p className="auth-welcome">Welcome to Shiftline</p>
+      <p className="auth-welcome">{t("auth.welcome")}</p>
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h1>Log in</h1>
+        <h1>{t("auth.login")}</h1>
         <div className="mode-toggle">
           <button
             type="button"
             className={mode === "employee" ? "active" : ""}
             onClick={() => setMode("employee")}
           >
-            Employee
+            {t("auth.employee")}
           </button>
           <button
             type="button"
             className={mode === "administration" ? "active" : ""}
             onClick={() => setMode("administration")}
           >
-            Administration
+            {t("auth.administration")}
           </button>
         </div>
         {error && <div className="error">{error}</div>}
         <label>
-          Email
+          {t("auth.email")}
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
         <label>
-          Password
+          {t("auth.password")}
           <input
             type="password"
             value={password}
@@ -71,16 +77,16 @@ export default function LoginPage() {
         </label>
         <button type="submit" disabled={submitting}>
           {submitting
-            ? "Logging in..."
+            ? t("auth.loggingIn")
             : mode === "administration"
-              ? "Log in to Administration"
-              : "Log in"}
+              ? t("auth.logInToAdmin")
+              : t("auth.login")}
         </button>
         <p>
-          <Link to="/forgot-password">Forgot password?</Link>
+          <Link to="/forgot-password">{t("auth.forgotPassword")}</Link>
         </p>
         <p>
-          No account? <Link to="/register">Register</Link>
+          {t("auth.noAccount")} <Link to="/register">{t("auth.register")}</Link>
         </p>
       </form>
       <AuthFooter />

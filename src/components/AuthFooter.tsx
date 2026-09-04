@@ -1,3 +1,6 @@
+import { useTranslation } from "react-i18next";
+
 export default function AuthFooter() {
-  return <p className="auth-footer">© {new Date().getFullYear()} Shiftline. All rights reserved.</p>;
+  const { t } = useTranslation();
+  return <p className="auth-footer">{t("footer.rights", { year: new Date().getFullYear() })}</p>;
 }

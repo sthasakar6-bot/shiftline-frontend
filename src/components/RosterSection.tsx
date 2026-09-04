@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { api, ApiError } from "../api/client";
 import type { Shift, UserSummary } from "../api/types";
@@ -6,18 +7,11 @@ import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "./ConfirmDialog";
 import Avatar from "./Avatar";
 import { formatTime, compactTime } from "../lib/formatDate";
+import { getDateLocale } from "../i18n";
 
 interface RosterEntry extends Shift {
   employeeName: string;
 }
-
-const BREAK_OPTIONS = [
-  { label: "No break", value: "" },
-  { label: "15 minutes", value: "15" },
-  { label: "30 minutes", value: "30" },
-  { label: "45 minutes", value: "45" },
-  { label: "1 hour", value: "60" },
-];
 
 // datetime-local gives a plain string with no timezone (e.g. "2026-09-01T09:00")
 // -- interpreting it via `new Date(...)` reads it as the browser's local time,
@@ -38,6 +32,7 @@ function dateKey(d: Date): string {
 }
 
 export default function RosterSection() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [roster, setRoster] = useState<RosterEntry[]>([]);
@@ -50,11 +45,22 @@ export default function RosterSection() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  const BREAK_OPTIONS = [
+    { label: t("adminRoster.breakNone"), value: "" },
+    { label: t("adminRoster.break15"), value: "15" },
+    { label: t("adminRoster.break30"), value: "30" },
+    { label: t("adminRoster.break45"), value: "45" },
+    { label: t("adminRoster.break60"), value: "60" },
+  ];
+
+  const youLabel = `(${t("common.you")})`;
+
   const people = useMemo(
     () =>
       user
-        ? [{ id: user.id, name: `${user.name} (you)`, hasAvatar: user.hasAvatar }, ...reports]
+        ? [{ id: user.id, name: `${user.name} ${youLabel}`, hasAvatar: user.hasAvatar }, ...reports]
         : reports,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [user, reports],
   );
 
@@ -64,13 +70,13 @@ export default function RosterSection() {
 
   async function loadRoster() {
     if (!user) return;
-    const targets = [{ id: user.id, name: `${user.name} (you)` }, ...reports];
+    const targets = [{ id: user.id, name: `${user.name} ${youLabel}` }, ...reports];
     try {
       const lists = await Promise.all(
-        targets.map((t) =>
+        targets.map((target) =>
           api
-            .listShiftsForReport(t.id)
-            .then((shifts) => shifts.map((s) => ({ ...s, employeeName: t.name }))),
+            .listShiftsForReport(target.id)
+            .then((shifts) => shifts.map((s) => ({ ...s, employeeName: target.name }))),
         ),
       );
       setRoster(lists.flat());
@@ -98,10 +104,10 @@ export default function RosterSection() {
       setStartsAt("");
       setEndsAt("");
       setBreakMinutes("");
-      setMessage("Shift assigned.");
+      setMessage(t("adminRoster.shiftAssigned"));
       loadRoster();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to assign shift");
+      setError(err instanceof ApiError ? err.message : t("adminRoster.assignFailed"));
     }
   }
 
@@ -111,7 +117,7 @@ export default function RosterSection() {
       await api.deleteShiftForReport(entry.userId, entry.id);
       loadRoster();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to remove shift");
+      setError(err instanceof ApiError ? err.message : t("adminRoster.removeShiftFailed"));
     } finally {
       setRemoveTarget(null);
     }
@@ -123,7 +129,7 @@ export default function RosterSection() {
     return d;
   }, [weekStart]);
 
-  const weekLabel = `${weekStart.toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${new Date(weekEnd.getTime() - 86400000).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
+  const weekLabel = `${weekStart.toLocaleDateString(getDateLocale(), { month: "short", day: "numeric" })} – ${new Date(weekEnd.getTime() - 86400000).toLocaleDateString(getDateLocale(), { month: "short", day: "numeric", year: "numeric" })}`;
 
   const weekDays = useMemo(() => {
     const days: Date[] = [];
@@ -158,15 +164,15 @@ export default function RosterSection() {
 
   return (
     <section className="panel">
-      <h2>Roster</h2>
+      <h2>{t("adminRoster.title")}</h2>
 
       <div className="subform">
-        <h3>Assign a shift</h3>
+        <h3>{t("adminRoster.assignShift")}</h3>
         <form className="inline-form" onSubmit={handleAssign}>
           <label className="field">
-            <span className="field-label">Employee</span>
+            <span className="field-label">{t("adminRoster.employeeLabel")}</span>
             <select value={assignee} onChange={(e) => setAssignee(e.target.value)} required>
-              <option value="">Select employee</option>
+              <option value="">{t("team.selectEmployee")}</option>
               {people.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -175,7 +181,7 @@ export default function RosterSection() {
             </select>
           </label>
           <label className="field">
-            <span className="field-label">Shift starts</span>
+            <span className="field-label">{t("adminRoster.shiftStarts")}</span>
             <input
               type="datetime-local"
               value={startsAt}
@@ -184,7 +190,7 @@ export default function RosterSection() {
             />
           </label>
           <label className="field">
-            <span className="field-label">Shift ends</span>
+            <span className="field-label">{t("adminRoster.shiftEnds")}</span>
             <input
               type="datetime-local"
               value={endsAt}
@@ -193,7 +199,7 @@ export default function RosterSection() {
             />
           </label>
           <label className="field">
-            <span className="field-label">Break</span>
+            <span className="field-label">{t("adminRoster.breakLabel")}</span>
             <select value={breakMinutes} onChange={(e) => setBreakMinutes(e.target.value)}>
               {BREAK_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -202,7 +208,7 @@ export default function RosterSection() {
               ))}
             </select>
           </label>
-          <button type="submit">Assign</button>
+          <button type="submit">{t("adminRoster.assign")}</button>
         </form>
         {message && <div className="success">{message}</div>}
         {error && <div className="error">{error}</div>}
@@ -245,9 +251,9 @@ export default function RosterSection() {
       </div>
 
       {people.length === 0 ? (
-        <p className="empty-state">No employees on your team yet.</p>
+        <p className="empty-state">{t("adminRoster.noEmployees")}</p>
       ) : shiftsThisWeek === 0 ? (
-        <p className="empty-state">No shifts scheduled this week.</p>
+        <p className="empty-state">{t("adminRoster.noShiftsWeek")}</p>
       ) : (
         <div className="roster-grid-wrap">
           <table className="roster-grid">
@@ -260,7 +266,7 @@ export default function RosterSection() {
                     className={dateKey(d) === today ? "today" : ""}
                   >
                     <span className="roster-grid-day-name">
-                      {d.toLocaleDateString(undefined, { weekday: "short" })}
+                      {d.toLocaleDateString(getDateLocale(), { weekday: "short" })}
                     </span>
                     <span className="roster-grid-day-num">{d.getDate()}</span>
                   </th>
@@ -285,7 +291,7 @@ export default function RosterSection() {
                             key={s.id}
                             className="roster-grid-chip"
                             onClick={() => setRemoveTarget(s)}
-                            title={`${formatTime(s.startsAt)} – ${formatTime(s.endsAt)}${s.breakMinutes ? ` · ${s.breakMinutes} min break` : ""}`}
+                            title={`${formatTime(s.startsAt)} – ${formatTime(s.endsAt)}${s.breakMinutes ? t("adminRoster.breakMinSuffix", { min: s.breakMinutes }) : ""}`}
                           >
                             {compactTime(s.startsAt)}-{compactTime(s.endsAt)}
                           </button>
@@ -302,9 +308,12 @@ export default function RosterSection() {
 
       {removeTarget && (
         <ConfirmDialog
-          title="Remove this shift?"
-          message={`Remove ${removeTarget.employeeName}'s shift on ${new Date(removeTarget.startsAt).toLocaleDateString()}?`}
-          confirmLabel="Remove"
+          title={t("adminRoster.removeShiftQuestion")}
+          message={t("adminRoster.removeShiftConfirm", {
+            name: removeTarget.employeeName,
+            date: new Date(removeTarget.startsAt).toLocaleDateString(getDateLocale()),
+          })}
+          confirmLabel={t("team.remove")}
           danger
           onConfirm={() => handleRemove(removeTarget)}
           onCancel={() => setRemoveTarget(null)}

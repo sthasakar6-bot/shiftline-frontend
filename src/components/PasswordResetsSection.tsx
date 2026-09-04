@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import type { PasswordResetRequest } from "../api/types";
 
@@ -7,6 +8,7 @@ function resetLinkFor(token: string) {
 }
 
 export default function PasswordResetsSection() {
+  const { t } = useTranslation();
   const [requests, setRequests] = useState<PasswordResetRequest[]>([]);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
 
@@ -27,14 +29,14 @@ export default function PasswordResetsSection() {
 
   return (
     <section className="panel">
-      <h2>Password reset requests</h2>
+      <h2>{t("passwordResets.title")}</h2>
       <ul className="list">
         {requests.map((r) => (
           <li key={r.id}>
             <span>{r.employeeName}</span>
             <span className="actions">
               <button onClick={() => handleCopyLink(r.token)}>
-                {copiedToken === r.token ? "Copied!" : "Copy reset link"}
+                {copiedToken === r.token ? t("invites.copied") : t("passwordResets.copyResetLink")}
               </button>
             </span>
           </li>

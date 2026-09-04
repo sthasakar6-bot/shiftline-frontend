@@ -1,17 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "../api/client";
 import type { Attendance, LeaveRequest, Shift } from "../api/types";
 import { formatTime, compactTime } from "../lib/formatDate";
 import { addDays, parseIsoDateLocal } from "../lib/dateOnly";
+import { getDateLocale } from "../i18n";
 
 function dateKey(d: Date): string {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+// 2024-01-07 is a Sunday; used purely to derive locale-correct weekday abbreviations.
+const WEEKDAY_REFERENCE = new Date(2024, 0, 7);
+
+function weekdayLabels(): string[] {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(WEEKDAY_REFERENCE);
+    d.setDate(WEEKDAY_REFERENCE.getDate() + i);
+    return d.toLocaleDateString(getDateLocale(), { weekday: "short" });
+  });
+}
 
 export default function ShiftsSection() {
+  const { t } = useTranslation();
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
@@ -73,7 +85,7 @@ export default function ShiftsSection() {
     return result;
   }, [monthCursor]);
 
-  const monthLabel = monthCursor.toLocaleDateString(undefined, {
+  const monthLabel = monthCursor.toLocaleDateString(getDateLocale(), {
     month: "long",
     year: "numeric",
   });
@@ -83,8 +95,8 @@ export default function ShiftsSection() {
 
   return (
     <section className="panel">
-      <h2>My Roster</h2>
-      <p className="hint">Set by your manager. Contact them for any changes.</p>
+      <h2>{t("roster.title")}</h2>
+      <p className="hint">{t("roster.hint")}</p>
 
       <div className="roster-week-nav">
         <button
@@ -118,8 +130,8 @@ export default function ShiftsSection() {
       </div>
 
       <div className="calendar-grid">
-        {WEEKDAYS.map((w) => (
-          <div key={w} className="calendar-weekday">
+        {weekdayLabels().map((w, i) => (
+          <div key={i} className="calendar-weekday">
             {w}
           </div>
         ))}
@@ -143,7 +155,7 @@ export default function ShiftsSection() {
               <span className="calendar-day-num">{day.getDate()}</span>
               {hasLeave ? (
                 <span className={`calendar-day-label ${leaveType}`}>
-                  {leaveType === "sick" ? "Sick" : "Vac"}
+                  {leaveType === "sick" ? t("roster.legendSick") : t("roster.vacShort")}
                 </span>
               ) : (
                 hasShift && (
@@ -161,39 +173,39 @@ export default function ShiftsSection() {
 
       <div className="calendar-legend">
         <span>
-          <span className="calendar-legend-swatch shift" /> Shift
+          <span className="calendar-legend-swatch shift" /> {t("roster.legendShift")}
         </span>
         <span>
-          <span className="calendar-legend-swatch sick" /> Sick
+          <span className="calendar-legend-swatch sick" /> {t("roster.legendSick")}
         </span>
         <span>
-          <span className="calendar-legend-swatch vacation" /> Vacation
+          <span className="calendar-legend-swatch vacation" /> {t("roster.legendVacation")}
         </span>
       </div>
 
       {selectedDay && (
         <div className="modal-overlay" onClick={() => setSelectedDay(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>{selectedDay.toLocaleDateString(undefined, { dateStyle: "full" })}</h3>
+            <h3>{selectedDay.toLocaleDateString(getDateLocale(), { dateStyle: "full" })}</h3>
             {selectedLeave.map((l) => (
               <p key={l.id} className="leave-flag">
-                {l.type === "sick" ? "Sick leave" : "Vacation"}
+                {l.type === "sick" ? t("roster.sickLeave") : t("leave.vacation")}
                 {l.reason && ` — ${l.reason}`}
               </p>
             ))}
             {selectedShifts.map((s) => (
               <p key={s.id}>
-                Shift: {formatTime(s.startsAt)} – {formatTime(s.endsAt)}
+                {t("roster.shiftLabel")}: {formatTime(s.startsAt)} – {formatTime(s.endsAt)}
                 {s.breakMinutes && (
                   <>
                     <br />
-                    Break: {s.breakMinutes} min
+                    {t("roster.breakMin", { min: s.breakMinutes })}
                   </>
                 )}
               </p>
             ))}
             <div className="modal-actions">
-              <button onClick={() => setSelectedDay(null)}>Close</button>
+              <button onClick={() => setSelectedDay(null)}>{t("common.close")}</button>
             </div>
           </div>
         </div>

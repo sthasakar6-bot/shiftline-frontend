@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api, ApiError } from "../api/client";
 import type { Contract, Payslip, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
@@ -9,6 +10,7 @@ import EmployeeDetailModal from "./EmployeeDetailModal";
 const PRESENCE_POLL_MS = 15000;
 
 export default function ManagerSection() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [employees, setEmployees] = useState<UserSummary[]>([]);
@@ -57,7 +59,7 @@ export default function ManagerSection() {
       loadReports();
       loadEmployees();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to add to team");
+      setError(err instanceof ApiError ? err.message : t("team.addFailed"));
     }
   }
 
@@ -68,7 +70,7 @@ export default function ManagerSection() {
       loadReports();
       loadEmployees();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to remove from team");
+      setError(err instanceof ApiError ? err.message : t("team.removeFailed"));
     } finally {
       setRemoveTarget(null);
     }
@@ -99,9 +101,9 @@ export default function ManagerSection() {
       setRole("");
       setPdfFile(null);
       loadContracts(userId);
-      setMessage("Contract created.");
+      setMessage(t("team.contractCreated"));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to create contract");
+      setError(err instanceof ApiError ? err.message : t("team.createContractFailed"));
     }
   }
 
@@ -114,9 +116,9 @@ export default function ManagerSection() {
       await api.uploadContractPdfForReport(userId, contractId, file);
       setReuploadFiles({ ...reuploadFiles, [contractId]: null });
       loadContracts(userId);
-      setMessage("Contract PDF uploaded.");
+      setMessage(t("team.contractPdfUploaded"));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to upload PDF");
+      setError(err instanceof ApiError ? err.message : t("team.uploadPdfFailed"));
     }
   }
 
@@ -128,7 +130,7 @@ export default function ManagerSection() {
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to open contract");
+      setError(err instanceof ApiError ? err.message : t("contracts.openFailed"));
     }
   }
 
@@ -163,9 +165,9 @@ export default function ManagerSection() {
       setPeriod("");
       setPayslipPdfFile(null);
       loadPayslips(userId);
-      setMessage("Payslip created.");
+      setMessage(t("team.payslipCreated"));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to create payslip");
+      setError(err instanceof ApiError ? err.message : t("team.createPayslipFailed"));
     }
   }
 
@@ -178,9 +180,9 @@ export default function ManagerSection() {
       await api.uploadPayslipPdfForReport(userId, payslipId, file);
       setPayslipReuploadFiles({ ...payslipReuploadFiles, [payslipId]: null });
       loadPayslips(userId);
-      setMessage("Payslip PDF uploaded.");
+      setMessage(t("team.payslipPdfUploaded"));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to upload PDF");
+      setError(err instanceof ApiError ? err.message : t("team.uploadPdfFailed"));
     }
   }
 
@@ -192,7 +194,7 @@ export default function ManagerSection() {
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to open payslip");
+      setError(err instanceof ApiError ? err.message : t("payslips.openFailed"));
     }
   }
 
@@ -204,7 +206,7 @@ export default function ManagerSection() {
 
   return (
     <section className="panel">
-      <h2>Manage team</h2>
+      <h2>{t("team.title")}</h2>
       <ul className="list">
         {employees.map((e) => (
           <li key={e.id}>
@@ -215,18 +217,18 @@ export default function ManagerSection() {
             >
               <Avatar userId={e.id} name={e.name} hasAvatar={e.hasAvatar} size={32} />
               {e.name}
-              {e.online && <span className="presence-dot inline" title="Online now" />}
+              {e.online && <span className="presence-dot inline" title={t("team.online")} />}
             </button>
             <span className="actions">
               {e.managerId === user?.id ? (
-                <button onClick={() => setRemoveTarget(e)}>Remove from team</button>
+                <button onClick={() => setRemoveTarget(e)}>{t("team.removeFromTeam")}</button>
               ) : (
-                <button onClick={() => handleAddToTeam(e.id)}>Add to my team</button>
+                <button onClick={() => handleAddToTeam(e.id)}>{t("team.addToTeam")}</button>
               )}
             </span>
           </li>
         ))}
-        {employees.length === 0 && <li className="empty">No employees registered yet.</li>}
+        {employees.length === 0 && <li className="empty">{t("team.empty")}</li>}
       </ul>
       {error && <div className="error">{error}</div>}
 
@@ -236,20 +238,24 @@ export default function ManagerSection() {
 
       {removeTarget && (
         <ConfirmDialog
-          title="Remove from team?"
-          message={`Are you sure you want to remove ${removeTarget.name} from your team?`}
-          confirmLabel="Remove"
+          title={t("team.removeQuestion")}
+          message={t("team.removeConfirmMessage", { name: removeTarget.name })}
+          confirmLabel={t("team.remove")}
           danger
           onConfirm={() => handleRemoveFromTeam(removeTarget.id)}
           onCancel={() => setRemoveTarget(null)}
         />
       )}
 
-      <h3>Manage contracts</h3>
+      <h3>{t("team.manageContracts")}</h3>
       <div className="inline-form">
         <select value={contractReport} onChange={(e) => setContractReport(e.target.value)}>
-          <option value="">Select employee</option>
-          {user && <option value={user.id}>{user.name} (you)</option>}
+          <option value="">{t("team.selectEmployee")}</option>
+          {user && (
+            <option value={user.id}>
+              {user.name} ({t("common.you")})
+            </option>
+          )}
           {reports.map((r) => (
             <option key={r.id} value={r.id}>
               {r.name}
@@ -264,10 +270,12 @@ export default function ManagerSection() {
               <li key={c.id}>
                 <span>
                   <strong>{c.role}</strong>
-                  {!c.pdfFilename && " — no PDF uploaded"}
+                  {!c.pdfFilename && ` — ${t("team.noPdfUploaded")}`}
                 </span>
                 <span className="actions">
-                  {c.pdfFilename && <button onClick={() => handleViewPdf(c.id)}>View PDF</button>}
+                  {c.pdfFilename && (
+                    <button onClick={() => handleViewPdf(c.id)}>{t("team.viewPdf")}</button>
+                  )}
                   <input
                     type="file"
                     accept="application/pdf"
@@ -279,18 +287,18 @@ export default function ManagerSection() {
                     }
                   />
                   <button onClick={() => handleUploadPdf(c.id)}>
-                    {c.pdfFilename ? "Replace PDF" : "Upload PDF"}
+                    {c.pdfFilename ? t("team.replacePdf") : t("team.uploadPdf")}
                   </button>
-                  <button onClick={() => handleDeleteContract(c.id)}>Delete</button>
+                  <button onClick={() => handleDeleteContract(c.id)}>{t("common.delete")}</button>
                 </span>
               </li>
             ))}
-            {contracts.length === 0 && <li className="empty">No contracts yet.</li>}
+            {contracts.length === 0 && <li className="empty">{t("team.noContracts")}</li>}
           </ul>
 
           <form className="inline-form" onSubmit={handleCreateContract}>
             <input
-              placeholder="Role"
+              placeholder={t("team.role")}
               value={role}
               onChange={(e) => setRole(e.target.value)}
               required
@@ -300,7 +308,7 @@ export default function ManagerSection() {
               accept="application/pdf"
               onChange={(e) => setPdfFile(e.target.files?.[0] ?? null)}
             />
-            <button type="submit">Create contract</button>
+            <button type="submit">{t("team.createContract")}</button>
           </form>
 
           {message && <div className="success">{message}</div>}
@@ -308,11 +316,15 @@ export default function ManagerSection() {
         </>
       )}
 
-      <h3>Manage payslips</h3>
+      <h3>{t("team.managePayslips")}</h3>
       <div className="inline-form">
         <select value={payslipReport} onChange={(e) => setPayslipReport(e.target.value)}>
-          <option value="">Select employee</option>
-          {user && <option value={user.id}>{user.name} (you)</option>}
+          <option value="">{t("team.selectEmployee")}</option>
+          {user && (
+            <option value={user.id}>
+              {user.name} ({t("common.you")})
+            </option>
+          )}
           {reports.map((r) => (
             <option key={r.id} value={r.id}>
               {r.name}
@@ -327,11 +339,11 @@ export default function ManagerSection() {
               <li key={p.id}>
                 <span>
                   <strong>{p.period}</strong>
-                  {!p.pdfFilename && " — no PDF uploaded"}
+                  {!p.pdfFilename && ` — ${t("team.noPdfUploaded")}`}
                 </span>
                 <span className="actions">
                   {p.pdfFilename && (
-                    <button onClick={() => handleViewPayslipPdf(p.id)}>View PDF</button>
+                    <button onClick={() => handleViewPayslipPdf(p.id)}>{t("team.viewPdf")}</button>
                   )}
                   <input
                     type="file"
@@ -344,18 +356,18 @@ export default function ManagerSection() {
                     }
                   />
                   <button onClick={() => handleUploadPayslipPdf(p.id)}>
-                    {p.pdfFilename ? "Replace PDF" : "Upload PDF"}
+                    {p.pdfFilename ? t("team.replacePdf") : t("team.uploadPdf")}
                   </button>
-                  <button onClick={() => handleDeletePayslip(p.id)}>Delete</button>
+                  <button onClick={() => handleDeletePayslip(p.id)}>{t("common.delete")}</button>
                 </span>
               </li>
             ))}
-            {payslips.length === 0 && <li className="empty">No payslips yet.</li>}
+            {payslips.length === 0 && <li className="empty">{t("team.noPayslips")}</li>}
           </ul>
 
           <form className="inline-form" onSubmit={handleCreatePayslip}>
             <input
-              placeholder="Pay period (e.g. August 2026)"
+              placeholder={t("team.payPeriod")}
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
               required
@@ -365,7 +377,7 @@ export default function ManagerSection() {
               accept="application/pdf"
               onChange={(e) => setPayslipPdfFile(e.target.files?.[0] ?? null)}
             />
-            <button type="submit">Create payslip</button>
+            <button type="submit">{t("team.createPayslip")}</button>
           </form>
 
           {message && <div className="success">{message}</div>}

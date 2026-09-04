@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Copy, Check, Mail, Phone, MapPin } from "lucide-react";
 import Avatar from "./Avatar";
 import type { UserSummary } from "../api/types";
@@ -10,6 +11,7 @@ export default function EmployeeDetailModal({
   employee: UserSummary;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState<"email" | "phone" | "address" | null>(null);
 
   function handleCopy(field: "email" | "phone" | "address", value: string) {
@@ -27,7 +29,7 @@ export default function EmployeeDetailModal({
           <h3>{employee.name}</h3>
           <span className={`presence-badge${employee.online ? " online" : ""}`}>
             <span className="presence-dot" />
-            {employee.online ? "Online now" : "Offline"}
+            {employee.online ? t("employeeDetail.onlineNow") : t("employeeDetail.offline")}
           </span>
         </div>
 
@@ -39,7 +41,7 @@ export default function EmployeeDetailModal({
               type="button"
               className="employee-detail-copy"
               onClick={() => handleCopy("email", employee.email)}
-              title="Copy email"
+              title={t("employeeDetail.copyEmail")}
             >
               {copied === "email" ? <Check size={14} /> : <Copy size={14} />}
             </button>
@@ -53,13 +55,13 @@ export default function EmployeeDetailModal({
                   type="button"
                   className="employee-detail-copy"
                   onClick={() => handleCopy("phone", employee.phone as string)}
-                  title="Copy phone number"
+                  title={t("employeeDetail.copyPhone")}
                 >
                   {copied === "phone" ? <Check size={14} /> : <Copy size={14} />}
                 </button>
               </>
             ) : (
-              <span className="employee-detail-value muted">No phone number on file</span>
+              <span className="employee-detail-value muted">{t("employeeDetail.noPhone")}</span>
             )}
           </div>
           <div className="employee-detail-row">
@@ -71,19 +73,19 @@ export default function EmployeeDetailModal({
                   type="button"
                   className="employee-detail-copy"
                   onClick={() => handleCopy("address", employee.address as string)}
-                  title="Copy address"
+                  title={t("employeeDetail.copyAddress")}
                 >
                   {copied === "address" ? <Check size={14} /> : <Copy size={14} />}
                 </button>
               </>
             ) : (
-              <span className="employee-detail-value muted">No address on file</span>
+              <span className="employee-detail-value muted">{t("employeeDetail.noAddress")}</span>
             )}
           </div>
         </div>
 
         <div className="modal-actions">
-          <button onClick={onClose}>Close</button>
+          <button onClick={onClose}>{t("common.close")}</button>
         </div>
       </div>
     </div>

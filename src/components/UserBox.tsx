@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { LogOut, ShieldCheck, LayoutDashboard, Bell, BellOff, User as UserIcon } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import Avatar from "./Avatar";
@@ -10,6 +11,7 @@ import {
 } from "../lib/push";
 
 export default function UserBox() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -47,7 +49,7 @@ export default function UserBox() {
         setPushEnabled(true);
       }
     } catch (err) {
-      setPushError(err instanceof Error ? err.message : "Failed to update notifications");
+      setPushError(err instanceof Error ? err.message : t("userBox.notificationsUpdateFailed"));
     }
   }
 
@@ -57,7 +59,7 @@ export default function UserBox() {
 
   return (
     <div className="user-box" ref={ref}>
-      <button className="user-box-trigger" onClick={() => setOpen(!open)} title="Account">
+      <button className="user-box-trigger" onClick={() => setOpen(!open)} title={t("userBox.account")}>
         <Avatar userId={user.id} name={user.name} hasAvatar={user.hasAvatar} size={36} />
       </button>
       {open && (
@@ -69,7 +71,7 @@ export default function UserBox() {
             }}
           >
             <UserIcon size={16} />
-            My Profile
+            {t("userBox.myProfile")}
           </button>
           {user.role === "manager" && (
             <button
@@ -79,19 +81,19 @@ export default function UserBox() {
               }}
             >
               {onAdmin ? <LayoutDashboard size={16} /> : <ShieldCheck size={16} />}
-              {onAdmin ? "Back to Dashboard" : "Switch to Administration"}
+              {onAdmin ? t("userBox.backToDashboard") : t("userBox.switchToAdmin")}
             </button>
           )}
           {isPushSupported() && (
             <button onClick={handleTogglePush}>
               {pushEnabled ? <BellOff size={16} /> : <Bell size={16} />}
-              {pushEnabled ? "Disable notifications" : "Enable notifications"}
+              {pushEnabled ? t("userBox.disableNotifications") : t("userBox.enableNotifications")}
             </button>
           )}
           {pushError && <div className="error" style={{ padding: "0 14px 8px" }}>{pushError}</div>}
           <button onClick={logout}>
             <LogOut size={16} />
-            Log out
+            {t("userBox.logOut")}
           </button>
         </div>
       )}

@@ -1,14 +1,25 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { parseIsoDateLocal, toIsoDateOnly, todayLocal } from "../lib/dateOnly";
+import { getDateLocale } from "../i18n";
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+// 2024-01-07 is a Sunday; used purely to derive locale-correct weekday abbreviations.
+const WEEKDAY_REFERENCE = new Date(2024, 0, 7);
+
+function weekdayLabels(): string[] {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(WEEKDAY_REFERENCE);
+    d.setDate(WEEKDAY_REFERENCE.getDate() + i);
+    return d.toLocaleDateString(getDateLocale(), { weekday: "short" });
+  });
+}
 
 function formatRangeLabel(startIso: string, endIso: string): string {
   const start = parseIsoDateLocal(startIso);
   const end = parseIsoDateLocal(endIso);
-  const startLabel = start.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  const endLabel = end.toLocaleDateString(undefined, {
+  const startLabel = start.toLocaleDateString(getDateLocale(), { month: "short", day: "numeric" });
+  const endLabel = end.toLocaleDateString(getDateLocale(), {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -27,6 +38,7 @@ export default function DateRangePicker({
   onChange: (start: string, end: string) => void;
   singleDay?: boolean;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [pendingStart, setPendingStart] = useState<Date | null>(null);
   const [monthCursor, setMonthCursor] = useState(() => {
@@ -56,7 +68,10 @@ export default function DateRangePicker({
     return result;
   }, [monthCursor]);
 
-  const monthLabel = monthCursor.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  const monthLabel = monthCursor.toLocaleDateString(getDateLocale(), {
+    month: "long",
+    year: "numeric",
+  });
 
   function handlePick(day: Date) {
     if (singleDay) {
@@ -83,8 +98,8 @@ export default function DateRangePicker({
     startDate && endDate
       ? formatRangeLabel(startDate, endDate)
       : singleDay
-        ? "Select date"
-        : "Select date or date range";
+        ? t("leave.selectDate")
+        : t("leave.selectDateRange");
 
   return (
     <>
@@ -98,10 +113,10 @@ export default function DateRangePicker({
           <div className="modal date-range-modal" onClick={(e) => e.stopPropagation()}>
             <p className="hint date-range-hint">
               {singleDay
-                ? "Tap the day of your leave"
+                ? t("leave.tapDay")
                 : pendingStart
-                  ? "Tap the last day of your leave"
-                  : "Tap the first day of your leave"}
+                  ? t("leave.tapLastDay")
+                  : t("leave.tapFirstDay")}
             </p>
 
             <div className="roster-week-nav">
@@ -127,8 +142,8 @@ export default function DateRangePicker({
             </div>
 
             <div className="calendar-grid">
-              {WEEKDAYS.map((w) => (
-                <div key={w} className="calendar-weekday">
+              {weekdayLabels().map((w, i) => (
+                <div key={i} className="calendar-weekday">
                   {w}
                 </div>
               ))}
@@ -154,7 +169,7 @@ export default function DateRangePicker({
 
             <div className="modal-actions">
               <button type="button" onClick={() => setOpen(false)}>
-                Done
+                {t("common.done")}
               </button>
             </div>
           </div>

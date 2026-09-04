@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Home, CalendarDays, Watch, Palmtree, Bell } from "lucide-react";
 import UserBox from "../components/UserBox";
 import AppLogo from "../components/AppLogo";
 import QuickAccessSearch from "../components/QuickAccessSearch";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import TabBar, { type Tab } from "../components/TabBar";
 import DashboardHome from "../components/DashboardHome";
 import ShiftsSection from "../components/ShiftsSection";
@@ -17,6 +19,7 @@ import { updateAppBadge } from "../lib/appBadge";
 const tabKeys = ["home", "roster", "attendance", "leave", "notifications"];
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const requestedTab = searchParams.get("tab");
   const [active, setActive] = useState(
@@ -47,11 +50,11 @@ export default function DashboardPage() {
   }, [unreadCount]);
 
   const tabs: Tab[] = [
-    { key: "home", label: "Home", icon: Home },
-    { key: "roster", label: "Roster", icon: CalendarDays },
-    { key: "attendance", label: "Attendance", icon: Watch },
-    { key: "leave", label: "Leave", icon: Palmtree },
-    { key: "notifications", label: "Alerts", icon: Bell, badge: unreadCount },
+    { key: "home", label: t("nav.home"), icon: Home },
+    { key: "roster", label: t("nav.roster"), icon: CalendarDays },
+    { key: "attendance", label: t("nav.attendance"), icon: Watch },
+    { key: "leave", label: t("nav.leave"), icon: Palmtree },
+    { key: "notifications", label: t("nav.alerts"), icon: Bell, badge: unreadCount },
   ];
 
   return (
@@ -60,6 +63,7 @@ export default function DashboardPage() {
         <AppLogo />
         <div className="app-header-actions">
           <QuickAccessSearch />
+          <LanguageSwitcher />
           <UserBox />
         </div>
       </header>

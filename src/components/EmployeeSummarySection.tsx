@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import type { LeaveRequest, Shift, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { formatTime } from "../lib/formatDate";
+import { getDateLocale } from "../i18n";
 import { downloadCsv } from "../lib/csv";
 
 function startOfMonth(): string {
@@ -20,6 +22,7 @@ function shiftHours(s: Shift): number {
 }
 
 export default function EmployeeSummarySection() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [selected, setSelected] = useState("");
@@ -28,7 +31,8 @@ export default function EmployeeSummarySection() {
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
 
-  const people = user ? [{ id: user.id, name: `${user.name} (you)` }, ...reports] : reports;
+  const youLabel = `(${t("common.you")})`;
+  const people = user ? [{ id: user.id, name: `${user.name} ${youLabel}` }, ...reports] : reports;
 
   useEffect(() => {
     api.listReports().then(setReports).catch(() => {});
@@ -77,27 +81,27 @@ export default function EmployeeSummarySection() {
   function handleDownloadCsv() {
     if (!selectedPerson) return;
     const rows: string[][] = [
-      ["Employee", selectedPerson.name],
-      ["Date range", `${rangeStart} to ${rangeEnd}`],
+      [t("summary.employee"), selectedPerson.name],
+      [t("summary.csvDateRange"), `${rangeStart} to ${rangeEnd}`],
       [],
-      ["Shifts"],
-      ["Date", "Start", "End", "Break (min)", "Hours"],
+      [t("summary.shifts")],
+      [t("summary.csvDate"), t("summary.csvStart"), t("summary.csvEnd"), t("summary.csvBreakMin"), t("summary.csvHours")],
       ...shiftsInRange.map((s) => [
-        new Date(s.startsAt).toLocaleDateString(),
+        new Date(s.startsAt).toLocaleDateString(getDateLocale()),
         formatTime(s.startsAt),
         formatTime(s.endsAt),
         String(s.breakMinutes ?? 0),
         shiftHours(s).toFixed(2),
       ]),
-      ["", "", "", "Total hours", totalHours.toFixed(2)],
+      ["", "", "", t("summary.csvTotalHours"), totalHours.toFixed(2)],
       [],
-      ["Leave requests"],
-      ["Type", "Start date", "End date", "Status"],
+      [t("summary.csvLeaveRequests")],
+      [t("summary.csvType"), t("summary.csvStartDate"), t("summary.csvEndDate"), t("summary.csvStatus")],
       ...leaveInRange.map((l) => [
-        l.type,
-        new Date(l.startDate).toLocaleDateString(),
-        new Date(l.endDate).toLocaleDateString(),
-        l.status,
+        t(`leave.${l.type}`),
+        new Date(l.startDate).toLocaleDateString(getDateLocale()),
+        new Date(l.endDate).toLocaleDateString(getDateLocale()),
+        t(`leave.${l.status}`),
       ]),
     ];
     downloadCsv(`${selectedPerson.name.replace(/\s+/g, "-")}-${rangeStart}-to-${rangeEnd}.csv`, rows);
@@ -105,14 +109,14 @@ export default function EmployeeSummarySection() {
 
   return (
     <section className="panel">
-      <h2>Employee Summary</h2>
-      <p className="hint">Hours worked, shift schedule, and leave history for a date range.</p>
+      <h2>{t("summary.title")}</h2>
+      <p className="hint">{t("summary.hint")}</p>
 
       <div className="inline-form">
         <label className="field">
-          <span className="field-label">Employee</span>
+          <span className="field-label">{t("summary.employee")}</span>
           <select value={selected} onChange={(e) => setSelected(e.target.value)}>
-            <option value="">Select employee</option>
+            <option value="">{t("team.selectEmployee")}</option>
             {people.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -121,11 +125,11 @@ export default function EmployeeSummarySection() {
           </select>
         </label>
         <label className="field">
-          <span className="field-label">From</span>
+          <span className="field-label">{t("summary.from")}</span>
           <input type="date" value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} />
         </label>
         <label className="field">
-          <span className="field-label">To</span>
+          <span className="field-label">{t("summary.to")}</span>
           <input type="date" value={rangeEnd} onChange={(e) => setRangeEnd(e.target.value)} />
         </label>
       </div>
@@ -133,41 +137,41 @@ export default function EmployeeSummarySection() {
       {selected && (
         <>
           <p>
-            <strong>{totalHours.toFixed(1)} hours</strong> scheduled across{" "}
-            {shiftsInRange.length} shift{shiftsInRange.length === 1 ? "" : "s"}
+            <strong>{t("summary.hoursScheduled", { hours: totalHours.toFixed(1) })}</strong>{" "}
+            {t("summary.scheduledAcross", { count: shiftsInRange.length })}
           </p>
 
-          <button onClick={handleDownloadCsv}>Download CSV</button>
+          <button onClick={handleDownloadCsv}>{t("summary.downloadCsv")}</button>
 
-          <h3>Shifts</h3>
+          <h3>{t("summary.shifts")}</h3>
           <ul className="list">
             {shiftsInRange.map((s) => (
               <li key={s.id}>
                 <span>
-                  {new Date(s.startsAt).toLocaleDateString(undefined, {
+                  {new Date(s.startsAt).toLocaleDateString(getDateLocale(), {
                     weekday: "short",
                     month: "short",
                     day: "numeric",
                   })}{" "}
                   — {formatTime(s.startsAt)} – {formatTime(s.endsAt)}
-                  {s.breakMinutes && ` (break ${s.breakMinutes} min)`}
+                  {s.breakMinutes && t("summary.breakSuffix", { min: s.breakMinutes })}
                 </span>
               </li>
             ))}
-            {shiftsInRange.length === 0 && <li className="empty">No shifts in this range.</li>}
+            {shiftsInRange.length === 0 && <li className="empty">{t("summary.noShiftsRange")}</li>}
           </ul>
 
-          <h3>Leave</h3>
+          <h3>{t("summary.leave")}</h3>
           <ul className="list">
             {leaveInRange.map((l) => (
               <li key={l.id}>
                 <span>
-                  {l.type} — {new Date(l.startDate).toLocaleDateString()} to{" "}
-                  {new Date(l.endDate).toLocaleDateString()} ({l.status})
+                  {t(`leave.${l.type}`)} — {new Date(l.startDate).toLocaleDateString(getDateLocale())} to{" "}
+                  {new Date(l.endDate).toLocaleDateString(getDateLocale())} ({t(`leave.${l.status}`)})
                 </span>
               </li>
             ))}
-            {leaveInRange.length === 0 && <li className="empty">No leave in this range.</li>}
+            {leaveInRange.length === 0 && <li className="empty">{t("summary.noLeaveRange")}</li>}
           </ul>
         </>
       )}

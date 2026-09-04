@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Hourglass, Palmtree, CalendarClock, History } from "lucide-react";
 import { api, ApiError } from "../api/client";
 import type { LeaveRequest, UserSummary } from "../api/types";
@@ -9,6 +10,7 @@ import ConfirmDialog from "./ConfirmDialog";
 import Avatar from "./Avatar";
 
 export default function LeaveApprovalsSection() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [selected, setSelected] = useState("");
@@ -19,11 +21,14 @@ export default function LeaveApprovalsSection() {
     null,
   );
 
+  const youLabel = `(${t("common.you")})`;
+
   const people = useMemo(
     () =>
       user
-        ? [{ id: user.id, name: `${user.name} (you)`, hasAvatar: user.hasAvatar }, ...reports]
+        ? [{ id: user.id, name: `${user.name} ${youLabel}`, hasAvatar: user.hasAvatar }, ...reports]
         : reports,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [user, reports],
   );
 
@@ -56,7 +61,7 @@ export default function LeaveApprovalsSection() {
       if (selected && Number(selected) === userId) load(userId);
       loadOverview();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to update request");
+      setError(err instanceof ApiError ? err.message : t("leaveApprovals.updateFailed"));
     }
   }
 
@@ -68,7 +73,7 @@ export default function LeaveApprovalsSection() {
       if (selected && Number(selected) === revokeTarget.userId) load(revokeTarget.userId);
       loadOverview();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to cancel leave");
+      setError(err instanceof ApiError ? err.message : t("leaveApprovals.cancelFailed"));
     } finally {
       setRevokeTarget(null);
     }
@@ -94,13 +99,13 @@ export default function LeaveApprovalsSection() {
 
   return (
     <section className="panel">
-      <h2>Leave Approvals</h2>
+      <h2>{t("leaveApprovals.title")}</h2>
       {error && <div className="error">{error}</div>}
 
       <div className="leave-group">
         <div className="leave-group-header">
           <Hourglass size={15} />
-          <span>Pending requests</span>
+          <span>{t("leaveApprovals.pendingRequests")}</span>
           {pendingRequests.length > 0 && (
             <span className="leave-group-count">{pendingRequests.length}</span>
           )}
@@ -111,7 +116,7 @@ export default function LeaveApprovalsSection() {
               <Avatar userId={r.userId} name={r.employeeName} hasAvatar={r.employeeHasAvatar} size={32} />
               <div className="leave-row-body">
                 <span className="leave-row-name">
-                  {r.employeeName} <span className={`type-badge ${r.type}`}>{r.type}</span>
+                  {r.employeeName} <span className={`type-badge ${r.type}`}>{t(`leave.${r.type}`)}</span>
                 </span>
                 <span className="leave-row-dates">
                   {formatDateOnly(r.startDate)} → {formatDateOnly(r.endDate)}
@@ -119,19 +124,25 @@ export default function LeaveApprovalsSection() {
                 </span>
               </div>
               <span className="actions">
-                <button onClick={() => decide(r.userId, r.id, "approved")}>Approve</button>
-                <button onClick={() => decide(r.userId, r.id, "rejected")}>Reject</button>
+                <button onClick={() => decide(r.userId, r.id, "approved")}>
+                  {t("leaveApprovals.approve")}
+                </button>
+                <button onClick={() => decide(r.userId, r.id, "rejected")}>
+                  {t("leaveApprovals.reject")}
+                </button>
               </span>
             </li>
           ))}
-          {pendingRequests.length === 0 && <li className="leave-empty">No pending requests.</li>}
+          {pendingRequests.length === 0 && (
+            <li className="leave-empty">{t("leaveApprovals.noPending")}</li>
+          )}
         </ul>
       </div>
 
       <div className="leave-group">
         <div className="leave-group-header">
           <Palmtree size={15} />
-          <span>On leave now</span>
+          <span>{t("leaveApprovals.onLeaveNow")}</span>
           {onLeaveNow.length > 0 && <span className="leave-group-count">{onLeaveNow.length}</span>}
         </div>
         <ul className="leave-rows">
@@ -140,10 +151,12 @@ export default function LeaveApprovalsSection() {
               <Avatar userId={l.userId} name={l.employeeName} hasAvatar={l.employeeHasAvatar} size={32} />
               <div className="leave-row-body">
                 <span className="leave-row-name">
-                  {l.employeeName} <span className={`type-badge ${l.type}`}>{l.type}</span>
+                  {l.employeeName} <span className={`type-badge ${l.type}`}>{t(`leave.${l.type}`)}</span>
                 </span>
                 <span className="leave-row-dates">
-                  Back {formatLocalDate(addDays(parseIsoDateLocal(l.endDate), 1))}
+                  {t("leaveApprovals.back", {
+                    date: formatLocalDate(addDays(parseIsoDateLocal(l.endDate), 1)),
+                  })}
                 </span>
               </div>
               <span className="actions">
@@ -152,19 +165,21 @@ export default function LeaveApprovalsSection() {
                     setRevokeTarget({ userId: l.userId, id: l.id, employeeName: l.employeeName })
                   }
                 >
-                  Cancel
+                  {t("leaveApprovals.cancel")}
                 </button>
               </span>
             </li>
           ))}
-          {onLeaveNow.length === 0 && <li className="leave-empty">Nobody is on leave today.</li>}
+          {onLeaveNow.length === 0 && (
+            <li className="leave-empty">{t("leaveApprovals.nobodyOnLeave")}</li>
+          )}
         </ul>
       </div>
 
       <div className="leave-group">
         <div className="leave-group-header">
           <CalendarClock size={15} />
-          <span>Upcoming leave</span>
+          <span>{t("leaveApprovals.upcomingLeave")}</span>
           {upcomingLeave.length > 0 && (
             <span className="leave-group-count">{upcomingLeave.length}</span>
           )}
@@ -175,7 +190,7 @@ export default function LeaveApprovalsSection() {
               <Avatar userId={l.userId} name={l.employeeName} hasAvatar={l.employeeHasAvatar} size={32} />
               <div className="leave-row-body">
                 <span className="leave-row-name">
-                  {l.employeeName} <span className={`type-badge ${l.type}`}>{l.type}</span>
+                  {l.employeeName} <span className={`type-badge ${l.type}`}>{t(`leave.${l.type}`)}</span>
                 </span>
                 <span className="leave-row-dates">
                   {formatDateOnly(l.startDate)} → {formatDateOnly(l.endDate)}
@@ -187,12 +202,14 @@ export default function LeaveApprovalsSection() {
                     setRevokeTarget({ userId: l.userId, id: l.id, employeeName: l.employeeName })
                   }
                 >
-                  Cancel
+                  {t("leaveApprovals.cancel")}
                 </button>
               </span>
             </li>
           ))}
-          {upcomingLeave.length === 0 && <li className="leave-empty">No upcoming leave scheduled.</li>}
+          {upcomingLeave.length === 0 && (
+            <li className="leave-empty">{t("leaveApprovals.noUpcoming")}</li>
+          )}
         </ul>
       </div>
 
@@ -200,11 +217,11 @@ export default function LeaveApprovalsSection() {
 
       <div className="leave-group-header">
         <History size={15} />
-        <span>Leave history by employee</span>
+        <span>{t("leaveApprovals.leaveHistory")}</span>
       </div>
       <div className="inline-form">
         <select value={selected} onChange={(e) => setSelected(e.target.value)}>
-          <option value="">Select employee</option>
+          <option value="">{t("team.selectEmployee")}</option>
           {people.map((r) => (
             <option key={r.id} value={r.id}>
               {r.name}
@@ -218,8 +235,8 @@ export default function LeaveApprovalsSection() {
             <li key={r.id} className="leave-row">
               <div className="leave-row-body">
                 <span className="leave-row-name">
-                  <span className={`type-badge ${r.type}`}>{r.type}</span>{" "}
-                  <span className={`status-badge ${r.status}`}>{r.status}</span>
+                  <span className={`type-badge ${r.type}`}>{t(`leave.${r.type}`)}</span>{" "}
+                  <span className={`status-badge ${r.status}`}>{t(`leave.${r.status}`)}</span>
                 </span>
                 <span className="leave-row-dates">
                   {formatDateOnly(r.startDate)} → {formatDateOnly(r.endDate)}
@@ -228,33 +245,38 @@ export default function LeaveApprovalsSection() {
               </div>
               {r.status === "pending" && (
                 <span className="actions">
-                  <button onClick={() => decide(Number(selected), r.id, "approved")}>Approve</button>
-                  <button onClick={() => decide(Number(selected), r.id, "rejected")}>Reject</button>
+                  <button onClick={() => decide(Number(selected), r.id, "approved")}>
+                    {t("leaveApprovals.approve")}
+                  </button>
+                  <button onClick={() => decide(Number(selected), r.id, "rejected")}>
+                    {t("leaveApprovals.reject")}
+                  </button>
                 </span>
               )}
               {r.status === "approved" && (
                 <span className="actions">
                   <button
                     onClick={() => {
-                      const name = people.find((p) => p.id === Number(selected))?.name ?? "them";
+                      const name =
+                        people.find((p) => p.id === Number(selected))?.name ?? t("leaveApprovals.them");
                       setRevokeTarget({ userId: Number(selected), id: r.id, employeeName: name });
                     }}
                   >
-                    Cancel
+                    {t("leaveApprovals.cancel")}
                   </button>
                 </span>
               )}
             </li>
           ))}
-          {requests.length === 0 && <li className="leave-empty">No leave requests.</li>}
+          {requests.length === 0 && <li className="leave-empty">{t("leaveApprovals.noRequests")}</li>}
         </ul>
       )}
 
       {revokeTarget && (
         <ConfirmDialog
-          title="Cancel this leave?"
-          message={`${revokeTarget.employeeName} will no longer be marked as on approved leave for this period, and their shifts can be scheduled normally again.`}
-          confirmLabel="Cancel Leave"
+          title={t("leaveApprovals.cancelLeaveQuestion")}
+          message={t("leaveApprovals.cancelLeaveMessage", { name: revokeTarget.employeeName })}
+          confirmLabel={t("leaveApprovals.cancelLeaveConfirm")}
           danger
           onConfirm={handleRevoke}
           onCancel={() => setRevokeTarget(null)}

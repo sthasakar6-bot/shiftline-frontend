@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const SESSION_KEY = "shiftline_splash_shown";
 const HOLD_MS = 3000;
@@ -17,6 +18,7 @@ function getInitialPhase(): Phase {
 }
 
 export default function SplashScreen() {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>(getInitialPhase);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export default function SplashScreen() {
       <div className="splash-glow" />
       <img src="/icon-192.png" alt="Shiftline" className="splash-logo" />
       <div className="splash-name">Shiftline</div>
-      <div className="splash-slogan">Every shift. Right on time.</div>
+      <div className="splash-slogan">{t("splash.slogan")}</div>
     </div>
   );
 }
