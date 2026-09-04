@@ -31,6 +31,16 @@ function dateKey(d: Date): string {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 
+// Combines another day's date with the time-of-day from a datetime-local
+// value, so "repeat on" days reuse the same start/end time picked once.
+function withDate(datetimeLocal: string, day: Date): string {
+  const timePart = datetimeLocal.split("T")[1] ?? "00:00";
+  const y = day.getFullYear();
+  const m = String(day.getMonth() + 1).padStart(2, "0");
+  const d = String(day.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}T${timePart}`;
+}
+
 export default function RosterSection() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -41,6 +51,7 @@ export default function RosterSection() {
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
   const [breakMinutes, setBreakMinutes] = useState("");
+  const [repeatDays, setRepeatDays] = useState<Set<number>>(new Set());
   const [removeTarget, setRemoveTarget] = useState<RosterEntry | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -91,20 +102,57 @@ export default function RosterSection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reports, user]);
 
+  function toggleRepeatDay(dow: number) {
+    setRepeatDays((prev) => {
+      const next = new Set(prev);
+      if (next.has(dow)) next.delete(dow);
+      else next.add(dow);
+      return next;
+    });
+  }
+
   async function handleAssign(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setMessage(null);
+
+    const targetDays =
+      repeatDays.size > 0 ? weekDays.filter((d) => repeatDays.has(d.getDay())) : null;
+
     try {
-      await api.createShiftForReport(Number(assignee), {
-        startsAt: toIso(startsAt),
-        endsAt: toIso(endsAt),
-        breakMinutes: breakMinutes ? Number(breakMinutes) : undefined,
-      });
+      if (!targetDays) {
+        await api.createShiftForReport(Number(assignee), {
+          startsAt: toIso(startsAt),
+          endsAt: toIso(endsAt),
+          breakMinutes: breakMinutes ? Number(breakMinutes) : undefined,
+        });
+        setMessage(t("adminRoster.shiftAssigned"));
+      } else {
+        const results = await Promise.allSettled(
+          targetDays.map((day) =>
+            api.createShiftForReport(Number(assignee), {
+              startsAt: toIso(withDate(startsAt, day)),
+              endsAt: toIso(withDate(endsAt, day)),
+              breakMinutes: breakMinutes ? Number(breakMinutes) : undefined,
+            }),
+          ),
+        );
+        const succeeded = results.filter((r) => r.status === "fulfilled").length;
+        const failedDays = targetDays.filter((_, i) => results[i].status === "rejected");
+        if (succeeded > 0) {
+          setMessage(t("adminRoster.shiftsAssigned", { count: succeeded }));
+        }
+        if (failedDays.length > 0) {
+          const dayNames = failedDays
+            .map((d) => d.toLocaleDateString(getDateLocale(), { weekday: "short" }))
+            .join(", ");
+          setError(t("adminRoster.assignPartialFailed", { days: dayNames }));
+        }
+      }
       setStartsAt("");
       setEndsAt("");
       setBreakMinutes("");
-      setMessage(t("adminRoster.shiftAssigned"));
+      setRepeatDays(new Set());
       loadRoster();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("adminRoster.assignFailed"));
@@ -208,6 +256,32 @@ export default function RosterSection() {
               ))}
             </select>
           </label>
+          <div className="field day-toggle-field">
+            <span className="field-label">{t("adminRoster.repeatOn")}</span>
+            <div className="day-toggle-row">
+              {weekDays.map((d) => (
+                <button
+                  key={dateKey(d)}
+                  type="button"
+                  className={`day-toggle-btn${repeatDays.has(d.getDay()) ? " active" : ""}`}
+                  onClick={() => toggleRepeatDay(d.getDay())}
+                >
+                  {d.toLocaleDateString(getDateLocale(), { weekday: "narrow" })}
+                </button>
+              ))}
+              <button
+                type="button"
+                className="day-toggle-all"
+                onClick={() =>
+                  setRepeatDays((prev) =>
+                    prev.size === 7 ? new Set() : new Set(weekDays.map((d) => d.getDay())),
+                  )
+                }
+              >
+                {t("adminRoster.wholeWeek")}
+              </button>
+            </div>
+          </div>
           <button type="submit">{t("adminRoster.assign")}</button>
         </form>
         {message && <div className="success">{message}</div>}
