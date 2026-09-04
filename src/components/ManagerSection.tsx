@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { api, ApiError } from "../api/client";
-import type { Contract, UserSummary } from "../api/types";
+import type { Contract, Payslip, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "./ConfirmDialog";
 import Avatar from "./Avatar";
@@ -23,6 +23,13 @@ export default function ManagerSection() {
   const [role, setRole] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [reuploadFiles, setReuploadFiles] = useState<Record<number, File | null>>({});
+
+  // Payslip management
+  const [payslipReport, setPayslipReport] = useState("");
+  const [payslips, setPayslips] = useState<Payslip[]>([]);
+  const [period, setPeriod] = useState("");
+  const [payslipPdfFile, setPayslipPdfFile] = useState<File | null>(null);
+  const [payslipReuploadFiles, setPayslipReuploadFiles] = useState<Record<number, File | null>>({});
 
   function loadReports() {
     api.listReports().then(setReports).catch(() => {});
@@ -131,6 +138,70 @@ export default function ManagerSection() {
     loadContracts(userId);
   }
 
+  function loadPayslips(userId: number) {
+    api.listPayslipsForReport(userId).then(setPayslips).catch(() => {});
+  }
+
+  useEffect(() => {
+    if (payslipReport) {
+      loadPayslips(Number(payslipReport));
+    } else {
+      setPayslips([]);
+    }
+  }, [payslipReport]);
+
+  async function handleCreatePayslip(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setMessage(null);
+    try {
+      const userId = Number(payslipReport);
+      const payslip = await api.createPayslipForReport(userId, { period });
+      if (payslipPdfFile) {
+        await api.uploadPayslipPdfForReport(userId, payslip.id, payslipPdfFile);
+      }
+      setPeriod("");
+      setPayslipPdfFile(null);
+      loadPayslips(userId);
+      setMessage("Payslip created.");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to create payslip");
+    }
+  }
+
+  async function handleUploadPayslipPdf(payslipId: number) {
+    const userId = Number(payslipReport);
+    const file = payslipReuploadFiles[payslipId];
+    if (!file) return;
+    setError(null);
+    try {
+      await api.uploadPayslipPdfForReport(userId, payslipId, file);
+      setPayslipReuploadFiles({ ...payslipReuploadFiles, [payslipId]: null });
+      loadPayslips(userId);
+      setMessage("Payslip PDF uploaded.");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to upload PDF");
+    }
+  }
+
+  async function handleViewPayslipPdf(payslipId: number) {
+    const userId = Number(payslipReport);
+    setError(null);
+    try {
+      const blob = await api.getPayslipPdfForReport(userId, payslipId);
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to open payslip");
+    }
+  }
+
+  async function handleDeletePayslip(payslipId: number) {
+    const userId = Number(payslipReport);
+    await api.deletePayslipForReport(userId, payslipId);
+    loadPayslips(userId);
+  }
+
   return (
     <section className="panel">
       <h2>Manage team</h2>
@@ -230,6 +301,71 @@ export default function ManagerSection() {
               onChange={(e) => setPdfFile(e.target.files?.[0] ?? null)}
             />
             <button type="submit">Create contract</button>
+          </form>
+
+          {message && <div className="success">{message}</div>}
+          {error && <div className="error">{error}</div>}
+        </>
+      )}
+
+      <h3>Manage payslips</h3>
+      <div className="inline-form">
+        <select value={payslipReport} onChange={(e) => setPayslipReport(e.target.value)}>
+          <option value="">Select employee</option>
+          {user && <option value={user.id}>{user.name} (you)</option>}
+          {reports.map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      {payslipReport && (
+        <>
+          <ul className="list">
+            {payslips.map((p) => (
+              <li key={p.id}>
+                <span>
+                  <strong>{p.period}</strong>
+                  {!p.pdfFilename && " — no PDF uploaded"}
+                </span>
+                <span className="actions">
+                  {p.pdfFilename && (
+                    <button onClick={() => handleViewPayslipPdf(p.id)}>View PDF</button>
+                  )}
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={(e) =>
+                      setPayslipReuploadFiles({
+                        ...payslipReuploadFiles,
+                        [p.id]: e.target.files?.[0] ?? null,
+                      })
+                    }
+                  />
+                  <button onClick={() => handleUploadPayslipPdf(p.id)}>
+                    {p.pdfFilename ? "Replace PDF" : "Upload PDF"}
+                  </button>
+                  <button onClick={() => handleDeletePayslip(p.id)}>Delete</button>
+                </span>
+              </li>
+            ))}
+            {payslips.length === 0 && <li className="empty">No payslips yet.</li>}
+          </ul>
+
+          <form className="inline-form" onSubmit={handleCreatePayslip}>
+            <input
+              placeholder="Pay period (e.g. August 2026)"
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              required
+            />
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => setPayslipPdfFile(e.target.files?.[0] ?? null)}
+            />
+            <button type="submit">Create payslip</button>
           </form>
 
           {message && <div className="success">{message}</div>}

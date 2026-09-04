@@ -6,6 +6,7 @@ import type {
   LoginResponse,
   Notification,
   PasswordResetRequest,
+  Payslip,
   Shift,
   User,
   UserSummary,
@@ -141,6 +142,28 @@ export const api = {
     requestBlob(`/api/users/${userId}/contracts/${contractId}/pdf`),
   deleteContractForReport: (userId: number, contractId: number) =>
     request<void>(`/api/users/${userId}/contracts/${contractId}`, { method: "DELETE" }),
+
+  listPayslips: () => request<Payslip[]>("/api/payslips"),
+  getPayslipPdf: (payslipId: number) => requestBlob(`/api/payslips/${payslipId}/pdf`),
+
+  listPayslipsForReport: (userId: number) => request<Payslip[]>(`/api/users/${userId}/payslips`),
+  createPayslipForReport: (userId: number, data: { period: string }) =>
+    request<Payslip>(`/api/users/${userId}/payslips`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  uploadPayslipPdfForReport: (userId: number, payslipId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("pdf", file);
+    return request<Payslip>(`/api/users/${userId}/payslips/${payslipId}/pdf`, {
+      method: "POST",
+      body: formData,
+    });
+  },
+  getPayslipPdfForReport: (userId: number, payslipId: number) =>
+    requestBlob(`/api/users/${userId}/payslips/${payslipId}/pdf`),
+  deletePayslipForReport: (userId: number, payslipId: number) =>
+    request<void>(`/api/users/${userId}/payslips/${payslipId}`, { method: "DELETE" }),
 
   listShifts: () => request<Shift[]>("/api/shifts"),
 

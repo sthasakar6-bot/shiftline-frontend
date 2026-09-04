@@ -5,6 +5,7 @@ import { useAuth } from "../auth/AuthContext";
 import { api, ApiError } from "../api/client";
 import Avatar from "../components/Avatar";
 import ContractsSection from "../components/ContractsSection";
+import PayslipsSection from "../components/PayslipsSection";
 import type { Attendance, LeaveRequest } from "../api/types";
 import { parseIsoDateLocal } from "../lib/dateOnly";
 
@@ -162,6 +163,7 @@ export default function ProfilePage() {
         </section>
 
         <ContractsSection />
+        <PayslipsSection />
       </main>
     </div>
   );

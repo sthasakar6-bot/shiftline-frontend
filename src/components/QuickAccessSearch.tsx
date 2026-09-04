@@ -46,7 +46,12 @@ const ITEMS: QuickAccessItem[] = [
     icon: Bell,
     path: "/?tab=notifications",
   },
-  { label: "My Profile", description: "Photo, stats, contracts", icon: UserIcon, path: "/profile" },
+  {
+    label: "My Profile",
+    description: "Photo, stats, contracts, payslips",
+    icon: UserIcon,
+    path: "/profile",
+  },
   {
     label: "Administration",
     description: "Manager dashboard",
@@ -56,7 +61,7 @@ const ITEMS: QuickAccessItem[] = [
   },
   {
     label: "Manage Team",
-    description: "Add/remove employees, contracts",
+    description: "Add/remove employees, contracts, payslips",
     icon: Users,
     path: "/admin?tab=team",
     managerOnly: true,
@@ -94,6 +99,13 @@ const ITEMS: QuickAccessItem[] = [
     description: "Hours worked and CSV export",
     icon: BarChart3,
     path: "/admin?tab=summary",
+    managerOnly: true,
+  },
+  {
+    label: "Admin Alerts",
+    description: "Leave requests and other manager notifications",
+    icon: Bell,
+    path: "/admin?tab=alerts",
     managerOnly: true,
   },
 ];

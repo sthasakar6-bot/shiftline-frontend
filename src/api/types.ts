@@ -22,6 +22,15 @@ export interface Contract {
   updatedAt: string;
 }
 
+export interface Payslip {
+  id: number;
+  period: string;
+  pdfFilename: string | null;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Shift {
   id: number;
   userId: number;

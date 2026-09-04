@@ -12,6 +12,7 @@ import NotificationsSection from "../components/NotificationsSection";
 import LeaveSection from "../components/LeaveSection";
 import { api } from "../api/client";
 import type { Notification } from "../api/types";
+import { updateAppBadge } from "../lib/appBadge";
 
 const tabKeys = ["home", "roster", "attendance", "leave", "notifications"];
 
@@ -40,6 +41,10 @@ export default function DashboardPage() {
   }, [searchParams]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  useEffect(() => {
+    updateAppBadge(unreadCount);
+  }, [unreadCount]);
 
   const tabs: Tab[] = [
     { key: "home", label: "Home", icon: Home },
