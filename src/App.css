@@ -916,6 +916,7 @@
 
 .list li {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
   gap: 8px;
@@ -929,7 +930,8 @@
 }
 
 .list li > span:first-child {
-  min-width: 0;
+  flex: 1;
+  min-width: 120px;
   overflow-wrap: break-word;
 }
 
@@ -1477,8 +1479,14 @@
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 6px;
   flex-shrink: 0;
+}
+
+.actions input[type="file"] {
+  max-width: 160px;
 }
 
 .error {
