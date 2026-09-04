@@ -163,6 +163,10 @@ export default {
     cancelled: "geannuleerd",
     requestFailed: "Verlof aanvragen is mislukt",
     cancelFailed: "Annuleren is mislukt",
+    delete: "Verwijderen",
+    deleteFailed: "Verwijderen is mislukt",
+    clearAll: "Alles wissen",
+    clearAllFailed: "Geschiedenis wissen is mislukt",
   },
   notifications: {
     title: "Meldingen",

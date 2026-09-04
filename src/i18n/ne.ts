@@ -164,6 +164,10 @@ export default {
     cancelled: "रद्द गरिएको",
     requestFailed: "बिदा अनुरोध गर्न असफल भयो",
     cancelFailed: "रद्द गर्न असफल भयो",
+    delete: "मेट्नुहोस्",
+    deleteFailed: "मेट्न असफल भयो",
+    clearAll: "सबै हटाउनुहोस्",
+    clearAllFailed: "इतिहास हटाउन असफल भयो",
   },
   notifications: {
     title: "सूचनाहरू",

@@ -163,6 +163,10 @@ export default {
     cancelled: "cancelled",
     requestFailed: "Failed to request leave",
     cancelFailed: "Failed to cancel",
+    delete: "Delete",
+    deleteFailed: "Failed to delete",
+    clearAll: "Clear all",
+    clearAllFailed: "Failed to clear history",
   },
   notifications: {
     title: "Notifications",
