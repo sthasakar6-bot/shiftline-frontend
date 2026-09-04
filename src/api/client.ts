@@ -186,15 +186,15 @@ export const api = {
     request<void>(`/api/users/${userId}/shifts/${shiftId}`, { method: "DELETE" }),
 
   listAttendance: () => request<Attendance[]>("/api/attendance"),
-  clockIn: (shiftId: number, coords?: { lat: number; lng: number }) =>
+  clockIn: (shiftId: number, coords?: { lat: number; lng: number }, clockedAt?: string) =>
     request<Attendance>("/api/attendance/clock-in", {
       method: "POST",
-      body: JSON.stringify({ shiftId, ...coords }),
+      body: JSON.stringify({ shiftId, ...coords, clockedAt }),
     }),
-  clockOut: (id: number, coords?: { lat: number; lng: number }) =>
+  clockOut: (id: number, coords?: { lat: number; lng: number }, clockedAt?: string) =>
     request<Attendance>(`/api/attendance/${id}/clock-out`, {
       method: "POST",
-      body: JSON.stringify(coords ?? {}),
+      body: JSON.stringify({ ...coords, clockedAt }),
     }),
   listAttendanceForReport: (userId: number) =>
     request<Attendance[]>(`/api/users/${userId}/attendance`),

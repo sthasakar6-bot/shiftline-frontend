@@ -444,6 +444,30 @@
   color: var(--accent);
 }
 
+.offline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: none;
+  margin-left: 6px;
+}
+
+.offline-banner {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: calc(8px + env(safe-area-inset-top)) 16px 8px;
+  background: #92400e;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: center;
+}
+
 .status-badge.accepted,
 .status-badge.approved {
   background: var(--success-bg);

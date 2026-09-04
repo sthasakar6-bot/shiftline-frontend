@@ -1,11 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Clock } from "lucide-react";
+import { Clock, WifiOff } from "lucide-react";
 import { api, ApiError } from "../api/client";
-import type { Attendance, Shift } from "../api/types";
+import type { Shift } from "../api/types";
 import { formatDateTime, formatTime, formatDuration } from "../lib/formatDate";
 import { getDateLocale } from "../i18n";
 import { getCurrentCoords } from "../lib/geolocation";
+import {
+  getPendingAttendance,
+  mergeAttendance,
+  queueClockIn,
+  queueClockOut,
+  queueClockOutForServerRecord,
+  watchForSync,
+  type DisplayAttendance,
+} from "../lib/offlineAttendance";
 import ConfirmDialog from "./ConfirmDialog";
 import { SkeletonLine, SkeletonRows } from "./Skeleton";
 
@@ -49,7 +58,7 @@ function ClockFace({ now }: { now: Date }) {
 
 export default function AttendanceSection() {
   const { t } = useTranslation();
-  const [records, setRecords] = useState<Attendance[]>([]);
+  const [records, setRecords] = useState<DisplayAttendance[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [shiftId, setShiftId] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +66,11 @@ export default function AttendanceSection() {
   const [now, setNow] = useState(new Date());
   const [confirmAction, setConfirmAction] = useState<"in" | "out" | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pendingTick, setPendingTick] = useState(0);
+
+  function bumpPending() {
+    setPendingTick((n) => n + 1);
+  }
 
   function load() {
     Promise.all([
@@ -67,20 +81,30 @@ export default function AttendanceSection() {
 
   useEffect(load, []);
 
+  useEffect(() => watchForSync(load), []);
+
+  const displayRecords = useMemo(
+    () => mergeAttendance(records, getPendingAttendance()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [records, pendingTick],
+  );
+
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const openRecord = records.find((r) => !r.clockOut);
-  const pastRecords = records
+  const openRecord = displayRecords.find((r) => !r.clockOut);
+  const pastRecords = displayRecords
     .filter((r) => r.id !== openRecord?.id)
     .sort((a, b) => {
       const aTime = a.clockIn ? new Date(a.clockIn).getTime() : 0;
       const bTime = b.clockIn ? new Date(b.clockIn).getTime() : 0;
       return bTime - aTime;
     });
-  const completedShiftIds = new Set(records.filter((r) => r.clockOut).map((r) => r.shiftId));
+  const completedShiftIds = new Set(
+    displayRecords.filter((r) => r.clockOut).map((r) => r.shiftId),
+  );
   const clockableShifts = shifts
     .filter((s) => !completedShiftIds.has(s.id))
     .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
@@ -106,13 +130,19 @@ export default function AttendanceSection() {
     setConfirmAction(null);
     setError(null);
     setBusy(true);
+    const coords = await getCurrentCoords();
     try {
-      const coords = await getCurrentCoords();
       await api.clockIn(Number(effectiveShiftId), coords);
       setShiftId("");
       load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("attendance.clockInFailed"));
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        queueClockIn(Number(effectiveShiftId), coords);
+        setShiftId("");
+        bumpPending();
+      }
     } finally {
       setBusy(false);
     }
@@ -123,12 +153,22 @@ export default function AttendanceSection() {
     setConfirmAction(null);
     setError(null);
     setBusy(true);
+    const coords = await getCurrentCoords();
     try {
-      const coords = await getCurrentCoords();
-      await api.clockOut(openRecord.id, coords);
-      load();
+      if (openRecord.id < 0 && openRecord.localId) {
+        queueClockOut(openRecord.localId, coords);
+        bumpPending();
+      } else {
+        await api.clockOut(openRecord.id, coords);
+        load();
+      }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("attendance.clockOutFailed"));
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else if (openRecord.clockIn) {
+        queueClockOutForServerRecord(openRecord.id, openRecord.shiftId, openRecord.clockIn, coords);
+        bumpPending();
+      }
     } finally {
       setBusy(false);
     }
@@ -169,6 +209,11 @@ export default function AttendanceSection() {
           <span className="shift-status-pill in">
             <span className="presence-dot" /> {t("home.clockedIn")}
           </span>
+          {openRecord.pending && (
+            <span className="status-badge pending offline-badge">
+              <WifiOff size={11} /> {t("attendance.pendingSync")}
+            </span>
+          )}
           <button
             className="shift-clock-btn out"
             onClick={() => setConfirmAction("out")}
@@ -253,6 +298,11 @@ export default function AttendanceSection() {
                         })
                       : t("attendance.unknownDate")}
                   </strong>
+                  {r.pending && (
+                    <span className="status-badge pending offline-badge">
+                      <WifiOff size={10} /> {t("attendance.pendingSync")}
+                    </span>
+                  )}
                   <br />
                   {r.clockIn ? formatTime(r.clockIn) : "-"} –{" "}
                   {r.clockOut ? formatTime(r.clockOut) : "-"}

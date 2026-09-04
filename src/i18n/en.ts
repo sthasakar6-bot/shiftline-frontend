@@ -18,6 +18,7 @@ export default {
     roleEmployee: "employee",
     roleManager: "manager",
     justNow: "Just now",
+    offlineBanner: "You're offline — actions like clock in/out will sync automatically once you're back online.",
     minAgo: "{{n}}m ago",
     hourAgo: "{{n}}h ago",
     dayAgo: "{{n}}d ago",
@@ -140,6 +141,8 @@ export default {
     clockInNow: "Clock in now?",
     clockOutQuestion: "Clock out?",
     clockOutConfirmMessage: "Are you sure you want to clock out? This will end your current shift.",
+    pendingSync: "Pending sync",
+    offlineClockedIn: "Recorded offline — will sync automatically once you're back online.",
   },
   leave: {
     title: "Leave Requests",

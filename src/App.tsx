@@ -11,6 +11,7 @@ import ProfilePage from "./pages/ProfilePage";
 import PullToRefresh from "./components/PullToRefresh";
 import SplashScreen from "./components/SplashScreen";
 import ButtonRipple from "./components/ButtonRipple";
+import OfflineBanner from "./components/OfflineBanner";
 import "./App.css";
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
     <BrowserRouter>
       <SplashScreen />
       <ButtonRipple />
+      <OfflineBanner />
       <AuthProvider>
         <PullToRefresh>
           <Routes>

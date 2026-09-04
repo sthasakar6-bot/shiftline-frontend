@@ -18,6 +18,7 @@ export default {
     roleEmployee: "medewerker",
     roleManager: "manager",
     justNow: "Zojuist",
+    offlineBanner: "Je bent offline — acties zoals in-/uitklokken synchroniseren automatisch zodra je weer online bent.",
     minAgo: "{{n}}m geleden",
     hourAgo: "{{n}}u geleden",
     dayAgo: "{{n}}d geleden",
@@ -140,6 +141,8 @@ export default {
     clockInNow: "Nu inklokken?",
     clockOutQuestion: "Uitklokken?",
     clockOutConfirmMessage: "Weet je zeker dat je wilt uitklokken? Dit beëindigt je huidige dienst.",
+    pendingSync: "Synchronisatie in behandeling",
+    offlineClockedIn: "Offline geregistreerd — synchroniseert automatisch zodra je weer online bent.",
   },
   leave: {
     title: "Verlofaanvragen",

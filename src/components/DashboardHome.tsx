@@ -1,14 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Clock, Palmtree } from "lucide-react";
+import { Clock, Palmtree, WifiOff } from "lucide-react";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import Avatar from "./Avatar";
 import { SkeletonLine } from "./Skeleton";
-import type { Attendance, LeaveRequest, Shift } from "../api/types";
+import type { LeaveRequest, Shift } from "../api/types";
 import { formatTime } from "../lib/formatDate";
 import { getDateLocale } from "../i18n";
 import { formatLocalDate, parseIsoDateLocal, todayLocal } from "../lib/dateOnly";
+import {
+  getPendingAttendance,
+  mergeAttendance,
+  watchForSync,
+  type DisplayAttendance,
+} from "../lib/offlineAttendance";
 
 function formatElapsed(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -21,19 +27,24 @@ function formatElapsed(ms: number): string {
 export default function DashboardHome() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [records, setRecords] = useState<Attendance[]>([]);
+  const [records, setRecords] = useState<DisplayAttendance[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
   const [now, setNow] = useState(new Date());
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  function load() {
     Promise.all([
       api.listAttendance().then(setRecords).catch(() => {}),
       api.listShifts().then(setShifts).catch(() => {}),
       api.listLeaveRequests().then(setLeaveRequests).catch(() => {}),
     ]).finally(() => setLoading(false));
-  }, []);
+  }
+
+  useEffect(load, []);
+  useEffect(() => watchForSync(load), []);
+
+  const displayRecords = useMemo(() => mergeAttendance(records, getPendingAttendance()), [records]);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
@@ -47,8 +58,10 @@ export default function DashboardHome() {
     return t("home.goodEvening");
   }
 
-  const openRecord = records.find((r) => !r.clockOut);
-  const completedShiftIds = new Set(records.filter((r) => r.clockOut).map((r) => r.shiftId));
+  const openRecord = displayRecords.find((r) => !r.clockOut);
+  const completedShiftIds = new Set(
+    displayRecords.filter((r) => r.clockOut).map((r) => r.shiftId),
+  );
   const clockableShifts = shifts
     .filter((s) => !completedShiftIds.has(s.id))
     .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
@@ -119,6 +132,11 @@ export default function DashboardHome() {
           <span className="shift-status-pill in">
             <span className="presence-dot" /> {t("home.clockedIn")}
           </span>
+          {openRecord.pending && (
+            <span className="status-badge pending offline-badge">
+              <WifiOff size={11} /> {t("attendance.pendingSync")}
+            </span>
+          )}
         </section>
       ) : featuredShift ? (
         <section className="panel shift-card">
