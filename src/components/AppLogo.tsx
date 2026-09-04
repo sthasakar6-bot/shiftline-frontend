@@ -3,6 +3,7 @@ export default function AppLogo() {
     <div className="app-logo">
       <img className="app-logo-icon" src="/icon-192.png" alt="Shiftline" />
       <span className="app-logo-text">Shiftline</span>
+      <span className="app-logo-business">Super Sushi</span>
     </div>
   );
 }
