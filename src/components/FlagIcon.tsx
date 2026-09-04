@@ -25,17 +25,22 @@ export default function FlagIcon({ lang, size = 18 }: { lang: SupportedLanguage;
     );
   }
 
-  // Nepal: not a rectangle, so give it its own square-ish viewBox rather than
-  // forcing the crimson pennant into a 4:3 box like the other two flags.
+  // Nepal: not a rectangle, so give it its own taller viewBox rather than
+  // forcing the crimson double-pennant into a 4:3 box like the other two
+  // flags. The moon (upper pennant) and sun (lower pennant) are what
+  // actually make it read as Nepal's flag, not just the pennant outline.
   return (
-    <svg viewBox="0 0 18 20" style={{ ...style, width: (size * 3) / 4 }} aria-hidden="true">
+    <svg viewBox="0 0 20 24" style={{ ...style, width: (size * 5) / 6 }} aria-hidden="true">
       <path
-        d="M2,1 L2,19 L11,13 L11,19 L17,8 L9,1.5 L9,7 Z"
+        d="M0,0 L20,8.4 L10,13.2 L17,19.2 L0,24 Z"
         fill="#DC143C"
         stroke="#003893"
-        strokeWidth="1.4"
+        strokeWidth="1.6"
         strokeLinejoin="round"
       />
+      <circle cx="6.6" cy="6.2" r="2" fill="#fff" />
+      <circle cx="7.8" cy="5.3" r="1.7" fill="#DC143C" />
+      <circle cx="8.8" cy="17.2" r="2.6" fill="#fff" />
     </svg>
   );
 }
