@@ -510,6 +510,9 @@
   color: var(--text);
   opacity: 0.6;
   font-size: 11px;
+  /* The unread-count badge on .tab-icon intentionally overflows its corner --
+     don't let the global button ripple clip (button { overflow: hidden }) hide it. */
+  overflow: visible;
 }
 
 .tab-bar button.active {
@@ -2432,4 +2435,141 @@
   font-size: 12px;
   opacity: 0.75;
   margin-top: 2px;
+}
+
+/* ---- Button press ripple (injected by ButtonRipple.tsx) ---- */
+
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.28;
+  transform: scale(0);
+  animation: btn-ripple-anim 480ms ease-out;
+  pointer-events: none;
+}
+
+@keyframes btn-ripple-anim {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* ---- Page/tab content transition ---- */
+
+.app-content > *,
+.auth-form,
+.auth-form.wide {
+  animation: page-fade-in 260ms ease-out both;
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Slide-up modals ---- */
+
+.modal-overlay {
+  animation: modal-overlay-in 180ms ease-out both;
+}
+
+@keyframes modal-overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.modal {
+  animation: modal-slide-up 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes modal-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Loading skeletons ---- */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    var(--accent-bg) 37%,
+    var(--border) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+.skeleton-line {
+  height: 12px;
+  margin-bottom: 8px;
+}
+
+.skeleton-line:last-child {
+  margin-bottom: 0;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.skeleton-row:last-child {
+  border-bottom: none;
+}
+
+.skeleton-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeleton-row-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.skeleton-card {
+  padding: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-ripple,
+  .app-content > *,
+  .auth-form,
+  .auth-form.wide,
+  .modal-overlay,
+  .modal,
+  .skeleton {
+    animation: none !important;
+  }
 }

@@ -4,6 +4,7 @@ import { api, ApiError } from "../api/client";
 import type { LeaveRequest } from "../api/types";
 import { formatDateOnly } from "../lib/dateOnly";
 import DateRangePicker from "./DateRangePicker";
+import { SkeletonRows } from "./Skeleton";
 
 export default function LeaveSection() {
   const { t } = useTranslation();
@@ -13,9 +14,14 @@ export default function LeaveSection() {
   const [endDate, setEndDate] = useState("");
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   function load() {
-    api.listLeaveRequests().then(setRequests).catch(() => {});
+    api
+      .listLeaveRequests()
+      .then(setRequests)
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }
 
   useEffect(load, []);
@@ -130,28 +136,32 @@ export default function LeaveSection() {
       </div>
 
       <ul className="list">
-        {sortedRequests.map((r) => (
-          <li key={r.id}>
-            <span>
-              <span className={`type-badge ${r.type}`}>{t(`leave.${r.type}`)}</span>{" "}
-              <span className={`status-badge ${r.status}`}>{t(`leave.${r.status}`)}</span>
-              <br />
-              {formatDateOnly(r.startDate)} → {formatDateOnly(r.endDate)}
-              {r.reason && <> · {r.reason}</>}
-            </span>
-            {r.status === "pending" && (
-              <span className="actions">
-                <button onClick={() => handleCancel(r.id)}>{t("common.cancel")}</button>
+        {loading && <SkeletonRows count={3} avatar={false} />}
+        {!loading &&
+          sortedRequests.map((r) => (
+            <li key={r.id}>
+              <span>
+                <span className={`type-badge ${r.type}`}>{t(`leave.${r.type}`)}</span>{" "}
+                <span className={`status-badge ${r.status}`}>{t(`leave.${r.status}`)}</span>
+                <br />
+                {formatDateOnly(r.startDate)} → {formatDateOnly(r.endDate)}
+                {r.reason && <> · {r.reason}</>}
               </span>
-            )}
-            {(r.status === "rejected" || r.status === "cancelled") && (
-              <span className="actions">
-                <button onClick={() => handleDelete(r.id)}>{t("leave.delete")}</button>
-              </span>
-            )}
-          </li>
-        ))}
-        {sortedRequests.length === 0 && <li className="empty">{t("leave.noRequests")}</li>}
+              {r.status === "pending" && (
+                <span className="actions">
+                  <button onClick={() => handleCancel(r.id)}>{t("common.cancel")}</button>
+                </span>
+              )}
+              {(r.status === "rejected" || r.status === "cancelled") && (
+                <span className="actions">
+                  <button onClick={() => handleDelete(r.id)}>{t("leave.delete")}</button>
+                </span>
+              )}
+            </li>
+          ))}
+        {!loading && sortedRequests.length === 0 && (
+          <li className="empty">{t("leave.noRequests")}</li>
+        )}
       </ul>
     </section>
   );

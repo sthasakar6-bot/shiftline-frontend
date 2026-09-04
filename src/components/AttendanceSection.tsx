@@ -7,6 +7,7 @@ import { formatDateTime, formatTime, formatDuration } from "../lib/formatDate";
 import { getDateLocale } from "../i18n";
 import { getCurrentCoords } from "../lib/geolocation";
 import ConfirmDialog from "./ConfirmDialog";
+import { SkeletonLine, SkeletonRows } from "./Skeleton";
 
 function formatElapsed(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -55,10 +56,13 @@ export default function AttendanceSection() {
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(new Date());
   const [confirmAction, setConfirmAction] = useState<"in" | "out" | null>(null);
+  const [loading, setLoading] = useState(true);
 
   function load() {
-    api.listAttendance().then(setRecords).catch(() => {});
-    api.listShifts().then(setShifts).catch(() => {});
+    Promise.all([
+      api.listAttendance().then(setRecords).catch(() => {}),
+      api.listShifts().then(setShifts).catch(() => {}),
+    ]).finally(() => setLoading(false));
   }
 
   useEffect(load, []);
@@ -136,7 +140,13 @@ export default function AttendanceSection() {
     <>
       <h2>{t("attendance.title")}</h2>
 
-      {openRecord ? (
+      {loading ? (
+        <section className="panel skeleton-card">
+          <SkeletonLine width="45%" />
+          <SkeletonLine width="65%" />
+          <SkeletonLine width="30%" />
+        </section>
+      ) : openRecord ? (
         <section className="panel shift-card">
           <h3 className="shift-card-title">{t("home.currentShift")}</h3>
           <div className="shift-card-date">
@@ -229,31 +239,38 @@ export default function AttendanceSection() {
 
         <h3>{t("attendance.history")}</h3>
         <ul className="list">
-          {pastRecords.map((r) => (
-            <li key={r.id}>
-              <span>
-                <strong>
-                  {r.clockIn
-                    ? new Date(r.clockIn).toLocaleDateString(getDateLocale(), {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : t("attendance.unknownDate")}
-                </strong>
-                <br />
-                {r.clockIn ? formatTime(r.clockIn) : "-"} – {r.clockOut ? formatTime(r.clockOut) : "-"}
-                {r.clockIn && r.clockOut && (
-                  <>
-                    {" "}
-                    ·{" "}
-                    {formatDuration(new Date(r.clockOut).getTime() - new Date(r.clockIn).getTime())}
-                  </>
-                )}
-              </span>
-            </li>
-          ))}
-          {pastRecords.length === 0 && <li className="empty">{t("attendance.noHistory")}</li>}
+          {loading && <SkeletonRows count={3} avatar={false} />}
+          {!loading &&
+            pastRecords.map((r) => (
+              <li key={r.id}>
+                <span>
+                  <strong>
+                    {r.clockIn
+                      ? new Date(r.clockIn).toLocaleDateString(getDateLocale(), {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : t("attendance.unknownDate")}
+                  </strong>
+                  <br />
+                  {r.clockIn ? formatTime(r.clockIn) : "-"} –{" "}
+                  {r.clockOut ? formatTime(r.clockOut) : "-"}
+                  {r.clockIn && r.clockOut && (
+                    <>
+                      {" "}
+                      ·{" "}
+                      {formatDuration(
+                        new Date(r.clockOut).getTime() - new Date(r.clockIn).getTime(),
+                      )}
+                    </>
+                  )}
+                </span>
+              </li>
+            ))}
+          {!loading && pastRecords.length === 0 && (
+            <li className="empty">{t("attendance.noHistory")}</li>
+          )}
         </ul>
       </section>
 

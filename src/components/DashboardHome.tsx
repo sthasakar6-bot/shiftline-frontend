@@ -4,8 +4,10 @@ import { Clock, Palmtree } from "lucide-react";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import Avatar from "./Avatar";
+import { SkeletonLine } from "./Skeleton";
 import type { Attendance, LeaveRequest, Shift } from "../api/types";
 import { formatTime } from "../lib/formatDate";
+import { getDateLocale } from "../i18n";
 import { formatLocalDate, parseIsoDateLocal, todayLocal } from "../lib/dateOnly";
 
 function formatElapsed(ms: number): string {
@@ -23,11 +25,14 @@ export default function DashboardHome() {
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
   const [now, setNow] = useState(new Date());
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.listAttendance().then(setRecords).catch(() => {});
-    api.listShifts().then(setShifts).catch(() => {});
-    api.listLeaveRequests().then(setLeaveRequests).catch(() => {});
+    Promise.all([
+      api.listAttendance().then(setRecords).catch(() => {}),
+      api.listShifts().then(setShifts).catch(() => {}),
+      api.listLeaveRequests().then(setLeaveRequests).catch(() => {}),
+    ]).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -85,11 +90,21 @@ export default function DashboardHome() {
         </div>
       )}
 
-      {openRecord ? (
+      {loading ? (
+        <section className="panel skeleton-card">
+          <SkeletonLine width="45%" />
+          <SkeletonLine width="65%" />
+          <SkeletonLine width="30%" />
+        </section>
+      ) : openRecord ? (
         <section className="panel shift-card">
           <h3 className="shift-card-title">{t("home.currentShift")}</h3>
           <div className="shift-card-date">
-            {now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+            {now.toLocaleDateString(getDateLocale(), {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}
           </div>
           <div className="shift-card-row">
             <Clock size={16} />
@@ -111,7 +126,7 @@ export default function DashboardHome() {
             {isFeaturedToday ? t("home.todaysShift") : t("home.nextShift")}
           </h3>
           <div className="shift-card-date">
-            {new Date(featuredShift.startsAt).toLocaleDateString(undefined, {
+            {new Date(featuredShift.startsAt).toLocaleDateString(getDateLocale(), {
               weekday: "long",
               month: "long",
               day: "numeric",

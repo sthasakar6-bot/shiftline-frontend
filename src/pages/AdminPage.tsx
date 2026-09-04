@@ -28,9 +28,14 @@ export default function AdminPage() {
     requestedTab && tabKeys.includes(requestedTab) ? requestedTab : "team",
   );
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifLoading, setNotifLoading] = useState(true);
 
   function loadNotifications() {
-    api.listNotifications().then(setNotifications).catch(() => {});
+    api
+      .listNotifications()
+      .then(setNotifications)
+      .catch(() => {})
+      .finally(() => setNotifLoading(false));
   }
 
   useEffect(loadNotifications, []);
@@ -82,7 +87,11 @@ export default function AdminPage() {
         {active === "attendance" && <AttendanceTrackingSection />}
         {active === "summary" && <EmployeeSummarySection />}
         {active === "alerts" && (
-          <NotificationsSection notifications={notifications} onReload={loadNotifications} />
+          <NotificationsSection
+            notifications={notifications}
+            loading={notifLoading}
+            onReload={loadNotifications}
+          />
         )}
       </main>
 

@@ -26,9 +26,14 @@ export default function DashboardPage() {
     requestedTab && tabKeys.includes(requestedTab) ? requestedTab : "home",
   );
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifLoading, setNotifLoading] = useState(true);
 
   function loadNotifications() {
-    api.listNotifications().then(setNotifications).catch(() => {});
+    api
+      .listNotifications()
+      .then(setNotifications)
+      .catch(() => {})
+      .finally(() => setNotifLoading(false));
   }
 
   useEffect(loadNotifications, []);
@@ -74,7 +79,11 @@ export default function DashboardPage() {
         {active === "attendance" && <AttendanceSection />}
         {active === "leave" && <LeaveSection />}
         {active === "notifications" && (
-          <NotificationsSection notifications={notifications} onReload={loadNotifications} />
+          <NotificationsSection
+            notifications={notifications}
+            loading={notifLoading}
+            onReload={loadNotifications}
+          />
         )}
       </main>
 

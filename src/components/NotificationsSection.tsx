@@ -5,6 +5,7 @@ import { CalendarDays, Palmtree, Watch, KeyRound, Bell, X } from "lucide-react";
 import { api } from "../api/client";
 import type { Notification } from "../api/types";
 import { formatRelativeTime } from "../lib/formatDate";
+import { SkeletonRows } from "./Skeleton";
 
 function iconForNotification(n: Notification): ComponentType<{ size?: number }> {
   const text = `${n.message} ${n.url ?? ""}`.toLowerCase();
@@ -17,9 +18,11 @@ function iconForNotification(n: Notification): ComponentType<{ size?: number }> 
 
 export default function NotificationsSection({
   notifications,
+  loading,
   onReload,
 }: {
   notifications: Notification[];
+  loading?: boolean;
   onReload: () => void;
 }) {
   const navigate = useNavigate();
@@ -68,36 +71,40 @@ export default function NotificationsSection({
       </div>
 
       <ul className="notif-list">
-        {notifications.map((n) => {
-          const Icon = iconForNotification(n);
-          return (
-            <li
-              key={n.id}
-              className={`notif-row${n.read ? "" : " unread"}`}
-              onClick={() => handleOpen(n)}
-            >
-              <span className="notif-icon">
-                <Icon size={18} />
-              </span>
-              <div className="notif-body">
-                <span className="notif-message">{n.message}</span>
-                <span className="notif-time">{formatRelativeTime(n.createdAt)}</span>
-              </div>
-              {!n.read && <span className="notif-dot" />}
-              <button
-                className="notif-delete"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  remove(n.id);
-                }}
-                title={t("notifications.delete")}
+        {loading && <SkeletonRows count={4} />}
+        {!loading &&
+          notifications.map((n) => {
+            const Icon = iconForNotification(n);
+            return (
+              <li
+                key={n.id}
+                className={`notif-row${n.read ? "" : " unread"}`}
+                onClick={() => handleOpen(n)}
               >
-                <X size={14} />
-              </button>
-            </li>
-          );
-        })}
-        {notifications.length === 0 && <li className="empty">{t("notifications.empty")}</li>}
+                <span className="notif-icon">
+                  <Icon size={18} />
+                </span>
+                <div className="notif-body">
+                  <span className="notif-message">{n.message}</span>
+                  <span className="notif-time">{formatRelativeTime(n.createdAt)}</span>
+                </div>
+                {!n.read && <span className="notif-dot" />}
+                <button
+                  className="notif-delete"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    remove(n.id);
+                  }}
+                  title={t("notifications.delete")}
+                >
+                  <X size={14} />
+                </button>
+              </li>
+            );
+          })}
+        {!loading && notifications.length === 0 && (
+          <li className="empty">{t("notifications.empty")}</li>
+        )}
       </ul>
     </section>
   );

@@ -10,12 +10,14 @@ import AdminPage from "./pages/AdminPage";
 import ProfilePage from "./pages/ProfilePage";
 import PullToRefresh from "./components/PullToRefresh";
 import SplashScreen from "./components/SplashScreen";
+import ButtonRipple from "./components/ButtonRipple";
 import "./App.css";
 
 function App() {
   return (
     <BrowserRouter>
       <SplashScreen />
+      <ButtonRipple />
       <AuthProvider>
         <PullToRefresh>
           <Routes>

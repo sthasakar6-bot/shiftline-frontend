@@ -6,6 +6,7 @@ import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "./ConfirmDialog";
 import Avatar from "./Avatar";
 import EmployeeDetailModal from "./EmployeeDetailModal";
+import { SkeletonRows } from "./Skeleton";
 
 const PRESENCE_POLL_MS = 15000;
 
@@ -18,6 +19,7 @@ export default function ManagerSection() {
   const [detailTargetId, setDetailTargetId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [employeesLoading, setEmployeesLoading] = useState(true);
 
   // Contract management
   const [contractReport, setContractReport] = useState("");
@@ -38,7 +40,11 @@ export default function ManagerSection() {
   }
 
   function loadEmployees() {
-    api.listEmployees().then(setEmployees).catch(() => {});
+    api
+      .listEmployees()
+      .then(setEmployees)
+      .catch(() => {})
+      .finally(() => setEmployeesLoading(false));
   }
 
   useEffect(loadReports, []);
@@ -208,27 +214,31 @@ export default function ManagerSection() {
     <section className="panel">
       <h2>{t("team.title")}</h2>
       <ul className="list">
-        {employees.map((e) => (
-          <li key={e.id}>
-            <button
-              type="button"
-              className="list-row-identity"
-              onClick={() => setDetailTargetId(e.id)}
-            >
-              <Avatar userId={e.id} name={e.name} hasAvatar={e.hasAvatar} size={32} />
-              {e.name}
-              {e.online && <span className="presence-dot inline" title={t("team.online")} />}
-            </button>
-            <span className="actions">
-              {e.managerId === user?.id ? (
-                <button onClick={() => setRemoveTarget(e)}>{t("team.removeFromTeam")}</button>
-              ) : (
-                <button onClick={() => handleAddToTeam(e.id)}>{t("team.addToTeam")}</button>
-              )}
-            </span>
-          </li>
-        ))}
-        {employees.length === 0 && <li className="empty">{t("team.empty")}</li>}
+        {employeesLoading && <SkeletonRows count={4} />}
+        {!employeesLoading &&
+          employees.map((e) => (
+            <li key={e.id}>
+              <button
+                type="button"
+                className="list-row-identity"
+                onClick={() => setDetailTargetId(e.id)}
+              >
+                <Avatar userId={e.id} name={e.name} hasAvatar={e.hasAvatar} size={32} />
+                {e.name}
+                {e.online && <span className="presence-dot inline" title={t("team.online")} />}
+              </button>
+              <span className="actions">
+                {e.managerId === user?.id ? (
+                  <button onClick={() => setRemoveTarget(e)}>{t("team.removeFromTeam")}</button>
+                ) : (
+                  <button onClick={() => handleAddToTeam(e.id)}>{t("team.addToTeam")}</button>
+                )}
+              </span>
+            </li>
+          ))}
+        {!employeesLoading && employees.length === 0 && (
+          <li className="empty">{t("team.empty")}</li>
+        )}
       </ul>
       {error && <div className="error">{error}</div>}
 
