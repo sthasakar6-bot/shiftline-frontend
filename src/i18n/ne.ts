@@ -343,7 +343,8 @@ export default {
     noShiftsWeek: "यो हप्ता कुनै शिफ्ट तालिका छैन।",
     breakMinSuffix: " · {{min}} मिनेट विश्राम",
     removeShiftQuestion: "यो शिफ्ट हटाउने हो?",
-    removeShiftConfirm: "{{date}} मा {{name}} को शिफ्ट हटाउने हो?",
+    removeShiftConfirm:
+      "{{date}} मा {{name}} को शिफ्ट हटाउने हो? यो शिफ्टको लागि रेकर्ड गरिएको क्लक इन/आउट पनि मेटिनेछ।",
   },
   quickAccess: {
     title: "द्रुत पहुँच",

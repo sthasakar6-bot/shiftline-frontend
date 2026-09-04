@@ -342,7 +342,8 @@ export default {
     noShiftsWeek: "Geen diensten deze week gepland.",
     breakMinSuffix: " · {{min}} min pauze",
     removeShiftQuestion: "Deze dienst verwijderen?",
-    removeShiftConfirm: "Dienst van {{name}} op {{date}} verwijderen?",
+    removeShiftConfirm:
+      "Dienst van {{name}} op {{date}} verwijderen? Eventuele in-/uitkloktijden voor deze dienst worden dan ook verwijderd.",
   },
   quickAccess: {
     title: "Snelle toegang",

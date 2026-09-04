@@ -342,7 +342,8 @@ export default {
     noShiftsWeek: "No shifts scheduled this week.",
     breakMinSuffix: " · {{min}} min break",
     removeShiftQuestion: "Remove this shift?",
-    removeShiftConfirm: "Remove {{name}}'s shift on {{date}}?",
+    removeShiftConfirm:
+      "Remove {{name}}'s shift on {{date}}? Any clock-in/out recorded for this shift will be deleted too.",
   },
   quickAccess: {
     title: "Quick access",
