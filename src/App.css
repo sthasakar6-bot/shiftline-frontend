@@ -1374,6 +1374,26 @@
   margin-bottom: 0;
 }
 
+.roster-grid-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 18px;
+  border-radius: 6px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text);
+  opacity: 0.45;
+}
+
+.roster-grid-add:hover,
+.roster-grid-add:focus-visible {
+  opacity: 1;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .list li.empty {
   color: var(--text);
   opacity: 0.6;

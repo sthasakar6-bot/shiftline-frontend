@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { api, ApiError } from "../api/client";
 import type { Shift, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
@@ -41,6 +41,15 @@ function withDate(datetimeLocal: string, day: Date): string {
   return `${y}-${m}-${d}T${timePart}`;
 }
 
+function toDatetimeLocal(day: Date, hour: number, minute: number): string {
+  const y = day.getFullYear();
+  const m = String(day.getMonth() + 1).padStart(2, "0");
+  const d = String(day.getDate()).padStart(2, "0");
+  const hh = String(hour).padStart(2, "0");
+  const mm = String(minute).padStart(2, "0");
+  return `${y}-${m}-${d}T${hh}:${mm}`;
+}
+
 export default function RosterSection() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -55,6 +64,14 @@ export default function RosterSection() {
   const [removeTarget, setRemoveTarget] = useState<RosterEntry | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [quickAdd, setQuickAdd] = useState<{ userId: number; userName: string; day: Date } | null>(
+    null,
+  );
+  const [qStart, setQStart] = useState("");
+  const [qEnd, setQEnd] = useState("");
+  const [qBreak, setQBreak] = useState("");
+  const [qError, setQError] = useState<string | null>(null);
+  const [qSaving, setQSaving] = useState(false);
 
   const BREAK_OPTIONS = [
     { label: t("adminRoster.breakNone"), value: "" },
@@ -156,6 +173,34 @@ export default function RosterSection() {
       loadRoster();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("adminRoster.assignFailed"));
+    }
+  }
+
+  function openQuickAdd(userId: number, userName: string, day: Date) {
+    setQuickAdd({ userId, userName, day });
+    setQStart(toDatetimeLocal(day, 9, 0));
+    setQEnd(toDatetimeLocal(day, 17, 0));
+    setQBreak("");
+    setQError(null);
+  }
+
+  async function handleQuickAdd(e: FormEvent) {
+    e.preventDefault();
+    if (!quickAdd) return;
+    setQSaving(true);
+    setQError(null);
+    try {
+      await api.createShiftForReport(quickAdd.userId, {
+        startsAt: toIso(qStart),
+        endsAt: toIso(qEnd),
+        breakMinutes: qBreak ? Number(qBreak) : undefined,
+      });
+      setQuickAdd(null);
+      loadRoster();
+    } catch (err) {
+      setQError(err instanceof ApiError ? err.message : t("adminRoster.assignFailed"));
+    } finally {
+      setQSaving(false);
     }
   }
 
@@ -370,6 +415,14 @@ export default function RosterSection() {
                             {compactTime(s.startsAt)}-{compactTime(s.endsAt)}
                           </button>
                         ))}
+                        <button
+                          type="button"
+                          className="roster-grid-add"
+                          onClick={() => openQuickAdd(p.id, p.name, d)}
+                          aria-label={t("adminRoster.quickAddTitle", { name: p.name })}
+                        >
+                          <Plus size={12} />
+                        </button>
                       </td>
                     );
                   })}
@@ -392,6 +445,60 @@ export default function RosterSection() {
           onConfirm={() => handleRemove(removeTarget)}
           onCancel={() => setRemoveTarget(null)}
         />
+      )}
+
+      {quickAdd && (
+        <div className="modal-overlay" onClick={() => setQuickAdd(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{t("adminRoster.quickAddTitle", { name: quickAdd.userName })}</h3>
+            <p className="hint">
+              {quickAdd.day.toLocaleDateString(getDateLocale(), {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+            <form onSubmit={handleQuickAdd}>
+              <label className="field">
+                <span className="field-label">{t("adminRoster.shiftStarts")}</span>
+                <input
+                  type="datetime-local"
+                  value={qStart}
+                  onChange={(e) => setQStart(e.target.value)}
+                  required
+                />
+              </label>
+              <label className="field">
+                <span className="field-label">{t("adminRoster.shiftEnds")}</span>
+                <input
+                  type="datetime-local"
+                  value={qEnd}
+                  onChange={(e) => setQEnd(e.target.value)}
+                  required
+                />
+              </label>
+              <label className="field">
+                <span className="field-label">{t("adminRoster.breakLabel")}</span>
+                <select value={qBreak} onChange={(e) => setQBreak(e.target.value)}>
+                  {BREAK_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {qError && <div className="error">{qError}</div>}
+              <div className="modal-actions">
+                <button type="button" onClick={() => setQuickAdd(null)}>
+                  {t("common.cancel")}
+                </button>
+                <button type="submit" disabled={qSaving}>
+                  {t("adminRoster.assign")}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </section>
   );

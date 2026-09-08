@@ -391,6 +391,7 @@ export default {
     removeShiftQuestion: "यो शिफ्ट हटाउने हो?",
     removeShiftConfirm:
       "{{date}} मा {{name}} को शिफ्ट हटाउने हो? यो शिफ्टको लागि रेकर्ड गरिएको क्लक इन/आउट पनि मेटिनेछ।",
+    quickAddTitle: "{{name}} को लागि शिफ्ट थप्नुहोस्",
   },
   quickAccess: {
     title: "द्रुत पहुँच",
