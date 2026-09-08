@@ -289,6 +289,7 @@ export default {
     loadFailed: "Back-upsleutel laden is mislukt",
     generateFailed: "Back-upsleutel genereren is mislukt",
     revokeFailed: "Back-upsleutel intrekken is mislukt",
+    recommended: "Aanbevolen",
     autoTitle: "Automatische cloud-back-ups",
     autoIntro:
       "Draait elk uur op de server, ongeacht of je computer aanstaat — kies hieronder een eerdere back-up om te downloaden. 30 dagen bewaard.",

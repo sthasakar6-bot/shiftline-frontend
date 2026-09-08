@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Copy, Check, RefreshCw } from "lucide-react";
+import { Copy, Check, RefreshCw, Laptop } from "lucide-react";
 import { api, ApiError, API_URL } from "../api/client";
 import type { BackupTokenInfo } from "../api/types";
 import { getDateLocale } from "../i18n";
@@ -75,7 +75,12 @@ export default function BackupSection() {
 
   return (
     <section className="panel">
-      <h2>{t("backup.title")}</h2>
+      <div className="panel-title">
+        <span className="panel-title-icon">
+          <Laptop size={17} />
+        </span>
+        <h2>{t("backup.title")}</h2>
+      </div>
       <p className="hint">{t("backup.intro")}</p>
       {error && <div className="error">{error}</div>}
 

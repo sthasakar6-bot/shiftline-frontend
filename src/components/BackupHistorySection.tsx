@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Download } from "lucide-react";
+import { Cloud, Download, History } from "lucide-react";
 import { api, ApiError } from "../api/client";
 import type { BackupSnapshotMeta } from "../api/types";
 import { getDateLocale } from "../i18n";
+import { formatRelativeTime } from "../lib/formatDate";
 import { SkeletonRows } from "./Skeleton";
 
 export default function BackupHistorySection() {
@@ -44,7 +45,13 @@ export default function BackupHistorySection() {
 
   return (
     <section className="panel">
-      <h2>{t("backup.autoTitle")}</h2>
+      <div className="panel-title">
+        <span className="panel-title-icon">
+          <Cloud size={17} />
+        </span>
+        <h2>{t("backup.autoTitle")}</h2>
+        <span className="panel-title-badge">{t("backup.recommended")}</span>
+      </div>
       <p className="hint">{t("backup.autoIntro")}</p>
       {error && <div className="error">{error}</div>}
 
@@ -53,7 +60,17 @@ export default function BackupHistorySection() {
         {!loading &&
           snapshots.map((s) => (
             <li key={s.id}>
-              <span>{new Date(s.createdAt).toLocaleString(getDateLocale())}</span>
+              <span className="backup-row">
+                <span className="backup-row-icon">
+                  <History size={14} />
+                </span>
+                <span className="backup-row-body">
+                  <span className="backup-row-time">
+                    {new Date(s.createdAt).toLocaleString(getDateLocale())}
+                  </span>
+                  <span className="backup-row-relative">{formatRelativeTime(s.createdAt)}</span>
+                </span>
+              </span>
               <span className="actions">
                 <button onClick={() => handleDownload(s)} disabled={downloadingId === s.id}>
                   <Download size={14} /> {t("backup.autoDownload")}

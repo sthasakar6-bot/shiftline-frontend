@@ -2619,3 +2619,74 @@
     animation: none !important;
   }
 }
+
+/* ---- Section icon + title header, used on Summary/Backup panels ---- */
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.panel-title h2 {
+  margin: 0;
+}
+
+.panel-title-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.panel-title-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.backup-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.backup-row-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.backup-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.backup-row-time {
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 13.5px;
+}
+
+.backup-row-relative {
+  font-size: 12px;
+  opacity: 0.65;
+}

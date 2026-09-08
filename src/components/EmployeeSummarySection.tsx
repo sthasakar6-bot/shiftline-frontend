@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { BarChart3 } from "lucide-react";
 import { api } from "../api/client";
 import type { LeaveRequest, Shift, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
@@ -109,7 +110,12 @@ export default function EmployeeSummarySection() {
 
   return (
     <section className="panel">
-      <h2>{t("summary.title")}</h2>
+      <div className="panel-title">
+        <span className="panel-title-icon">
+          <BarChart3 size={17} />
+        </span>
+        <h2>{t("summary.title")}</h2>
+      </div>
       <p className="hint">{t("summary.hint")}</p>
 
       <div className="inline-form">
