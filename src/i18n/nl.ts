@@ -384,6 +384,11 @@ export default {
     removeShiftQuestion: "Deze dienst verwijderen?",
     removeShiftConfirm:
       "Dienst van {{name}} op {{date}} verwijderen? Eventuele in-/uitkloktijden voor deze dienst worden dan ook verwijderd.",
+    downloadPdf: "PDF downloaden",
+    generatingPdf: "Bezig met genereren...",
+    pdfGeneratedBy: "Gegenereerd op {{date}} door {{name}}",
+    pdfEmployeeColumn: "Medewerker",
+    pdfEmptyCell: "—",
     quickAddTitle: "Dienst van {{name}}",
   },
   quickAccess: {

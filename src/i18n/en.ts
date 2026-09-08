@@ -383,6 +383,11 @@ export default {
     removeShiftQuestion: "Remove this shift?",
     removeShiftConfirm:
       "Remove {{name}}'s shift on {{date}}? Any clock-in/out recorded for this shift will be deleted too.",
+    downloadPdf: "Download PDF",
+    generatingPdf: "Generating...",
+    pdfGeneratedBy: "Generated {{date}} by {{name}}",
+    pdfEmployeeColumn: "Employee",
+    pdfEmptyCell: "—",
     quickAddTitle: "{{name}}'s shift",
   },
   quickAccess: {

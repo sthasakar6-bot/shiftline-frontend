@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, FileDown } from "lucide-react";
 import { api, ApiError } from "../api/client";
 import type { Shift, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
@@ -8,6 +8,7 @@ import ConfirmDialog from "./ConfirmDialog";
 import Avatar from "./Avatar";
 import { formatTime, compactTime } from "../lib/formatDate";
 import { getDateLocale } from "../i18n";
+import { BUSINESS_NAME } from "../lib/branding";
 
 interface RosterEntry extends Shift {
   employeeName: string;
@@ -64,6 +65,7 @@ export default function RosterSection() {
   const [mBreak, setMBreak] = useState("");
   const [mError, setMError] = useState<string | null>(null);
   const [mSaving, setMSaving] = useState(false);
+  const [pdfBusy, setPdfBusy] = useState(false);
 
   const BREAK_OPTIONS = [
     { label: t("adminRoster.breakNone"), value: "" },
@@ -206,6 +208,50 @@ export default function RosterSection() {
 
   const today = dateKey(new Date());
 
+  async function handleDownloadPdf() {
+    setPdfBusy(true);
+    try {
+      // Loaded on demand -- jsPDF pulls in a heavy html2canvas/dompurify
+      // dependency chain that only a manager exporting the roster needs.
+      const { downloadRosterPdf } = await import("../lib/rosterPdf");
+      const dayHeaders = weekDays.map((d) =>
+        d.toLocaleDateString(getDateLocale(), { weekday: "short", day: "numeric" }).toUpperCase(),
+      );
+      const emptyCellText = t("adminRoster.pdfEmptyCell");
+      const rows = people.map((p) => ({
+        name: p.name,
+        cells: weekDays.map((d) => {
+          const dayShifts = shiftsByPersonAndDay.get(`${p.id}_${dateKey(d)}`) ?? [];
+          if (dayShifts.length === 0) return emptyCellText;
+          return dayShifts
+            .map((s) => `${compactTime(s.startsAt)}-${compactTime(s.endsAt)}`)
+            .join("\n");
+        }),
+      }));
+      const rangeSlug = `${weekStart.toISOString().slice(0, 10)}_to_${new Date(weekEnd.getTime() - 86400000).toISOString().slice(0, 10)}`;
+
+      await downloadRosterPdf({
+        businessName: BUSINESS_NAME,
+        weekLabel: weekLabel,
+        dayHeaders,
+        rows,
+        generatedByLine: t("adminRoster.pdfGeneratedBy", {
+          date: new Date().toLocaleDateString(getDateLocale(), {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+          name: user?.name ?? "",
+        }),
+        employeeColumnLabel: t("adminRoster.pdfEmployeeColumn"),
+        fileName: `Shiftline-Roster_${rangeSlug}.pdf`,
+        emptyCellText,
+      });
+    } finally {
+      setPdfBusy(false);
+    }
+  }
+
   return (
     <section className="panel">
       <h2>{t("adminRoster.title")}</h2>
@@ -247,6 +293,20 @@ export default function RosterSection() {
           <ChevronRight size={18} />
         </button>
       </div>
+
+      {people.length > 0 && (
+        <div className="roster-pdf-row">
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={handleDownloadPdf}
+            disabled={pdfBusy}
+          >
+            <FileDown size={14} />
+            {pdfBusy ? t("adminRoster.generatingPdf") : t("adminRoster.downloadPdf")}
+          </button>
+        </div>
+      )}
 
       {people.length === 0 ? (
         <p className="empty-state">{t("adminRoster.noEmployees")}</p>

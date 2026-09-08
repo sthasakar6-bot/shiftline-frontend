@@ -384,6 +384,11 @@ export default {
     removeShiftQuestion: "यो शिफ्ट हटाउने हो?",
     removeShiftConfirm:
       "{{date}} मा {{name}} को शिफ्ट हटाउने हो? यो शिफ्टको लागि रेकर्ड गरिएको क्लक इन/आउट पनि मेटिनेछ।",
+    downloadPdf: "PDF डाउनलोड गर्नुहोस्",
+    generatingPdf: "तयार गर्दै...",
+    pdfGeneratedBy: "{{date}} मा {{name}} द्वारा तयार गरियो",
+    pdfEmployeeColumn: "कर्मचारी",
+    pdfEmptyCell: "—",
     quickAddTitle: "{{name}} को शिफ्ट",
   },
   quickAccess: {
