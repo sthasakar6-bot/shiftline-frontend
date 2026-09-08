@@ -9,8 +9,7 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 // Per-company logos -- falls back to the plain Shiftline mark for any
 // company that doesn't have its own icon set here yet.
 const COMPANY_LOGO: Record<string, string> = {
-  "super-sushi": "/logo-super-sushi.png",
-  zuiderzoet: "/logo-zuiderzoet.png",
+  "super-sushi": "/logo-super-sushi-mark.png",
 };
 
 export default function SelectCompanyPage() {
