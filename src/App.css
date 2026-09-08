@@ -545,8 +545,15 @@
   max-width: 120px;
 }
 
+.app-logo-business-mark {
+  height: 24px;
+  width: auto;
+  border-radius: 6px;
+}
+
 @media (max-width: 420px) {
-  .app-logo-business {
+  .app-logo-business,
+  .app-logo-business-mark {
     display: none;
   }
 }

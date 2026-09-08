@@ -8,6 +8,7 @@ export interface User {
   address: string | null;
   companyId: number;
   companyName: string;
+  companySlug: string;
 }
 
 export interface Company {
