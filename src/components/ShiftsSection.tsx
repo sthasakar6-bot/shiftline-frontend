@@ -90,6 +90,9 @@ export default function ShiftsSection() {
     year: "numeric",
   });
 
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
   const selectedShifts = selectedDay ? (shiftsByDay.get(dateKey(selectedDay)) ?? []) : [];
   const selectedLeave = selectedDay ? (leaveByDay.get(dateKey(selectedDay)) ?? []) : [];
 
@@ -142,7 +145,11 @@ export default function ShiftsSection() {
           const hasShift = dayShifts.length > 0;
           const hasLeave = dayLeave.length > 0;
           const leaveType = dayLeave[0]?.type;
-          const hasActiveShift = dayShifts.some((s) => !completedShiftIds.has(s.id));
+          const isPastDay = day.getTime() < todayStart.getTime();
+          // A past day always reads as "worked" (muted), even if a clock-in
+          // was missed -- only a not-yet-passed day should still draw the eye
+          // with the active/upcoming green highlight.
+          const hasActiveShift = !isPastDay && dayShifts.some((s) => !completedShiftIds.has(s.id));
           const isToday = dateKey(day) === dateKey(new Date());
           return (
             <button
