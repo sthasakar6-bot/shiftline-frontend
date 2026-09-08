@@ -79,7 +79,7 @@ export default function AdminPage() {
       <div className="app-body">
         <Sidebar tabs={tabs} active={active} onChange={setActive} />
 
-        <main className="app-content">
+        <main className={active === "roster" ? "app-content wide" : "app-content"}>
           {active === "team" && <ManagerSection />}
           {active === "roster" && <RosterSection />}
           {active === "invite" && (

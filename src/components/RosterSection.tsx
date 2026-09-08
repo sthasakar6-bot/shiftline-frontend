@@ -298,7 +298,7 @@ export default function RosterSection() {
                           onClick={() => openAdd(p.id, p.name, d)}
                           aria-label={t("adminRoster.quickAddTitle", { name: p.name })}
                         >
-                          <Plus size={12} />
+                          <Plus size={14} />
                         </button>
                       </td>
                     );
