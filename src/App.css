@@ -2656,8 +2656,34 @@
   border-radius: 7px;
 }
 
+.panel-subtitle-toggle {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 4px 0;
+  margin-bottom: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.panel-subtitle-chevron {
+  margin-left: auto;
+  color: var(--text);
+  opacity: 0.5;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.panel-subtitle-chevron.open {
+  transform: rotate(180deg);
+}
+
+.backup-subsection-body {
+  padding-top: 10px;
+}
+
 .backup-subsection {
-  padding: 16px 0;
+  padding: 12px 0;
 }
 
 .backup-subsection:first-of-type {

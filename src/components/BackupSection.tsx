@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Copy, Check, RefreshCw, Laptop } from "lucide-react";
+import { ChevronDown, Copy, Check, RefreshCw, Laptop } from "lucide-react";
 import { api, ApiError, API_URL } from "../api/client";
 import type { BackupTokenInfo } from "../api/types";
 import { getDateLocale } from "../i18n";
@@ -24,6 +24,7 @@ export default function BackupSection() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<"url" | "script" | null>(null);
   const [confirmRevoke, setConfirmRevoke] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     api
@@ -68,88 +69,92 @@ export default function BackupSection() {
     });
   }
 
-  if (loading) return null;
-
   const backupUrl = info ? `${API_URL}/api/backup?token=${info.token}` : "";
   const script = info ? buildScript(backupUrl) : "";
 
   return (
     <div className="backup-subsection">
-      <div className="panel-subtitle">
+      <button type="button" className="panel-subtitle panel-subtitle-toggle" onClick={() => setOpen(!open)}>
         <span className="panel-title-icon">
           <Laptop size={15} />
         </span>
         <h3>{t("backup.title")}</h3>
-      </div>
-      {error && <div className="error">{error}</div>}
+        <ChevronDown size={16} className={`panel-subtitle-chevron${open ? " open" : ""}`} />
+      </button>
 
-      {!info ? (
-        <button onClick={handleGenerate} disabled={busy}>
-          {t("backup.generate")}
-        </button>
-      ) : (
-        <>
-          <p className="hint">
-            {t("backup.created", {
-              date: new Date(info.createdAt).toLocaleString(getDateLocale()),
-            })}
-            {" · "}
-            {info.lastUsedAt
-              ? t("backup.lastUsed", {
-                  date: new Date(info.lastUsedAt).toLocaleString(getDateLocale()),
-                })
-              : t("backup.neverUsed")}
-          </p>
+      {open && !loading && (
+        <div className="backup-subsection-body">
+          {error && <div className="error">{error}</div>}
 
-          <div className="invite-link-callout">
-            <span className="field-label">{t("backup.urlLabel")}</span>
-            <div className="inline-form">
-              <input value={backupUrl} readOnly />
-              <button type="button" onClick={() => handleCopy("url", backupUrl)}>
-                {copied === "url" ? (
-                  <Check size={14} />
-                ) : (
-                  <>
-                    <Copy size={14} /> {t("backup.copyUrl")}
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div className="invite-link-callout">
-            <span className="field-label">{t("backup.scriptLabel")}</span>
-            <pre className="backup-script">{script}</pre>
-            <button type="button" onClick={() => handleCopy("script", script)}>
-              {copied === "script" ? (
-                <Check size={14} />
-              ) : (
-                <>
-                  <Copy size={14} /> {t("backup.copyScript")}
-                </>
-              )}
-            </button>
-          </div>
-
-          <div className="backup-setup">
-            <h4>{t("backup.setupTitle")}</h4>
-            <ol className="install-steps">
-              <li>{t("backup.setupStep1")}</li>
-              <li>{t("backup.setupStep2")}</li>
-              <li>{t("backup.setupStep3")}</li>
-              <li>{t("backup.setupStep4")}</li>
-            </ol>
-          </div>
-
-          <div className="actions">
+          {!info ? (
             <button onClick={handleGenerate} disabled={busy}>
-              <RefreshCw size={14} /> {t("backup.regenerate")}
+              {t("backup.generate")}
             </button>
-            <button onClick={() => setConfirmRevoke(true)} disabled={busy}>
-              {t("backup.revoke")}
-            </button>
-          </div>
-        </>
+          ) : (
+            <>
+              <p className="hint">
+                {t("backup.created", {
+                  date: new Date(info.createdAt).toLocaleString(getDateLocale()),
+                })}
+                {" · "}
+                {info.lastUsedAt
+                  ? t("backup.lastUsed", {
+                      date: new Date(info.lastUsedAt).toLocaleString(getDateLocale()),
+                    })
+                  : t("backup.neverUsed")}
+              </p>
+
+              <div className="invite-link-callout">
+                <span className="field-label">{t("backup.urlLabel")}</span>
+                <div className="inline-form">
+                  <input value={backupUrl} readOnly />
+                  <button type="button" onClick={() => handleCopy("url", backupUrl)}>
+                    {copied === "url" ? (
+                      <Check size={14} />
+                    ) : (
+                      <>
+                        <Copy size={14} /> {t("backup.copyUrl")}
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="invite-link-callout">
+                <span className="field-label">{t("backup.scriptLabel")}</span>
+                <pre className="backup-script">{script}</pre>
+                <button type="button" onClick={() => handleCopy("script", script)}>
+                  {copied === "script" ? (
+                    <Check size={14} />
+                  ) : (
+                    <>
+                      <Copy size={14} /> {t("backup.copyScript")}
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="backup-setup">
+                <h4>{t("backup.setupTitle")}</h4>
+                <ol className="install-steps">
+                  <li>{t("backup.setupStep1")}</li>
+                  <li>{t("backup.setupStep2")}</li>
+                  <li>{t("backup.setupStep3")}</li>
+                  <li>{t("backup.setupStep4")}</li>
+                </ol>
+              </div>
+
+              <div className="actions">
+                <button onClick={handleGenerate} disabled={busy}>
+                  <RefreshCw size={14} /> {t("backup.regenerate")}
+                </button>
+                <button onClick={() => setConfirmRevoke(true)} disabled={busy}>
+                  {t("backup.revoke")}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       )}
 
       {confirmRevoke && (
