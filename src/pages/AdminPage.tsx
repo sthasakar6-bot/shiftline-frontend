@@ -13,6 +13,7 @@ import RosterSection from "../components/RosterSection";
 import LeaveApprovalsSection from "../components/LeaveApprovalsSection";
 import AttendanceTrackingSection from "../components/AttendanceTrackingSection";
 import EmployeeSummarySection from "../components/EmployeeSummarySection";
+import BackupSection from "../components/BackupSection";
 import NotificationsSection from "../components/NotificationsSection";
 import { api } from "../api/client";
 import type { Notification } from "../api/types";
@@ -85,7 +86,12 @@ export default function AdminPage() {
         )}
         {active === "leave" && <LeaveApprovalsSection />}
         {active === "attendance" && <AttendanceTrackingSection />}
-        {active === "summary" && <EmployeeSummarySection />}
+        {active === "summary" && (
+          <>
+            <EmployeeSummarySection />
+            <BackupSection />
+          </>
+        )}
         {active === "alerts" && (
           <NotificationsSection
             notifications={notifications}

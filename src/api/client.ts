@@ -1,5 +1,6 @@
 import type {
   Attendance,
+  BackupTokenInfo,
   Contract,
   Invite,
   LeaveRequest,
@@ -14,6 +15,8 @@ import type {
 
 const API_URL = import.meta.env.VITE_API_URL as string;
 const TOKEN_KEY = "shiftline_token";
+
+export { API_URL };
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -198,6 +201,10 @@ export const api = {
     }),
   listAttendanceForReport: (userId: number) =>
     request<Attendance[]>(`/api/users/${userId}/attendance`),
+
+  getBackupToken: () => request<BackupTokenInfo | null>("/api/backup-token"),
+  createBackupToken: () => request<BackupTokenInfo>("/api/backup-token", { method: "POST" }),
+  deleteBackupToken: () => request<void>("/api/backup-token", { method: "DELETE" }),
 
   listNotifications: () => request<Notification[]>("/api/notifications"),
   markNotificationRead: (id: number) =>

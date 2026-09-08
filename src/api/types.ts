@@ -31,6 +31,14 @@ export interface Payslip {
   updatedAt: string;
 }
 
+export interface BackupTokenInfo {
+  id: number;
+  userId: number;
+  token: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+}
+
 export interface Shift {
   id: number;
   userId: number;

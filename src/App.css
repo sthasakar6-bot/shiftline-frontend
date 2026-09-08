@@ -2243,6 +2243,28 @@
   gap: 8px;
 }
 
+.backup-script {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--text-h);
+  margin: 8px 0;
+}
+
+.backup-setup {
+  margin-top: 16px;
+}
+
+.backup-setup h3 {
+  margin-bottom: 8px;
+}
+
 .install-step-icon {
   vertical-align: -2px;
   color: var(--accent);
