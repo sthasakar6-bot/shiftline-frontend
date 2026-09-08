@@ -1,5 +1,6 @@
 import type {
   Attendance,
+  BackupSnapshotMeta,
   BackupTokenInfo,
   Contract,
   Invite,
@@ -205,6 +206,9 @@ export const api = {
   getBackupToken: () => request<BackupTokenInfo | null>("/api/backup-token"),
   createBackupToken: () => request<BackupTokenInfo>("/api/backup-token", { method: "POST" }),
   deleteBackupToken: () => request<void>("/api/backup-token", { method: "DELETE" }),
+
+  listBackupHistory: () => request<BackupSnapshotMeta[]>("/api/backup-history"),
+  getBackupHistoryCsv: (id: number) => requestBlob(`/api/backup-history/${id}`),
 
   listNotifications: () => request<Notification[]>("/api/notifications"),
   markNotificationRead: (id: number) =>

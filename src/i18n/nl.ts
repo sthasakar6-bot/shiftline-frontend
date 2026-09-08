@@ -289,6 +289,13 @@ export default {
     loadFailed: "Back-upsleutel laden is mislukt",
     generateFailed: "Back-upsleutel genereren is mislukt",
     revokeFailed: "Back-upsleutel intrekken is mislukt",
+    autoTitle: "Automatische cloud-back-ups",
+    autoIntro:
+      "Draait elk uur op de server, ongeacht of je computer aanstaat — kies hieronder een eerdere back-up om te downloaden. 30 dagen bewaard.",
+    autoEmpty: "Nog geen automatische back-ups — de eerste verschijnt binnen een uur.",
+    autoDownload: "Downloaden",
+    autoLoadFailed: "Back-upgeschiedenis laden is mislukt",
+    autoDownloadFailed: "Back-up downloaden is mislukt",
   },
   summary: {
     title: "Medewerkersoverzicht",

@@ -39,6 +39,12 @@ export interface BackupTokenInfo {
   lastUsedAt: string | null;
 }
 
+export interface BackupSnapshotMeta {
+  id: number;
+  userId: number;
+  createdAt: string;
+}
+
 export interface Shift {
   id: number;
   userId: number;

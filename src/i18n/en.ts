@@ -288,6 +288,13 @@ export default {
     loadFailed: "Failed to load backup key",
     generateFailed: "Failed to generate backup key",
     revokeFailed: "Failed to revoke backup key",
+    autoTitle: "Automatic Cloud Backups",
+    autoIntro:
+      "Runs on the server every hour regardless of whether your computer is on — pick any past backup below to download it. Kept for 30 days.",
+    autoEmpty: "No automatic backups yet — the first one appears within an hour.",
+    autoDownload: "Download",
+    autoLoadFailed: "Failed to load backup history",
+    autoDownloadFailed: "Failed to download backup",
   },
   summary: {
     title: "Employee Summary",
