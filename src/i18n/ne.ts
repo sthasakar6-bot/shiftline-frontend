@@ -46,6 +46,7 @@ export default {
     noCompanies: "कुनै कम्पनी फेला परेन।",
     loadCompaniesFailed: "कम्पनीहरू लोड गर्न असफल भयो",
     loggingInTo: "{{name}} मा लगइन गर्दै",
+    welcomeToCompany: "{{name}} मा स्वागत छ",
     joiningCompany: "तपाईं {{name}} मा सामेल हुँदै हुनुहुन्छ",
     welcome: "Shiftline मा स्वागत छ",
     email: "इमेल",

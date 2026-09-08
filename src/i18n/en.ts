@@ -46,6 +46,7 @@ export default {
     noCompanies: "No companies found.",
     loadCompaniesFailed: "Failed to load companies",
     loggingInTo: "Logging into {{name}}",
+    welcomeToCompany: "Welcome to {{name}}",
     joiningCompany: "You're joining {{name}}",
     welcome: "Welcome to Shiftline",
     email: "Email",

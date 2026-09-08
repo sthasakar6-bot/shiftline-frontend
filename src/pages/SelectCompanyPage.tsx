@@ -13,6 +13,16 @@ const COMPANY_LOGO: Record<string, string> = {
   zuiderzoet: "/logo-zuiderzoet.png",
 };
 
+const HOLD_MS = 1400;
+const FADE_MS = 400;
+
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
 export default function SelectCompanyPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -20,6 +30,8 @@ export default function SelectCompanyPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [welcoming, setWelcoming] = useState<Company | null>(null);
+  const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
     api
@@ -30,10 +42,46 @@ export default function SelectCompanyPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function choose(company: Company) {
+  function proceed(company: Company) {
     setSelectedCompany({ id: company.id, name: company.name });
     const returnTo = (location.state as { returnTo?: string } | null)?.returnTo ?? "/login";
     navigate(returnTo);
+  }
+
+  function choose(company: Company) {
+    if (prefersReducedMotion()) {
+      proceed(company);
+      return;
+    }
+    setWelcoming(company);
+  }
+
+  useEffect(() => {
+    if (!welcoming) return;
+    const holdTimer = setTimeout(() => setLeaving(true), HOLD_MS);
+    return () => clearTimeout(holdTimer);
+  }, [welcoming]);
+
+  useEffect(() => {
+    if (!leaving || !welcoming) return;
+    const fadeTimer = setTimeout(() => proceed(welcoming), FADE_MS);
+    return () => clearTimeout(fadeTimer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leaving]);
+
+  if (welcoming) {
+    return (
+      <div className={`company-welcome${leaving ? " leaving" : ""}`}>
+        <img
+          className="company-welcome-logo"
+          src={COMPANY_LOGO[welcoming.slug] ?? "/icon-192.png"}
+          alt=""
+        />
+        <div className="company-welcome-text">
+          {t("auth.welcomeToCompany", { name: welcoming.name })}
+        </div>
+      </div>
+    );
   }
 
   return (

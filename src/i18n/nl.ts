@@ -46,6 +46,7 @@ export default {
     noCompanies: "Geen bedrijven gevonden.",
     loadCompaniesFailed: "Bedrijven laden is mislukt",
     loggingInTo: "Inloggen bij {{name}}",
+    welcomeToCompany: "Welkom bij {{name}}",
     joiningCompany: "Je sluit je aan bij {{name}}",
     welcome: "Welkom bij Shiftline",
     email: "E-mail",
