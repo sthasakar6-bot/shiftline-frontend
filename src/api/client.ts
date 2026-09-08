@@ -202,6 +202,23 @@ export const api = {
     }),
   listAttendanceForReport: (userId: number) =>
     request<Attendance[]>(`/api/users/${userId}/attendance`),
+  createManualAttendance: (
+    userId: number,
+    data: { shiftId: number; clockIn: string; clockOut?: string },
+  ) =>
+    request<Attendance>(`/api/users/${userId}/attendance`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  editManualAttendance: (
+    userId: number,
+    attendanceId: number,
+    data: { clockIn: string; clockOut?: string },
+  ) =>
+    request<Attendance>(`/api/users/${userId}/attendance/${attendanceId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
 
   getBackupToken: () => request<BackupTokenInfo | null>("/api/backup-token"),
   createBackupToken: () => request<BackupTokenInfo>("/api/backup-token", { method: "POST" }),

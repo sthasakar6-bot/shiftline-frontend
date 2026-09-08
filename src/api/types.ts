@@ -65,6 +65,7 @@ export interface Attendance {
   clockInLng: number | null;
   clockOutLat: number | null;
   clockOutLng: number | null;
+  manualEntry: boolean;
   createdAt: string;
   updatedAt: string;
 }

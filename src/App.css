@@ -1696,6 +1696,20 @@
   flex-shrink: 0;
 }
 
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel-bg);
+  color: var(--text);
+  flex-shrink: 0;
+}
+
 .actions input[type="file"] {
   max-width: 160px;
 }

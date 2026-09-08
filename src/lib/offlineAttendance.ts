@@ -148,6 +148,7 @@ export function mergeAttendance(
       clockInLng: p.clockInLng ?? null,
       clockOutLat: p.clockOutLat ?? null,
       clockOutLng: p.clockOutLng ?? null,
+      manualEntry: false,
       createdAt: p.clockInAt,
       updatedAt: p.clockOutAt ?? p.clockInAt,
       pending: true,
