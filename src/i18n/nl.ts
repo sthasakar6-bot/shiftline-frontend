@@ -145,6 +145,7 @@ export default {
     clockOutConfirmMessage: "Weet je zeker dat je wilt uitklokken? Dit beëindigt je huidige dienst.",
     pendingSync: "Synchronisatie in behandeling",
     offlineClockedIn: "Offline geregistreerd — synchroniseert automatisch zodra je weer online bent.",
+    tooEarly: "Je kunt inklokken vanaf {{time}}",
   },
   leave: {
     title: "Verlofaanvragen",

@@ -23,6 +23,11 @@ import { SkeletonLine, SkeletonRows } from "./Skeleton";
 // is rejected server-side, so there's no point offering it here either.
 const CLOCK_IN_WINDOW_MS = 30 * 60 * 1000;
 
+// ...and the backend also rejects a clock-in more than this long before a
+// shift starts, so the button stays disabled (with an explanation) until
+// then instead of letting the tap fail server-side.
+const EARLY_CLOCK_IN_MS = 5 * 60 * 1000;
+
 function formatElapsed(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
   const h = Math.floor(totalSeconds / 3600);
@@ -181,6 +186,9 @@ export default function AttendanceSection() {
   }
 
   const selectedShift = clockableShifts.find((s) => String(s.id) === effectiveShiftId);
+  const tooEarly = selectedShift
+    ? new Date(selectedShift.startsAt).getTime() - now.getTime() > EARLY_CLOCK_IN_MS
+    : false;
 
   return (
     <>
@@ -266,10 +274,15 @@ export default function AttendanceSection() {
           <button
             className="shift-clock-btn in"
             onClick={handleClockInClick}
-            disabled={busy || !effectiveShiftId}
+            disabled={busy || !effectiveShiftId || tooEarly}
           >
             {t("attendance.clockIn")}
           </button>
+          {tooEarly && selectedShift && (
+            <p className="hint">
+              {t("attendance.tooEarly", { time: formatTime(selectedShift.startsAt) })}
+            </p>
+          )}
         </section>
       ) : (
         <p className="hint">{t("home.noUpcomingShifts")}</p>

@@ -145,6 +145,7 @@ export default {
     clockOutConfirmMessage: "Are you sure you want to clock out? This will end your current shift.",
     pendingSync: "Pending sync",
     offlineClockedIn: "Recorded offline — will sync automatically once you're back online.",
+    tooEarly: "You can clock in starting at {{time}}",
   },
   leave: {
     title: "Leave Requests",
