@@ -183,6 +183,11 @@ export default function DashboardHome() {
             <span className={`type-badge ${nextLeave.type}`}>{t(`leave.${nextLeave.type}`)}</span>
             <span className="status-badge approved">{t("leave.approved")}</span>
           </div>
+          {isLeaveActive && (
+            <div className="leave-wish">
+              {nextLeave.type === "sick" ? t("home.getWellSoon") : t("home.enjoyVacation")}
+            </div>
+          )}
         </section>
       )}
     </>

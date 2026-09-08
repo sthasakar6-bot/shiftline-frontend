@@ -111,6 +111,8 @@ export default {
     clockedIn: "Ingeklokt",
     notClockedInYet: "Nog niet ingeklokt",
     noUpcomingShifts: "Nog geen aankomende diensten gepland.",
+    enjoyVacation: "Geniet van je vakantie! 🌴",
+    getWellSoon: "Beterschap! 🤒",
   },
   roster: {
     title: "Mijn rooster",

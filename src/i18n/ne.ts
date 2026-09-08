@@ -112,6 +112,8 @@ export default {
     clockedIn: "क्लक इन गरियो",
     notClockedInYet: "अझै क्लक इन गरिएको छैन",
     noUpcomingShifts: "अहिलेसम्म कुनै आगामी शिफ्ट तालिका छैन।",
+    enjoyVacation: "आफ्नो बिदाको आनन्द लिनुहोस्! 🌴",
+    getWellSoon: "चाँडै निको होस्! 🤒",
   },
   roster: {
     title: "मेरो रोस्टर",

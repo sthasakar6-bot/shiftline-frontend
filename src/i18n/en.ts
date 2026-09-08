@@ -111,6 +111,8 @@ export default {
     clockedIn: "Clocked in",
     notClockedInYet: "Not clocked in yet",
     noUpcomingShifts: "No upcoming shifts scheduled yet.",
+    enjoyVacation: "Enjoy your vacation! 🌴",
+    getWellSoon: "Get well soon! 🤒",
   },
   roster: {
     title: "My Roster",
