@@ -377,10 +377,23 @@
 }
 
 .auth-company-banner {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  width: auto;
+  margin-top: -6px;
+  padding: 4px 0;
+  background: transparent;
+  border: none;
   font-size: 12.5px;
   color: var(--text);
   opacity: 0.8;
-  margin-top: -6px;
+}
+
+.auth-company-banner:hover,
+.auth-company-banner:focus-visible {
+  opacity: 1;
+  color: var(--accent);
 }
 
 .app-shell {

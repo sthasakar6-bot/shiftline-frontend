@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { ChevronLeft } from "lucide-react";
 import { api, ApiError, getSelectedCompany } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
@@ -68,7 +69,14 @@ export default function ForgotPasswordPage() {
       <AuthBrand />
       <form className="auth-form" onSubmit={handleSubmit}>
         <h1>{t("auth.forgotPageTitle")}</h1>
-        <div className="auth-company-banner">{t("auth.loggingInTo", { name: company.name })}</div>
+        <button
+          type="button"
+          className="auth-company-banner"
+          onClick={() => navigate("/select-company")}
+        >
+          <ChevronLeft size={14} />
+          {t("auth.loggingInTo", { name: company.name })}
+        </button>
         <p className="hint">{t("auth.forgotHint")}</p>
         {error && <div className="error">{error}</div>}
         <label>
