@@ -2459,6 +2459,10 @@
   border-color: var(--danger);
 }
 
+.modal-actions button.modal-action-detach {
+  margin-right: auto;
+}
+
 .back-button {
   display: flex;
   align-items: center;

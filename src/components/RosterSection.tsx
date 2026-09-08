@@ -31,16 +31,6 @@ function dateKey(d: Date): string {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 
-// Combines another day's date with the time-of-day from a datetime-local
-// value, so "repeat on" days reuse the same start/end time picked once.
-function withDate(datetimeLocal: string, day: Date): string {
-  const timePart = datetimeLocal.split("T")[1] ?? "00:00";
-  const y = day.getFullYear();
-  const m = String(day.getMonth() + 1).padStart(2, "0");
-  const d = String(day.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}T${timePart}`;
-}
-
 function toDatetimeLocal(day: Date, hour: number, minute: number): string {
   const y = day.getFullYear();
   const m = String(day.getMonth() + 1).padStart(2, "0");
@@ -50,28 +40,30 @@ function toDatetimeLocal(day: Date, hour: number, minute: number): string {
   return `${y}-${m}-${d}T${hh}:${mm}`;
 }
 
+function toLocalInput(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+type ShiftModalState =
+  | { mode: "add"; userId: number; userName: string; day: Date }
+  | { mode: "edit"; entry: RosterEntry };
+
 export default function RosterSection() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [roster, setRoster] = useState<RosterEntry[]>([]);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
-  const [assignee, setAssignee] = useState("");
-  const [startsAt, setStartsAt] = useState("");
-  const [endsAt, setEndsAt] = useState("");
-  const [breakMinutes, setBreakMinutes] = useState("");
-  const [repeatDays, setRepeatDays] = useState<Set<number>>(new Set());
   const [removeTarget, setRemoveTarget] = useState<RosterEntry | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [quickAdd, setQuickAdd] = useState<{ userId: number; userName: string; day: Date } | null>(
-    null,
-  );
-  const [qStart, setQStart] = useState("");
-  const [qEnd, setQEnd] = useState("");
-  const [qBreak, setQBreak] = useState("");
-  const [qError, setQError] = useState<string | null>(null);
-  const [qSaving, setQSaving] = useState(false);
+  const [modal, setModal] = useState<ShiftModalState | null>(null);
+  const [mStart, setMStart] = useState("");
+  const [mEnd, setMEnd] = useState("");
+  const [mBreak, setMBreak] = useState("");
+  const [mError, setMError] = useState<string | null>(null);
+  const [mSaving, setMSaving] = useState(false);
 
   const BREAK_OPTIONS = [
     { label: t("adminRoster.breakNone"), value: "" },
@@ -119,89 +111,53 @@ export default function RosterSection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reports, user]);
 
-  function toggleRepeatDay(dow: number) {
-    setRepeatDays((prev) => {
-      const next = new Set(prev);
-      if (next.has(dow)) next.delete(dow);
-      else next.add(dow);
-      return next;
-    });
+  function openAdd(userId: number, userName: string, day: Date) {
+    setModal({ mode: "add", userId, userName, day });
+    setMStart(toDatetimeLocal(day, 9, 0));
+    setMEnd(toDatetimeLocal(day, 17, 0));
+    setMBreak("");
+    setMError(null);
   }
 
-  async function handleAssign(e: FormEvent) {
+  function openEdit(entry: RosterEntry) {
+    setModal({ mode: "edit", entry });
+    setMStart(toLocalInput(entry.startsAt));
+    setMEnd(toLocalInput(entry.endsAt));
+    setMBreak(entry.breakMinutes ? String(entry.breakMinutes) : "");
+    setMError(null);
+  }
+
+  async function handleModalSave(e: FormEvent) {
     e.preventDefault();
-    setError(null);
-    setMessage(null);
-
-    const targetDays =
-      repeatDays.size > 0 ? weekDays.filter((d) => repeatDays.has(d.getDay())) : null;
-
+    if (!modal) return;
+    setMSaving(true);
+    setMError(null);
     try {
-      if (!targetDays) {
-        await api.createShiftForReport(Number(assignee), {
-          startsAt: toIso(startsAt),
-          endsAt: toIso(endsAt),
-          breakMinutes: breakMinutes ? Number(breakMinutes) : undefined,
+      if (modal.mode === "add") {
+        await api.createShiftForReport(modal.userId, {
+          startsAt: toIso(mStart),
+          endsAt: toIso(mEnd),
+          breakMinutes: mBreak ? Number(mBreak) : undefined,
         });
-        setMessage(t("adminRoster.shiftAssigned"));
       } else {
-        const results = await Promise.allSettled(
-          targetDays.map((day) =>
-            api.createShiftForReport(Number(assignee), {
-              startsAt: toIso(withDate(startsAt, day)),
-              endsAt: toIso(withDate(endsAt, day)),
-              breakMinutes: breakMinutes ? Number(breakMinutes) : undefined,
-            }),
-          ),
-        );
-        const succeeded = results.filter((r) => r.status === "fulfilled").length;
-        const failedDays = targetDays.filter((_, i) => results[i].status === "rejected");
-        if (succeeded > 0) {
-          setMessage(t("adminRoster.shiftsAssigned", { count: succeeded }));
-        }
-        if (failedDays.length > 0) {
-          const dayNames = failedDays
-            .map((d) => d.toLocaleDateString(getDateLocale(), { weekday: "short" }))
-            .join(", ");
-          setError(t("adminRoster.assignPartialFailed", { days: dayNames }));
-        }
+        await api.updateShiftForReport(modal.entry.userId, modal.entry.id, {
+          startsAt: toIso(mStart),
+          endsAt: toIso(mEnd),
+          breakMinutes: mBreak ? Number(mBreak) : undefined,
+        });
       }
-      setStartsAt("");
-      setEndsAt("");
-      setBreakMinutes("");
-      setRepeatDays(new Set());
+      setModal(null);
       loadRoster();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("adminRoster.assignFailed"));
-    }
-  }
-
-  function openQuickAdd(userId: number, userName: string, day: Date) {
-    setQuickAdd({ userId, userName, day });
-    setQStart(toDatetimeLocal(day, 9, 0));
-    setQEnd(toDatetimeLocal(day, 17, 0));
-    setQBreak("");
-    setQError(null);
-  }
-
-  async function handleQuickAdd(e: FormEvent) {
-    e.preventDefault();
-    if (!quickAdd) return;
-    setQSaving(true);
-    setQError(null);
-    try {
-      await api.createShiftForReport(quickAdd.userId, {
-        startsAt: toIso(qStart),
-        endsAt: toIso(qEnd),
-        breakMinutes: qBreak ? Number(qBreak) : undefined,
-      });
-      setQuickAdd(null);
-      loadRoster();
-    } catch (err) {
-      setQError(err instanceof ApiError ? err.message : t("adminRoster.assignFailed"));
+      setMError(err instanceof ApiError ? err.message : t("adminRoster.assignFailed"));
     } finally {
-      setQSaving(false);
+      setMSaving(false);
     }
+  }
+
+  function requestRemove(entry: RosterEntry) {
+    setModal(null);
+    setRemoveTarget(entry);
   }
 
   async function handleRemove(entry: RosterEntry) {
@@ -253,80 +209,8 @@ export default function RosterSection() {
   return (
     <section className="panel">
       <h2>{t("adminRoster.title")}</h2>
-
-      <div className="subform">
-        <h3>{t("adminRoster.assignShift")}</h3>
-        <form className="inline-form" onSubmit={handleAssign}>
-          <label className="field">
-            <span className="field-label">{t("adminRoster.employeeLabel")}</span>
-            <select value={assignee} onChange={(e) => setAssignee(e.target.value)} required>
-              <option value="">{t("team.selectEmployee")}</option>
-              {people.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span className="field-label">{t("adminRoster.shiftStarts")}</span>
-            <input
-              type="datetime-local"
-              value={startsAt}
-              onChange={(e) => setStartsAt(e.target.value)}
-              required
-            />
-          </label>
-          <label className="field">
-            <span className="field-label">{t("adminRoster.shiftEnds")}</span>
-            <input
-              type="datetime-local"
-              value={endsAt}
-              onChange={(e) => setEndsAt(e.target.value)}
-              required
-            />
-          </label>
-          <label className="field">
-            <span className="field-label">{t("adminRoster.breakLabel")}</span>
-            <select value={breakMinutes} onChange={(e) => setBreakMinutes(e.target.value)}>
-              {BREAK_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="field day-toggle-field">
-            <span className="field-label">{t("adminRoster.repeatOn")}</span>
-            <div className="day-toggle-row">
-              {weekDays.map((d) => (
-                <button
-                  key={dateKey(d)}
-                  type="button"
-                  className={`day-toggle-btn${repeatDays.has(d.getDay()) ? " active" : ""}`}
-                  onClick={() => toggleRepeatDay(d.getDay())}
-                >
-                  {d.toLocaleDateString(getDateLocale(), { weekday: "narrow" })}
-                </button>
-              ))}
-              <button
-                type="button"
-                className="day-toggle-all"
-                onClick={() =>
-                  setRepeatDays((prev) =>
-                    prev.size === 7 ? new Set() : new Set(weekDays.map((d) => d.getDay())),
-                  )
-                }
-              >
-                {t("adminRoster.wholeWeek")}
-              </button>
-            </div>
-          </div>
-          <button type="submit">{t("adminRoster.assign")}</button>
-        </form>
-        {message && <div className="success">{message}</div>}
-        {error && <div className="error">{error}</div>}
-      </div>
+      <p className="hint">{t("adminRoster.gridHint")}</p>
+      {error && <div className="error">{error}</div>}
 
       <div className="roster-week-nav">
         <button
@@ -402,7 +286,7 @@ export default function RosterSection() {
                           <button
                             key={s.id}
                             className="roster-grid-chip"
-                            onClick={() => setRemoveTarget(s)}
+                            onClick={() => openEdit(s)}
                             title={`${formatTime(s.startsAt)} – ${formatTime(s.endsAt)}${s.breakMinutes ? t("adminRoster.breakMinSuffix", { min: s.breakMinutes }) : ""}`}
                           >
                             {compactTime(s.startsAt)}-{compactTime(s.endsAt)}
@@ -411,7 +295,7 @@ export default function RosterSection() {
                         <button
                           type="button"
                           className="roster-grid-add"
-                          onClick={() => openQuickAdd(p.id, p.name, d)}
+                          onClick={() => openAdd(p.id, p.name, d)}
                           aria-label={t("adminRoster.quickAddTitle", { name: p.name })}
                         >
                           <Plus size={12} />
@@ -440,24 +324,27 @@ export default function RosterSection() {
         />
       )}
 
-      {quickAdd && (
-        <div className="modal-overlay" onClick={() => setQuickAdd(null)}>
+      {modal && (
+        <div className="modal-overlay" onClick={() => setModal(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>{t("adminRoster.quickAddTitle", { name: quickAdd.userName })}</h3>
-            <p className="hint">
-              {quickAdd.day.toLocaleDateString(getDateLocale(), {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
+            <h3>
+              {t("adminRoster.quickAddTitle", {
+                name: modal.mode === "add" ? modal.userName : modal.entry.employeeName,
               })}
+            </h3>
+            <p className="hint">
+              {(modal.mode === "add" ? modal.day : new Date(modal.entry.startsAt)).toLocaleDateString(
+                getDateLocale(),
+                { weekday: "long", month: "long", day: "numeric" },
+              )}
             </p>
-            <form onSubmit={handleQuickAdd}>
+            <form onSubmit={handleModalSave}>
               <label className="field">
                 <span className="field-label">{t("adminRoster.shiftStarts")}</span>
                 <input
                   type="datetime-local"
-                  value={qStart}
-                  onChange={(e) => setQStart(e.target.value)}
+                  value={mStart}
+                  onChange={(e) => setMStart(e.target.value)}
                   required
                 />
               </label>
@@ -465,14 +352,14 @@ export default function RosterSection() {
                 <span className="field-label">{t("adminRoster.shiftEnds")}</span>
                 <input
                   type="datetime-local"
-                  value={qEnd}
-                  onChange={(e) => setQEnd(e.target.value)}
+                  value={mEnd}
+                  onChange={(e) => setMEnd(e.target.value)}
                   required
                 />
               </label>
               <label className="field">
                 <span className="field-label">{t("adminRoster.breakLabel")}</span>
-                <select value={qBreak} onChange={(e) => setQBreak(e.target.value)}>
+                <select value={mBreak} onChange={(e) => setMBreak(e.target.value)}>
                   {BREAK_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                       {opt.label}
@@ -480,12 +367,21 @@ export default function RosterSection() {
                   ))}
                 </select>
               </label>
-              {qError && <div className="error">{qError}</div>}
+              {mError && <div className="error">{mError}</div>}
               <div className="modal-actions">
-                <button type="button" onClick={() => setQuickAdd(null)}>
+                {modal.mode === "edit" && (
+                  <button
+                    type="button"
+                    className="danger modal-action-detach"
+                    onClick={() => requestRemove(modal.entry)}
+                  >
+                    {t("team.remove")}
+                  </button>
+                )}
+                <button type="button" onClick={() => setModal(null)}>
                   {t("common.cancel")}
                 </button>
-                <button type="submit" disabled={qSaving}>
+                <button type="submit" disabled={mSaving}>
                   {t("adminRoster.assign")}
                 </button>
               </div>

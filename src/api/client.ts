@@ -180,7 +180,7 @@ export const api = {
   updateShiftForReport: (
     userId: number,
     shiftId: number,
-    data: Partial<{ startsAt: string; endsAt: string }>,
+    data: Partial<{ startsAt: string; endsAt: string; breakMinutes: number }>,
   ) =>
     request<Shift>(`/api/users/${userId}/shifts/${shiftId}`, {
       method: "PATCH",
