@@ -9,6 +9,7 @@ import ContractsSection from "../components/ContractsSection";
 import PayslipsSection from "../components/PayslipsSection";
 import type { Attendance, LeaveRequest } from "../api/types";
 import { parseIsoDateLocal } from "../lib/dateOnly";
+import { formatDuration } from "../lib/formatDate";
 
 function countLeaveDays(l: LeaveRequest): number {
   const start = parseIsoDateLocal(l.startDate);
@@ -61,9 +62,9 @@ export default function ProfilePage() {
     });
     const daysWorked = new Set(thisMonth.map((a) => new Date(a.clockIn as string).toDateString()))
       .size;
-    const hoursWorked = thisMonth.reduce((sum, a) => {
+    const workedMs = thisMonth.reduce((sum, a) => {
       if (!a.clockIn || !a.clockOut) return sum;
-      return sum + (new Date(a.clockOut).getTime() - new Date(a.clockIn).getTime()) / 3600000;
+      return sum + (new Date(a.clockOut).getTime() - new Date(a.clockIn).getTime());
     }, 0);
 
     const approvedThisYear = leaveRequests.filter((l) => {
@@ -78,7 +79,7 @@ export default function ProfilePage() {
       .filter((l) => l.type === "sick")
       .reduce((sum, l) => sum + countLeaveDays(l), 0);
 
-    return { daysWorked, hoursWorked, vacationDays, sickDays };
+    return { daysWorked, workedMs, vacationDays, sickDays };
   }, [attendance, leaveRequests]);
 
   if (!user) return null;
@@ -140,7 +141,7 @@ export default function ProfilePage() {
               <span className="stat-icon-circle">
                 <Clock size={18} />
               </span>
-              <div className="stat-value">{stats.hoursWorked.toFixed(1)}</div>
+              <div className="stat-value">{formatDuration(stats.workedMs)}</div>
               <div className="stat-label">{t("profile.hoursWorked")}</div>
             </div>
           </div>
