@@ -16,6 +16,11 @@ import {
   type DisplayAttendance,
 } from "../lib/offlineAttendance";
 
+// Mirrors the backend's clock-in window (attendance/service.ts) -- once a
+// shift is this far past its start with no clock-in, self-service clock-in
+// is rejected server-side, so there's no point featuring it here either.
+const CLOCK_IN_WINDOW_MS = 30 * 60 * 1000;
+
 function formatElapsed(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
   const h = Math.floor(totalSeconds / 3600);
@@ -64,6 +69,7 @@ export default function DashboardHome() {
   );
   const clockableShifts = shifts
     .filter((s) => !completedShiftIds.has(s.id))
+    .filter((s) => new Date(s.startsAt).getTime() + CLOCK_IN_WINDOW_MS >= now.getTime())
     .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
   const todaysShifts = clockableShifts.filter(
     (s) => new Date(s.startsAt).toDateString() === now.toDateString(),
