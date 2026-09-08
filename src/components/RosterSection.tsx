@@ -248,11 +248,6 @@ export default function RosterSection() {
     return map;
   }, [roster, weekStart, weekEnd]);
 
-  const shiftsThisWeek = [...shiftsByPersonAndDay.values()].reduce(
-    (sum, list) => sum + list.length,
-    0,
-  );
-
   const today = dateKey(new Date());
 
   return (
@@ -371,8 +366,6 @@ export default function RosterSection() {
 
       {people.length === 0 ? (
         <p className="empty-state">{t("adminRoster.noEmployees")}</p>
-      ) : shiftsThisWeek === 0 ? (
-        <p className="empty-state">{t("adminRoster.noShiftsWeek")}</p>
       ) : (
         <div className="roster-grid-wrap">
           <table className="roster-grid">
