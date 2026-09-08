@@ -8,8 +8,8 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 
 // Per-company logos -- falls back to the plain Shiftline mark for any
 // company that doesn't have its own icon set here yet.
-const COMPANY_EMOJI: Record<string, string> = {
-  "super-sushi": "🍣",
+const COMPANY_LOGO: Record<string, string> = {
+  "super-sushi": "/logo-super-sushi.png",
 };
 
 export default function SelectCompanyPage() {
@@ -56,11 +56,11 @@ export default function SelectCompanyPage() {
                 className="company-select-card"
                 onClick={() => choose(c)}
               >
-                {COMPANY_EMOJI[c.slug] ? (
-                  <span className="company-select-emoji">{COMPANY_EMOJI[c.slug]}</span>
-                ) : (
-                  <img className="company-select-logo" src="/icon-192.png" alt="" />
-                )}
+                <img
+                  className="company-select-logo"
+                  src={COMPANY_LOGO[c.slug] ?? "/icon-192.png"}
+                  alt=""
+                />
                 <span className="company-select-name">{c.name}</span>
               </button>
             ))}
