@@ -1,7 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { LogOut, ShieldCheck, LayoutDashboard, Bell, BellOff, User as UserIcon } from "lucide-react";
+import {
+  LogOut,
+  ShieldCheck,
+  LayoutDashboard,
+  Bell,
+  BellOff,
+  User as UserIcon,
+  Building2,
+} from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import Avatar from "./Avatar";
 import {
@@ -91,6 +99,16 @@ export default function UserBox() {
             </button>
           )}
           {pushError && <div className="error" style={{ padding: "0 14px 8px" }}>{pushError}</div>}
+          <button
+            onClick={() => {
+              logout();
+              navigate("/select-company");
+              setOpen(false);
+            }}
+          >
+            <Building2 size={16} />
+            {t("userBox.switchCompany")}
+          </button>
           <button onClick={logout}>
             <LogOut size={16} />
             {t("userBox.logOut")}

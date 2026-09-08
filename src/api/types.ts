@@ -6,6 +6,15 @@ export interface User {
   hasAvatar: boolean;
   phone: string | null;
   address: string | null;
+  companyId: number;
+  companyName: string;
+}
+
+export interface Company {
+  id: number;
+  name: string;
+  slug: string;
+  createdAt: string;
 }
 
 export interface UserSummary extends User {

@@ -2,6 +2,7 @@ import type {
   Attendance,
   BackupSnapshotMeta,
   BackupTokenInfo,
+  Company,
   Contract,
   Invite,
   LeaveRequest,
@@ -16,6 +17,7 @@ import type {
 
 const API_URL = import.meta.env.VITE_API_URL as string;
 const TOKEN_KEY = "shiftline_token";
+const COMPANY_KEY = "shiftline_selected_company";
 
 export { API_URL };
 
@@ -29,6 +31,32 @@ export function setToken(token: string): void {
 
 export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY);
+}
+
+// Remembered across visits, like a language or region picker -- chosen once
+// on the company-select screen and reused for every login/register/password
+// -reset attempt until the user explicitly switches companies.
+export interface SelectedCompany {
+  id: number;
+  name: string;
+}
+
+export function getSelectedCompany(): SelectedCompany | null {
+  const raw = localStorage.getItem(COMPANY_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as SelectedCompany;
+  } catch {
+    return null;
+  }
+}
+
+export function setSelectedCompany(company: SelectedCompany): void {
+  localStorage.setItem(COMPANY_KEY, JSON.stringify(company));
+}
+
+export function clearSelectedCompany(): void {
+  localStorage.removeItem(COMPANY_KEY);
 }
 
 export class ApiError extends Error {
@@ -92,18 +120,27 @@ export const api = {
     phone?: string;
     address?: string;
   }) =>
-    request<User>("/api/auth/register", {
+    request<{
+      id: number;
+      name: string;
+      email: string;
+      role: string;
+      companyId: number;
+      companyName: string;
+    }>("/api/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
     }),
 
-  login: (email: string, password: string) =>
+  login: (email: string, password: string, companyId: number) =>
     request<LoginResponse>("/api/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, companyId }),
     }),
 
   me: () => request<User>("/api/auth/me"),
+
+  listCompanies: () => request<Company[]>("/api/companies"),
 
   listUsers: () => request<User[]>("/api/users"),
   listReports: () => request<UserSummary[]>("/api/users/reports"),
@@ -260,17 +297,18 @@ export const api = {
   createInvite: (email: string) =>
     request<Invite>("/api/invites", { method: "POST", body: JSON.stringify({ email }) }),
   listInvites: () => request<Invite[]>("/api/invites"),
-  getInviteByToken: (token: string) => request<{ email: string }>(`/api/invites/${token}`),
+  getInviteByToken: (token: string) =>
+    request<{ email: string; companyName: string }>(`/api/invites/${token}`),
 
   subscribeToPush: (subscription: PushSubscriptionJSON) =>
     request<void>("/api/push/subscribe", { method: "POST", body: JSON.stringify(subscription) }),
   unsubscribeFromPush: (endpoint: string) =>
     request<void>("/api/push/unsubscribe", { method: "POST", body: JSON.stringify({ endpoint }) }),
 
-  requestPasswordReset: (email: string) =>
+  requestPasswordReset: (email: string, companyId: number) =>
     request<{ ok: true }>("/api/password-reset-requests", {
       method: "POST",
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, companyId }),
     }),
   listPasswordResetRequests: () => request<PasswordResetRequest[]>("/api/password-reset-requests"),
   getPasswordResetToken: (token: string) =>

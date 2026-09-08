@@ -324,6 +324,51 @@
   color: #fff;
 }
 
+.company-select-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.company-select-btn {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.company-select-btn:hover,
+.company-select-btn:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.auth-company-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text);
+  opacity: 0.8;
+  margin-top: -6px;
+}
+
+.auth-company-banner button {
+  margin-top: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 12.5px;
+  width: auto;
+}
+
 .app-shell {
   display: flex;
   flex-direction: column;

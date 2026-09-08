@@ -24,6 +24,7 @@ export default function RegisterPage() {
   const [submitting, setSubmitting] = useState(false);
   const [checkingInvite, setCheckingInvite] = useState(true);
   const [inviteValid, setInviteValid] = useState(false);
+  const [companyName, setCompanyName] = useState("");
 
   useEffect(() => {
     if (!token) {
@@ -34,6 +35,7 @@ export default function RegisterPage() {
       .getInviteByToken(token)
       .then((res) => {
         setEmail(res.email);
+        setCompanyName(res.companyName);
         setInviteValid(true);
       })
       .catch((err) => {
@@ -96,6 +98,7 @@ export default function RegisterPage() {
       <AuthBrand />
       <form className="auth-form wide" onSubmit={handleSubmit}>
         <h1>{t("auth.createYourAccount")}</h1>
+        {companyName && <p className="hint">{t("auth.joiningCompany", { name: companyName })}</p>}
         <p className="hint">{t("auth.createAccountHint")}</p>
         {error && <div className="error">{error}</div>}
 

@@ -8,7 +8,6 @@ import ConfirmDialog from "./ConfirmDialog";
 import Avatar from "./Avatar";
 import { formatTime, compactTime } from "../lib/formatDate";
 import { getDateLocale } from "../i18n";
-import { BUSINESS_NAME } from "../lib/branding";
 
 interface RosterEntry extends Shift {
   employeeName: string;
@@ -231,7 +230,7 @@ export default function RosterSection() {
       const rangeSlug = `${weekStart.toISOString().slice(0, 10)}_to_${new Date(weekEnd.getTime() - 86400000).toISOString().slice(0, 10)}`;
 
       await downloadRosterPdf({
-        businessName: BUSINESS_NAME,
+        businessName: user?.companyName,
         weekLabel: weekLabel,
         dayHeaders,
         rows,

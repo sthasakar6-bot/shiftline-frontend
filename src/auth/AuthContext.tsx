@@ -1,5 +1,12 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { api, clearToken, getToken, setToken } from "../api/client";
+import {
+  api,
+  clearToken,
+  getSelectedCompany,
+  getToken,
+  setSelectedCompany,
+  setToken,
+} from "../api/client";
 import type { User } from "../api/types";
 
 export interface RegisterInput {
@@ -40,14 +47,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function login(email: string, password: string) {
-    const res = await api.login(email, password);
+    const company = getSelectedCompany();
+    if (!company) {
+      throw new Error("No company selected");
+    }
+    const res = await api.login(email, password, company.id);
     setToken(res.token);
     setUser(res.user);
     return res.user;
   }
 
   async function register(data: RegisterInput) {
-    await api.register(data);
+    const registered = await api.register(data);
+    setSelectedCompany({ id: registered.companyId, name: registered.companyName ?? "" });
     return login(data.email, data.password);
   }
 

@@ -1,8 +1,8 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
-import { ApiError } from "../api/client";
+import { ApiError, getSelectedCompany } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -16,6 +16,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const company = getSelectedCompany();
+
+  useEffect(() => {
+    if (!company) {
+      navigate("/select-company", { state: { returnTo: "/login" } });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [company]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -36,6 +44,10 @@ export default function LoginPage() {
     }
   }
 
+  if (!company) {
+    return null;
+  }
+
   return (
     <div className="auth-page">
       <div className="auth-lang-switcher">
@@ -45,6 +57,12 @@ export default function LoginPage() {
       <p className="auth-welcome">{t("auth.welcome")}</p>
       <form className="auth-form" onSubmit={handleSubmit}>
         <h1>{t("auth.login")}</h1>
+        <div className="auth-company-banner">
+          <span>{t("auth.loggingInTo", { name: company.name })}</span>
+          <button type="button" onClick={() => navigate("/select-company", { state: { returnTo: "/login" } })}>
+            {t("auth.switchCompany")}
+          </button>
+        </div>
         <div className="mode-toggle">
           <button
             type="button"
