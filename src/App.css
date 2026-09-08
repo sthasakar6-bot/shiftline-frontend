@@ -324,49 +324,63 @@
   color: #fff;
 }
 
-.company-select-list {
+.company-select-page {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px 32px;
+  width: 460px;
+  max-width: 100%;
+  text-align: center;
+  box-shadow:
+    0 24px 48px -24px rgba(15, 23, 42, 0.3),
+    0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.company-select-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.company-select-card {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 10px;
-}
-
-.company-select-btn {
-  padding: 14px 16px;
+  width: 150px;
+  padding: 24px 12px;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--bg);
   color: var(--text-h);
-  font-size: 15px;
-  font-weight: 600;
-  text-align: left;
 }
 
-.company-select-btn:hover,
-.company-select-btn:focus-visible {
+.company-select-card:hover,
+.company-select-card:focus-visible {
   border-color: var(--accent);
   background: var(--accent-bg);
 }
 
+.company-select-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+}
+
+.company-select-name {
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+
 .auth-company-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
   font-size: 12.5px;
   color: var(--text);
   opacity: 0.8;
   margin-top: -6px;
-}
-
-.auth-company-banner button {
-  margin-top: 0;
-  padding: 0;
-  background: transparent;
-  border: none;
-  color: var(--accent);
-  font-weight: 600;
-  font-size: 12.5px;
-  width: auto;
 }
 
 .app-shell {

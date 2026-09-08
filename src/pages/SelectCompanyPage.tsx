@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api, ApiError, setSelectedCompany } from "../api/client";
 import type { Company } from "../api/types";
-import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
@@ -35,8 +34,7 @@ export default function SelectCompanyPage() {
       <div className="auth-lang-switcher">
         <LanguageSwitcher />
       </div>
-      <AuthBrand />
-      <div className="auth-form">
+      <div className="company-select-page">
         <h1>{t("auth.selectCompanyTitle")}</h1>
         <p className="hint">{t("auth.selectCompanyHint")}</p>
         {error && <div className="error">{error}</div>}
@@ -45,15 +43,16 @@ export default function SelectCompanyPage() {
         ) : companies.length === 0 ? (
           <p className="hint">{t("auth.noCompanies")}</p>
         ) : (
-          <div className="company-select-list">
+          <div className="company-select-grid">
             {companies.map((c) => (
               <button
                 type="button"
                 key={c.id}
-                className="company-select-btn"
+                className="company-select-card"
                 onClick={() => choose(c)}
               >
-                {c.name}
+                <img className="company-select-logo" src="/icon-192.png" alt="" />
+                <span className="company-select-name">{c.name}</span>
               </button>
             ))}
           </div>

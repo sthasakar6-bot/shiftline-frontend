@@ -57,12 +57,7 @@ export default function LoginPage() {
       <p className="auth-welcome">{t("auth.welcome")}</p>
       <form className="auth-form" onSubmit={handleSubmit}>
         <h1>{t("auth.login")}</h1>
-        <div className="auth-company-banner">
-          <span>{t("auth.loggingInTo", { name: company.name })}</span>
-          <button type="button" onClick={() => navigate("/select-company", { state: { returnTo: "/login" } })}>
-            {t("auth.switchCompany")}
-          </button>
-        </div>
+        <div className="auth-company-banner">{t("auth.loggingInTo", { name: company.name })}</div>
         <div className="mode-toggle">
           <button
             type="button"

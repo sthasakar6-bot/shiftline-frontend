@@ -68,15 +68,7 @@ export default function ForgotPasswordPage() {
       <AuthBrand />
       <form className="auth-form" onSubmit={handleSubmit}>
         <h1>{t("auth.forgotPageTitle")}</h1>
-        <div className="auth-company-banner">
-          <span>{t("auth.loggingInTo", { name: company.name })}</span>
-          <button
-            type="button"
-            onClick={() => navigate("/select-company", { state: { returnTo: "/forgot-password" } })}
-          >
-            {t("auth.switchCompany")}
-          </button>
-        </div>
+        <div className="auth-company-banner">{t("auth.loggingInTo", { name: company.name })}</div>
         <p className="hint">{t("auth.forgotHint")}</p>
         {error && <div className="error">{error}</div>}
         <label>

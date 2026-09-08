@@ -18,7 +18,7 @@ export default function ProtectedRoute({
     return <div className="loading">{t("common.loading")}</div>;
   }
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/select-company" replace />;
   }
   if (requireRole && user.role !== requireRole) {
     return <Navigate to="/" replace />;

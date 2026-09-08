@@ -8,7 +8,6 @@ import {
   Bell,
   BellOff,
   User as UserIcon,
-  Building2,
 } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import Avatar from "./Avatar";
@@ -99,16 +98,6 @@ export default function UserBox() {
             </button>
           )}
           {pushError && <div className="error" style={{ padding: "0 14px 8px" }}>{pushError}</div>}
-          <button
-            onClick={() => {
-              logout();
-              navigate("/select-company");
-              setOpen(false);
-            }}
-          >
-            <Building2 size={16} />
-            {t("userBox.switchCompany")}
-          </button>
           <button onClick={logout}>
             <LogOut size={16} />
             {t("userBox.logOut")}
