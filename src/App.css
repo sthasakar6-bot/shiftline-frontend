@@ -330,6 +330,17 @@
   min-height: 100svh;
 }
 
+.app-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-sidebar {
+  display: none;
+}
+
 .ptr-indicator {
   position: fixed;
   top: 0;
@@ -680,6 +691,62 @@
   line-height: 13px;
   text-align: center;
   box-shadow: 0 0 0 1px rgba(255, 59, 48, 0.35);
+}
+
+/* ---- Desktop layout: sidebar nav instead of the mobile bottom tab bar ---- */
+
+@media (min-width: 900px) {
+  .app-body {
+    flex-direction: row;
+  }
+
+  .app-sidebar {
+    display: flex;
+  }
+
+  .tab-bar {
+    display: none;
+  }
+
+  .app-content {
+    padding-bottom: 24px;
+  }
+}
+
+.app-sidebar {
+  flex-direction: column;
+  width: 220px;
+  flex-shrink: 0;
+  padding: 20px 12px;
+  gap: 2px;
+  background: var(--panel-bg);
+  border-right: 1px solid var(--border);
+}
+
+.app-sidebar button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.app-sidebar button.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.sidebar-icon {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
 }
 
 .app-header-actions {

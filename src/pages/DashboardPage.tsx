@@ -7,6 +7,7 @@ import AppLogo from "../components/AppLogo";
 import QuickAccessSearch from "../components/QuickAccessSearch";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import TabBar, { type Tab } from "../components/TabBar";
+import Sidebar from "../components/Sidebar";
 import DashboardHome from "../components/DashboardHome";
 import ShiftsSection from "../components/ShiftsSection";
 import AttendanceSection from "../components/AttendanceSection";
@@ -73,19 +74,23 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="app-content">
-        {active === "home" && <DashboardHome />}
-        {active === "roster" && <ShiftsSection />}
-        {active === "attendance" && <AttendanceSection />}
-        {active === "leave" && <LeaveSection />}
-        {active === "notifications" && (
-          <NotificationsSection
-            notifications={notifications}
-            loading={notifLoading}
-            onReload={loadNotifications}
-          />
-        )}
-      </main>
+      <div className="app-body">
+        <Sidebar tabs={tabs} active={active} onChange={setActive} />
+
+        <main className="app-content">
+          {active === "home" && <DashboardHome />}
+          {active === "roster" && <ShiftsSection />}
+          {active === "attendance" && <AttendanceSection />}
+          {active === "leave" && <LeaveSection />}
+          {active === "notifications" && (
+            <NotificationsSection
+              notifications={notifications}
+              loading={notifLoading}
+              onReload={loadNotifications}
+            />
+          )}
+        </main>
+      </div>
 
       <TabBar tabs={tabs} active={active} onChange={setActive} fabKey="attendance" />
     </div>

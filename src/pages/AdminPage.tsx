@@ -6,6 +6,7 @@ import UserBox from "../components/UserBox";
 import QuickAccessSearch from "../components/QuickAccessSearch";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import TabBar, { type Tab } from "../components/TabBar";
+import Sidebar from "../components/Sidebar";
 import ManagerSection from "../components/ManagerSection";
 import InvitesSection from "../components/InvitesSection";
 import PasswordResetsSection from "../components/PasswordResetsSection";
@@ -75,31 +76,35 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <main className="app-content">
-        {active === "team" && <ManagerSection />}
-        {active === "roster" && <RosterSection />}
-        {active === "invite" && (
-          <>
-            <InvitesSection />
-            <PasswordResetsSection />
-          </>
-        )}
-        {active === "leave" && <LeaveApprovalsSection />}
-        {active === "attendance" && <AttendanceTrackingSection />}
-        {active === "summary" && (
-          <>
-            <EmployeeSummarySection />
-            <BackupOverviewSection />
-          </>
-        )}
-        {active === "alerts" && (
-          <NotificationsSection
-            notifications={notifications}
-            loading={notifLoading}
-            onReload={loadNotifications}
-          />
-        )}
-      </main>
+      <div className="app-body">
+        <Sidebar tabs={tabs} active={active} onChange={setActive} />
+
+        <main className="app-content">
+          {active === "team" && <ManagerSection />}
+          {active === "roster" && <RosterSection />}
+          {active === "invite" && (
+            <>
+              <InvitesSection />
+              <PasswordResetsSection />
+            </>
+          )}
+          {active === "leave" && <LeaveApprovalsSection />}
+          {active === "attendance" && <AttendanceTrackingSection />}
+          {active === "summary" && (
+            <>
+              <EmployeeSummarySection />
+              <BackupOverviewSection />
+            </>
+          )}
+          {active === "alerts" && (
+            <NotificationsSection
+              notifications={notifications}
+              loading={notifLoading}
+              onReload={loadNotifications}
+            />
+          )}
+        </main>
+      </div>
 
       <TabBar tabs={tabs} active={active} onChange={setActive} />
     </div>
