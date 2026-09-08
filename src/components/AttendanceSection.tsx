@@ -279,7 +279,7 @@ export default function AttendanceSection() {
             {t("attendance.clockIn")}
           </button>
           {tooEarly && selectedShift && (
-            <p className="hint">
+            <p className="shift-clock-hint">
               {t("attendance.tooEarly", { time: formatTime(selectedShift.startsAt) })}
             </p>
           )}
