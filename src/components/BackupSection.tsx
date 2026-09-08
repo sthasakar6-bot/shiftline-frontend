@@ -74,14 +74,13 @@ export default function BackupSection() {
   const script = info ? buildScript(backupUrl) : "";
 
   return (
-    <section className="panel">
-      <div className="panel-title">
+    <div className="backup-subsection">
+      <div className="panel-subtitle">
         <span className="panel-title-icon">
-          <Laptop size={17} />
+          <Laptop size={15} />
         </span>
-        <h2>{t("backup.title")}</h2>
+        <h3>{t("backup.title")}</h3>
       </div>
-      <p className="hint">{t("backup.intro")}</p>
       {error && <div className="error">{error}</div>}
 
       {!info ? (
@@ -133,7 +132,7 @@ export default function BackupSection() {
           </div>
 
           <div className="backup-setup">
-            <h3>{t("backup.setupTitle")}</h3>
+            <h4>{t("backup.setupTitle")}</h4>
             <ol className="install-steps">
               <li>{t("backup.setupStep1")}</li>
               <li>{t("backup.setupStep2")}</li>
@@ -150,7 +149,6 @@ export default function BackupSection() {
               {t("backup.revoke")}
             </button>
           </div>
-          <p className="hint">{t("backup.regenerateHint")}</p>
         </>
       )}
 
@@ -164,6 +162,6 @@ export default function BackupSection() {
           onCancel={() => setConfirmRevoke(false)}
         />
       )}
-    </section>
+    </div>
   );
 }

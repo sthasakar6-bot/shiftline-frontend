@@ -13,8 +13,7 @@ import RosterSection from "../components/RosterSection";
 import LeaveApprovalsSection from "../components/LeaveApprovalsSection";
 import AttendanceTrackingSection from "../components/AttendanceTrackingSection";
 import EmployeeSummarySection from "../components/EmployeeSummarySection";
-import BackupSection from "../components/BackupSection";
-import BackupHistorySection from "../components/BackupHistorySection";
+import BackupOverviewSection from "../components/BackupOverviewSection";
 import NotificationsSection from "../components/NotificationsSection";
 import { api } from "../api/client";
 import type { Notification } from "../api/types";
@@ -90,8 +89,7 @@ export default function AdminPage() {
         {active === "summary" && (
           <>
             <EmployeeSummarySection />
-            <BackupHistorySection />
-            <BackupSection />
+            <BackupOverviewSection />
           </>
         )}
         {active === "alerts" && (

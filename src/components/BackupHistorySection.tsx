@@ -44,15 +44,14 @@ export default function BackupHistorySection() {
   }
 
   return (
-    <section className="panel">
-      <div className="panel-title">
+    <div className="backup-subsection">
+      <div className="panel-subtitle">
         <span className="panel-title-icon">
-          <Cloud size={17} />
+          <Cloud size={15} />
         </span>
-        <h2>{t("backup.autoTitle")}</h2>
+        <h3>{t("backup.autoTitle")}</h3>
         <span className="panel-title-badge">{t("backup.recommended")}</span>
       </div>
-      <p className="hint">{t("backup.autoIntro")}</p>
       {error && <div className="error">{error}</div>}
 
       <ul className="list">
@@ -82,6 +81,6 @@ export default function BackupHistorySection() {
           <li className="empty">{t("backup.autoEmpty")}</li>
         )}
       </ul>
-    </section>
+    </div>
   );
 }

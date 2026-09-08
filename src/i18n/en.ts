@@ -262,9 +262,8 @@ export default {
     statusAccepted: "accepted",
   },
   backup: {
-    title: "Automatic Backup",
-    intro:
-      "Generate a backup key and use it in a scheduled script on your own computer to automatically save attendance, roster, and leave data as a file, on whatever interval you choose — completely hands-off once set up.",
+    overviewTitle: "Backup",
+    title: "Local Backup",
     noKey: "No backup key generated yet.",
     generate: "Generate backup key",
     regenerate: "Regenerate key",
@@ -289,9 +288,7 @@ export default {
     generateFailed: "Failed to generate backup key",
     revokeFailed: "Failed to revoke backup key",
     recommended: "Recommended",
-    autoTitle: "Automatic Cloud Backups",
-    autoIntro:
-      "Runs on the server every hour regardless of whether your computer is on — pick any past backup below to download it. Kept for 30 days.",
+    autoTitle: "Cloud Backup",
     autoEmpty: "No automatic backups yet — the first one appears within an hour.",
     autoDownload: "Download",
     autoLoadFailed: "Failed to load backup history",

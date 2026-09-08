@@ -262,9 +262,8 @@ export default {
     statusAccepted: "geaccepteerd",
   },
   backup: {
-    title: "Automatische back-up",
-    intro:
-      "Genereer een back-upsleutel en gebruik deze in een geplande script op je eigen computer om aanwezigheid, rooster en verlofgegevens automatisch als bestand op te slaan, op het interval dat je zelf kiest — volledig automatisch zodra het is ingesteld.",
+    overviewTitle: "Back-up",
+    title: "Lokale back-up",
     noKey: "Nog geen back-upsleutel gegenereerd.",
     generate: "Back-upsleutel genereren",
     regenerate: "Sleutel opnieuw genereren",
@@ -290,9 +289,7 @@ export default {
     generateFailed: "Back-upsleutel genereren is mislukt",
     revokeFailed: "Back-upsleutel intrekken is mislukt",
     recommended: "Aanbevolen",
-    autoTitle: "Automatische cloud-back-ups",
-    autoIntro:
-      "Draait elk uur op de server, ongeacht of je computer aanstaat — kies hieronder een eerdere back-up om te downloaden. 30 dagen bewaard.",
+    autoTitle: "Cloud-back-up",
     autoEmpty: "Nog geen automatische back-ups — de eerste verschijnt binnen een uur.",
     autoDownload: "Downloaden",
     autoLoadFailed: "Back-upgeschiedenis laden is mislukt",
