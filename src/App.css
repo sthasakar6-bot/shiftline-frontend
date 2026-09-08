@@ -2034,6 +2034,15 @@
   animation: greeting-in 0.5s ease 0.05s both;
 }
 
+.shift-card-clickable {
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.shift-card-clickable:active {
+  transform: scale(0.98);
+}
+
 .shift-card-title {
   margin: 0 0 6px;
   font-size: 15px;

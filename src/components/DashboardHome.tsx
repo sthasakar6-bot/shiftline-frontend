@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Clock, Palmtree, WifiOff } from "lucide-react";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
@@ -31,6 +32,7 @@ function formatElapsed(ms: number): string {
 
 export default function DashboardHome() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [records, setRecords] = useState<DisplayAttendance[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
@@ -145,7 +147,18 @@ export default function DashboardHome() {
           )}
         </section>
       ) : featuredShift ? (
-        <section className="panel shift-card">
+        <section
+          className="panel shift-card shift-card-clickable"
+          role="button"
+          tabIndex={0}
+          onClick={() => navigate("/?tab=attendance")}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              navigate("/?tab=attendance");
+            }
+          }}
+        >
           <h3 className="shift-card-title">
             {isFeaturedToday ? t("home.todaysShift") : t("home.nextShift")}
           </h3>
