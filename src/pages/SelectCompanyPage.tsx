@@ -10,6 +10,7 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 // company that doesn't have its own icon set here yet.
 const COMPANY_LOGO: Record<string, string> = {
   "super-sushi": "/logo-super-sushi-mark.png",
+  zuiderzoet: "/logo-zuiderzoet.png",
 };
 
 export default function SelectCompanyPage() {
