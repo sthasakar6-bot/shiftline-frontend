@@ -42,7 +42,6 @@ export default {
   },
   auth: {
     selectCompanyTitle: "आफ्नो कम्पनी छान्नुहोस्",
-    selectCompanyHint: "जारी राख्न तपाईं कुन कम्पनीको लागि काम गर्नुहुन्छ छान्नुहोस्।",
     loadingCompanies: "कम्पनीहरू लोड हुँदैछ...",
     noCompanies: "कुनै कम्पनी फेला परेन।",
     loadCompaniesFailed: "कम्पनीहरू लोड गर्न असफल भयो",

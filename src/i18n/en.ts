@@ -42,7 +42,6 @@ export default {
   },
   auth: {
     selectCompanyTitle: "Select your company",
-    selectCompanyHint: "Choose which company you work for to continue.",
     loadingCompanies: "Loading companies...",
     noCompanies: "No companies found.",
     loadCompaniesFailed: "Failed to load companies",

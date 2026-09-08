@@ -42,7 +42,6 @@ export default {
   },
   auth: {
     selectCompanyTitle: "Selecteer je bedrijf",
-    selectCompanyHint: "Kies voor welk bedrijf je werkt om verder te gaan.",
     loadingCompanies: "Bedrijven laden...",
     noCompanies: "Geen bedrijven gevonden.",
     loadCompaniesFailed: "Bedrijven laden is mislukt",
