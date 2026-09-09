@@ -313,7 +313,7 @@ export default {
     hoursScheduled: "{{hours}} घण्टा",
     scheduledAcross_one: "{{count}} शिफ्टमा तालिका बनाइयो",
     scheduledAcross_other: "{{count}} शिफ्टहरूमा तालिका बनाइयो",
-    downloadCsv: "CSV डाउनलोड गर्नुहोस्",
+    downloadPdf: "PDF डाउनलोड गर्नुहोस्",
     shifts: "शिफ्टहरू",
     leave: "बिदा",
     noShiftsRange: "यो दायरामा कुनै शिफ्ट छैन।",

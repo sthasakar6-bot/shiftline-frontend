@@ -6,7 +6,6 @@ import type { LeaveRequest, Shift, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { formatTime } from "../lib/formatDate";
 import { getDateLocale } from "../i18n";
-import { downloadCsv } from "../lib/csv";
 
 function startOfMonth(): string {
   const d = new Date();
@@ -31,6 +30,7 @@ export default function EmployeeSummarySection() {
   const [rangeEnd, setRangeEnd] = useState(today());
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
+  const [pdfBusy, setPdfBusy] = useState(false);
 
   const youLabel = `(${t("common.you")})`;
   const people = user ? [{ id: user.id, name: `${user.name} ${youLabel}` }, ...reports] : reports;
@@ -79,33 +79,62 @@ export default function EmployeeSummarySection() {
   const totalHours = shiftsInRange.reduce((sum, s) => sum + shiftHours(s), 0);
   const selectedPerson = people.find((p) => String(p.id) === selected);
 
-  function handleDownloadCsv() {
+  async function handleDownloadPdf() {
     if (!selectedPerson) return;
-    const rows: string[][] = [
-      [t("summary.employee"), selectedPerson.name],
-      [t("summary.csvDateRange"), `${rangeStart} to ${rangeEnd}`],
-      [],
-      [t("summary.shifts")],
-      [t("summary.csvDate"), t("summary.csvStart"), t("summary.csvEnd"), t("summary.csvBreakMin"), t("summary.csvHours")],
-      ...shiftsInRange.map((s) => [
-        new Date(s.startsAt).toLocaleDateString(getDateLocale()),
-        formatTime(s.startsAt),
-        formatTime(s.endsAt),
-        String(s.breakMinutes ?? 0),
-        shiftHours(s).toFixed(2),
-      ]),
-      ["", "", "", t("summary.csvTotalHours"), totalHours.toFixed(2)],
-      [],
-      [t("summary.csvLeaveRequests")],
-      [t("summary.csvType"), t("summary.csvStartDate"), t("summary.csvEndDate"), t("summary.csvStatus")],
-      ...leaveInRange.map((l) => [
-        t(`leave.${l.type}`),
-        new Date(l.startDate).toLocaleDateString(getDateLocale()),
-        new Date(l.endDate).toLocaleDateString(getDateLocale()),
-        t(`leave.${l.status}`),
-      ]),
-    ];
-    downloadCsv(`${selectedPerson.name.replace(/\s+/g, "-")}-${rangeStart}-to-${rangeEnd}.csv`, rows);
+    setPdfBusy(true);
+    try {
+      // Loaded on demand -- jsPDF pulls in a heavy html2canvas/dompurify
+      // dependency chain that only a manager exporting a summary needs.
+      const { downloadSummaryPdf } = await import("../lib/summaryPdf");
+      await downloadSummaryPdf({
+        businessName: user?.companyName,
+        employeeName: selectedPerson.name,
+        rangeLabel: `${rangeStart} — ${rangeEnd}`,
+        generatedByLine: t("adminRoster.pdfGeneratedBy", {
+          date: new Date().toLocaleDateString(getDateLocale(), {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+          name: user?.name ?? "",
+        }),
+        shiftsTitle: t("summary.shifts"),
+        shiftsColumns: [
+          t("summary.csvDate"),
+          t("summary.csvStart"),
+          t("summary.csvEnd"),
+          t("summary.csvBreakMin"),
+          t("summary.csvHours"),
+        ],
+        shiftRows: shiftsInRange.map((s) => ({
+          date: new Date(s.startsAt).toLocaleDateString(getDateLocale()),
+          start: formatTime(s.startsAt),
+          end: formatTime(s.endsAt),
+          breakMin: String(s.breakMinutes ?? 0),
+          hours: shiftHours(s).toFixed(2),
+        })),
+        totalHoursLabel: t("summary.csvTotalHours"),
+        totalHours: totalHours.toFixed(2),
+        noShiftsText: t("summary.noShiftsRange"),
+        leaveTitle: t("summary.leave"),
+        leaveColumns: [
+          t("summary.csvType"),
+          t("summary.csvStartDate"),
+          t("summary.csvEndDate"),
+          t("summary.csvStatus"),
+        ],
+        leaveRows: leaveInRange.map((l) => ({
+          type: t(`leave.${l.type}`),
+          startDate: new Date(l.startDate).toLocaleDateString(getDateLocale()),
+          endDate: new Date(l.endDate).toLocaleDateString(getDateLocale()),
+          status: t(`leave.${l.status}`),
+        })),
+        noLeaveText: t("summary.noLeaveRange"),
+        fileName: `Shiftline-Summary_${selectedPerson.name.replace(/\s+/g, "-")}_${rangeStart}_to_${rangeEnd}.pdf`,
+      });
+    } finally {
+      setPdfBusy(false);
+    }
   }
 
   return (
@@ -147,7 +176,9 @@ export default function EmployeeSummarySection() {
             {t("summary.scheduledAcross", { count: shiftsInRange.length })}
           </p>
 
-          <button onClick={handleDownloadCsv}>{t("summary.downloadCsv")}</button>
+          <button onClick={handleDownloadPdf} disabled={pdfBusy}>
+            {t("summary.downloadPdf")}
+          </button>
 
           <h3>{t("summary.shifts")}</h3>
           <ul className="list">

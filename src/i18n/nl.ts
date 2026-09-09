@@ -313,7 +313,7 @@ export default {
     hoursScheduled: "{{hours}} uur",
     scheduledAcross_one: "ingepland over {{count}} dienst",
     scheduledAcross_other: "ingepland over {{count}} diensten",
-    downloadCsv: "CSV downloaden",
+    downloadPdf: "PDF downloaden",
     shifts: "Diensten",
     leave: "Verlof",
     noShiftsRange: "Geen diensten in deze periode.",

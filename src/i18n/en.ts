@@ -312,7 +312,7 @@ export default {
     hoursScheduled: "{{hours}} hours",
     scheduledAcross_one: "scheduled across {{count}} shift",
     scheduledAcross_other: "scheduled across {{count}} shifts",
-    downloadCsv: "Download CSV",
+    downloadPdf: "Download PDF",
     shifts: "Shifts",
     leave: "Leave",
     noShiftsRange: "No shifts in this range.",
