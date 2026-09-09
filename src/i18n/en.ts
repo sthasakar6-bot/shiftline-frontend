@@ -61,6 +61,8 @@ export default {
     forgotPassword: "Forgot password?",
     firstName: "First name",
     lastName: "Last name",
+    phoneOptional: "Phone number (optional)",
+    addressOptional: "Address (optional)",
     forgotPageTitle: "Forgot password",
     forgotHint:
       "Enter your account email. Your manager will be notified and can send you a link to set a new password.",
@@ -253,6 +255,16 @@ export default {
     createFailed: "Failed to create employee",
     credentialsCallout: "{{name}}'s account is ready — share these with them",
     copyCredentials: "Copy credentials",
+  },
+  completeAccount: {
+    title: "Finish setting up your account",
+    hint: "Set a password only you know, and add your contact details for your manager's records.",
+    newPassword: "New password",
+    confirmPassword: "Confirm password",
+    passwordMismatch: "Passwords don't match",
+    save: "Save and continue",
+    saving: "Saving...",
+    saveFailed: "Failed to save your details",
   },
   backup: {
     overviewTitle: "Backup",

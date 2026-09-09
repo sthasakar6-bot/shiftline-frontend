@@ -302,4 +302,9 @@ export const api = {
     }),
   updatePhone: (phone: string) =>
     request<void>("/api/auth/phone", { method: "PATCH", body: JSON.stringify({ phone }) }),
+  completeOnboarding: (data: { password: string; phone?: string; address?: string }) =>
+    request<void>("/api/auth/complete-onboarding", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
 };

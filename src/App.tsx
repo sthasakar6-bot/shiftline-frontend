@@ -5,6 +5,7 @@ import SelectCompanyPage from "./pages/SelectCompanyPage";
 import LoginPage from "./pages/LoginPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import CompleteAccountPage from "./pages/CompleteAccountPage";
 import DashboardPage from "./pages/DashboardPage";
 import AdminPage from "./pages/AdminPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -27,6 +28,14 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route
+              path="/complete-account"
+              element={
+                <ProtectedRoute>
+                  <CompleteAccountPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/"
               element={

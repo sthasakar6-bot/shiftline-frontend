@@ -61,6 +61,8 @@ export default {
     forgotPassword: "Wachtwoord vergeten?",
     firstName: "Voornaam",
     lastName: "Achternaam",
+    phoneOptional: "Telefoonnummer (optioneel)",
+    addressOptional: "Adres (optioneel)",
     forgotPageTitle: "Wachtwoord vergeten",
     forgotHint:
       "Voer je accounte-mail in. Je manager wordt op de hoogte gesteld en kan je een link sturen om een nieuw wachtwoord in te stellen.",
@@ -253,6 +255,16 @@ export default {
     createFailed: "Medewerker aanmaken is mislukt",
     credentialsCallout: "Het account van {{name}} is klaar — deel dit met hen",
     copyCredentials: "Gegevens kopiëren",
+  },
+  completeAccount: {
+    title: "Rond je account instellen af",
+    hint: "Stel een wachtwoord in dat alleen jij kent, en voeg je contactgegevens toe voor de administratie van je manager.",
+    newPassword: "Nieuw wachtwoord",
+    confirmPassword: "Wachtwoord bevestigen",
+    passwordMismatch: "Wachtwoorden komen niet overeen",
+    save: "Opslaan en doorgaan",
+    saving: "Bezig met opslaan...",
+    saveFailed: "Je gegevens opslaan is mislukt",
   },
   backup: {
     overviewTitle: "Back-up",

@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import OnboardingPrompt from "./OnboardingPrompt";
@@ -13,6 +13,7 @@ export default function ProtectedRoute({
 }) {
   const { t } = useTranslation();
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return <div className="loading">{t("common.loading")}</div>;
@@ -20,12 +21,19 @@ export default function ProtectedRoute({
   if (!user) {
     return <Navigate to="/select-company" replace />;
   }
+  // A manager-created account must set its own password and fill in contact
+  // details before doing anything else -- force this before any other page.
+  if (user.needsOnboarding && location.pathname !== "/complete-account") {
+    return <Navigate to="/complete-account" replace />;
+  }
   if (requireRole && user.role !== requireRole) {
     return <Navigate to="/" replace />;
   }
   return (
     <>
-      <OnboardingPrompt />
+      {/* Don't compete with the mandatory account-setup form -- the "add to
+          home screen" / notifications pitch can wait until after it. */}
+      {!user.needsOnboarding && <OnboardingPrompt />}
       {children}
     </>
   );

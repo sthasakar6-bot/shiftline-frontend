@@ -6,6 +6,7 @@ export interface User {
   hasAvatar: boolean;
   phone: string | null;
   address: string | null;
+  needsOnboarding: boolean;
   companyId: number;
   companyName: string;
   companySlug: string;
