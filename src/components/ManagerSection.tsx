@@ -16,10 +16,16 @@ export default function ManagerSection() {
   const [reports, setReports] = useState<UserSummary[]>([]);
   const [employees, setEmployees] = useState<UserSummary[]>([]);
   const [removeTarget, setRemoveTarget] = useState<UserSummary | null>(null);
+  const [deactivateTarget, setDeactivateTarget] = useState<UserSummary | null>(null);
   const [detailTargetId, setDetailTargetId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [employeesLoading, setEmployeesLoading] = useState(true);
+
+  // Former employees
+  const [formerEmployees, setFormerEmployees] = useState<UserSummary[]>([]);
+  const [showFormerEmployees, setShowFormerEmployees] = useState(false);
+  const [formerLoading, setFormerLoading] = useState(true);
 
   // Contract management
   const [contractReport, setContractReport] = useState("");
@@ -47,8 +53,17 @@ export default function ManagerSection() {
       .finally(() => setEmployeesLoading(false));
   }
 
+  function loadFormerEmployees() {
+    api
+      .listFormerEmployees()
+      .then(setFormerEmployees)
+      .catch(() => {})
+      .finally(() => setFormerLoading(false));
+  }
+
   useEffect(loadReports, []);
   useEffect(loadEmployees, []);
+  useEffect(loadFormerEmployees, []);
 
   useEffect(() => {
     if (detailTargetId === null) return;
@@ -79,6 +94,31 @@ export default function ManagerSection() {
       setError(err instanceof ApiError ? err.message : t("team.removeFailed"));
     } finally {
       setRemoveTarget(null);
+    }
+  }
+
+  async function handleDeactivate(id: number) {
+    setError(null);
+    try {
+      await api.deactivateEmployee(id);
+      loadReports();
+      loadEmployees();
+      loadFormerEmployees();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t("team.deactivateFailed"));
+    } finally {
+      setDeactivateTarget(null);
+    }
+  }
+
+  async function handleReactivate(id: number) {
+    setError(null);
+    try {
+      await api.reactivateEmployee(id);
+      loadEmployees();
+      loadFormerEmployees();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t("team.reactivateFailed"));
     }
   }
 
@@ -233,6 +273,9 @@ export default function ManagerSection() {
                 ) : (
                   <button onClick={() => handleAddToTeam(e.id)}>{t("team.addToTeam")}</button>
                 )}
+                <button className="danger-text" onClick={() => setDeactivateTarget(e)}>
+                  {t("team.removePermanently")}
+                </button>
               </span>
             </li>
           ))}
@@ -241,6 +284,33 @@ export default function ManagerSection() {
         )}
       </ul>
       {error && <div className="error">{error}</div>}
+
+      <button
+        type="button"
+        className="link-btn"
+        onClick={() => setShowFormerEmployees((v) => !v)}
+      >
+        {showFormerEmployees
+          ? t("team.hideFormerEmployees")
+          : t("team.showFormerEmployees", { count: formerEmployees.length })}
+      </button>
+      {showFormerEmployees && (
+        <ul className="list">
+          {formerLoading && <SkeletonRows count={2} avatar={false} />}
+          {!formerLoading &&
+            formerEmployees.map((e) => (
+              <li key={e.id}>
+                <span>{e.name}</span>
+                <span className="actions">
+                  <button onClick={() => handleReactivate(e.id)}>{t("team.restore")}</button>
+                </span>
+              </li>
+            ))}
+          {!formerLoading && formerEmployees.length === 0 && (
+            <li className="empty">{t("team.noFormerEmployees")}</li>
+          )}
+        </ul>
+      )}
 
       {detailTarget && (
         <EmployeeDetailModal employee={detailTarget} onClose={() => setDetailTargetId(null)} />
@@ -254,6 +324,17 @@ export default function ManagerSection() {
           danger
           onConfirm={() => handleRemoveFromTeam(removeTarget.id)}
           onCancel={() => setRemoveTarget(null)}
+        />
+      )}
+
+      {deactivateTarget && (
+        <ConfirmDialog
+          title={t("team.removePermanentlyQuestion")}
+          message={t("team.removePermanentlyConfirmMessage", { name: deactivateTarget.name })}
+          confirmLabel={t("team.removePermanently")}
+          danger
+          onConfirm={() => handleDeactivate(deactivateTarget.id)}
+          onCancel={() => setDeactivateTarget(null)}
         />
       )}
 

@@ -133,6 +133,11 @@ export const api = {
     request<UserSummary>(`/api/users/${id}/manager`, { method: "PATCH" }),
   removeFromTeam: (id: number) =>
     request<UserSummary>(`/api/users/${id}/manager`, { method: "DELETE" }),
+  listFormerEmployees: () => request<UserSummary[]>("/api/users/former-employees"),
+  deactivateEmployee: (id: number) =>
+    request<UserSummary>(`/api/users/${id}/deactivate`, { method: "POST" }),
+  reactivateEmployee: (id: number) =>
+    request<UserSummary>(`/api/users/${id}/reactivate`, { method: "POST" }),
   uploadAvatar: (file: File) => {
     const formData = new FormData();
     formData.append("avatar", file);

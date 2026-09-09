@@ -21,6 +21,7 @@ export interface Company {
 
 export interface UserSummary extends User {
   managerId: number | null;
+  active: boolean;
   online: boolean;
 }
 

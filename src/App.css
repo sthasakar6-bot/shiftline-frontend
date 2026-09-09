@@ -2692,6 +2692,21 @@
   color: var(--text);
 }
 
+.danger-text {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 4px 0;
+  color: var(--accent);
+  font-size: 13px;
+  text-decoration: underline;
+  align-self: flex-start;
+}
+
 .profile-card {
   padding: 0;
   overflow: hidden;
