@@ -2723,6 +2723,10 @@
   display: inline-block;
 }
 
+.complete-account-avatar {
+  align-self: center;
+}
+
 .profile-avatar-wrap .user-avatar {
   border: 4px solid var(--panel-bg);
   font-size: 32px;

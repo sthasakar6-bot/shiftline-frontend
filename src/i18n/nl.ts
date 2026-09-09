@@ -259,6 +259,8 @@ export default {
   completeAccount: {
     title: "Rond je account instellen af",
     hint: "Stel een wachtwoord in dat alleen jij kent, en voeg je contactgegevens toe voor de administratie van je manager.",
+    photoRequired: "Een profielfoto is verplicht — tik op het camera-icoon om er een toe te voegen.",
+    photoUploaded: "Foto toegevoegd.",
     newPassword: "Nieuw wachtwoord",
     confirmPassword: "Wachtwoord bevestigen",
     passwordMismatch: "Wachtwoorden komen niet overeen",

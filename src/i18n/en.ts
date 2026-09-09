@@ -259,6 +259,8 @@ export default {
   completeAccount: {
     title: "Finish setting up your account",
     hint: "Set a password only you know, and add your contact details for your manager's records.",
+    photoRequired: "A profile picture is required — tap the camera icon to add one.",
+    photoUploaded: "Photo added.",
     newPassword: "New password",
     confirmPassword: "Confirm password",
     passwordMismatch: "Passwords don't match",
