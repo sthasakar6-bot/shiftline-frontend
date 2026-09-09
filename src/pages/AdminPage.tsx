@@ -50,16 +50,31 @@ export default function AdminPage() {
   }, [searchParams]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+  // Leave requests notify the manager with this exact url (see leave/service.ts),
+  // so it doubles as a reliable filter for "new leave request" badges/dots.
+  const unreadLeaveNotifications = notifications.filter(
+    (n) => !n.read && n.url === "/admin?tab=leave",
+  );
 
   useEffect(() => {
     updateAppBadge(unreadCount);
   }, [unreadCount]);
 
+  // Looking at the Leave tab counts as having seen those requests -- clear
+  // their badge the same way opening a notification would.
+  useEffect(() => {
+    if (active !== "leave") return;
+    const unread = notifications.filter((n) => !n.read && n.url === "/admin?tab=leave");
+    if (unread.length === 0) return;
+    Promise.all(unread.map((n) => api.markNotificationRead(n.id))).then(loadNotifications);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, notifications]);
+
   const tabs: Tab[] = [
     { key: "team", label: t("nav.team"), icon: Users },
     { key: "roster", label: t("nav.roster"), icon: CalendarDays },
     { key: "invite", label: t("nav.invite"), icon: UserPlus },
-    { key: "leave", label: t("nav.leave"), icon: Palmtree },
+    { key: "leave", label: t("nav.leave"), icon: Palmtree, badge: unreadLeaveNotifications.length },
     { key: "attendance", label: t("nav.attendance"), icon: Clock },
     { key: "summary", label: t("nav.summary"), icon: BarChart3 },
     { key: "alerts", label: t("nav.alerts"), icon: Bell, badge: unreadCount },
