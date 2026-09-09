@@ -111,60 +111,62 @@ export default function DateRangePicker({
       {open && (
         <div className="modal-overlay" onClick={() => setOpen(false)}>
           <div className="modal date-range-modal" onClick={(e) => e.stopPropagation()}>
-            <p className="hint date-range-hint">
-              {singleDay
-                ? t("leave.tapDay")
-                : pendingStart
-                  ? t("leave.tapLastDay")
-                  : t("leave.tapFirstDay")}
-            </p>
+            <div className="modal-scroll-body">
+              <p className="hint date-range-hint">
+                {singleDay
+                  ? t("leave.tapDay")
+                  : pendingStart
+                    ? t("leave.tapLastDay")
+                    : t("leave.tapFirstDay")}
+              </p>
 
-            <div className="roster-week-nav">
-              <button
-                type="button"
-                className="roster-nav-btn"
-                onClick={() =>
-                  setMonthCursor(new Date(monthCursor.getFullYear(), monthCursor.getMonth() - 1, 1))
-                }
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <span className="roster-week-label">{monthLabel}</span>
-              <button
-                type="button"
-                className="roster-nav-btn"
-                onClick={() =>
-                  setMonthCursor(new Date(monthCursor.getFullYear(), monthCursor.getMonth() + 1, 1))
-                }
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
+              <div className="roster-week-nav">
+                <button
+                  type="button"
+                  className="roster-nav-btn"
+                  onClick={() =>
+                    setMonthCursor(new Date(monthCursor.getFullYear(), monthCursor.getMonth() - 1, 1))
+                  }
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <span className="roster-week-label">{monthLabel}</span>
+                <button
+                  type="button"
+                  className="roster-nav-btn"
+                  onClick={() =>
+                    setMonthCursor(new Date(monthCursor.getFullYear(), monthCursor.getMonth() + 1, 1))
+                  }
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
 
-            <div className="calendar-grid">
-              {weekdayLabels().map((w, i) => (
-                <div key={i} className="calendar-weekday">
-                  {w}
-                </div>
-              ))}
-              {cells.map((day, i) => {
-                if (!day) return <div key={`blank-${i}`} className="calendar-day empty" />;
-                const time = day.getTime();
-                const isStart = start && time === start.getTime();
-                const isEnd = end && time === end.getTime();
-                const inRange = start && end && time > start.getTime() && time < end.getTime();
-                const isToday = time === todayLocal().getTime();
-                return (
-                  <button
-                    type="button"
-                    key={time}
-                    className={`calendar-day${isToday ? " today" : ""}${isStart || isEnd ? " range-endpoint" : ""}${inRange ? " in-range" : ""}`}
-                    onClick={() => handlePick(day)}
-                  >
-                    <span className="calendar-day-num">{day.getDate()}</span>
-                  </button>
-                );
-              })}
+              <div className="calendar-grid">
+                {weekdayLabels().map((w, i) => (
+                  <div key={i} className="calendar-weekday">
+                    {w}
+                  </div>
+                ))}
+                {cells.map((day, i) => {
+                  if (!day) return <div key={`blank-${i}`} className="calendar-day empty" />;
+                  const time = day.getTime();
+                  const isStart = start && time === start.getTime();
+                  const isEnd = end && time === end.getTime();
+                  const inRange = start && end && time > start.getTime() && time < end.getTime();
+                  const isToday = time === todayLocal().getTime();
+                  return (
+                    <button
+                      type="button"
+                      key={time}
+                      className={`calendar-day${isToday ? " today" : ""}${isStart || isEnd ? " range-endpoint" : ""}${inRange ? " in-range" : ""}`}
+                      onClick={() => handlePick(day)}
+                    >
+                      <span className="calendar-day-num">{day.getDate()}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="modal-actions">

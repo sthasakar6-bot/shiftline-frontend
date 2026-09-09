@@ -61,6 +61,12 @@ button {
   font-size: 14px;
   position: relative;
   overflow: hidden;
+  /* Tells the browser to treat a tap as a tap immediately instead of
+     waiting to see if it turns into a scroll/zoom gesture -- without
+     this, a button inside (or near) a scrollable area can have its tap
+     silently swallowed on real touchscreens if the finger moves even a
+     little, which a mouse click or an automated test never reproduces. */
+  touch-action: manipulation;
 }
 
 button:hover {
