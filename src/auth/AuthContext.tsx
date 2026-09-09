@@ -1,29 +1,11 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import {
-  api,
-  clearToken,
-  getSelectedCompany,
-  getToken,
-  setSelectedCompany,
-  setToken,
-} from "../api/client";
+import { api, clearToken, getSelectedCompany, getToken, setToken } from "../api/client";
 import type { User } from "../api/types";
-
-export interface RegisterInput {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  token: string;
-  phone?: string;
-  address?: string;
-}
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
-  register: (data: RegisterInput) => Promise<User>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -57,12 +39,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res.user;
   }
 
-  async function register(data: RegisterInput) {
-    const registered = await api.register(data);
-    setSelectedCompany({ id: registered.companyId, name: registered.companyName ?? "" });
-    return login(data.email, data.password);
-  }
-
   function logout() {
     clearToken();
     setUser(null);
@@ -74,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

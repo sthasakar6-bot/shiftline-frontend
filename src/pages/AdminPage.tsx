@@ -8,7 +8,7 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 import TabBar, { type Tab } from "../components/TabBar";
 import Sidebar from "../components/Sidebar";
 import ManagerSection from "../components/ManagerSection";
-import InvitesSection from "../components/InvitesSection";
+import AddEmployeeSection from "../components/AddEmployeeSection";
 import PasswordResetsSection from "../components/PasswordResetsSection";
 import RosterSection from "../components/RosterSection";
 import LeaveApprovalsSection from "../components/LeaveApprovalsSection";
@@ -99,7 +99,7 @@ export default function AdminPage() {
           {active === "roster" && <RosterSection />}
           {active === "invite" && (
             <>
-              <InvitesSection />
+              <AddEmployeeSection />
               <PasswordResetsSection />
             </>
           )}

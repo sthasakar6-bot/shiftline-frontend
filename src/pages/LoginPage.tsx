@@ -106,9 +106,6 @@ export default function LoginPage() {
         <p>
           <Link to="/forgot-password">{t("auth.forgotPassword")}</Link>
         </p>
-        <p>
-          {t("auth.noAccount")} <Link to="/register">{t("auth.register")}</Link>
-        </p>
       </form>
       <AuthFooter />
     </div>

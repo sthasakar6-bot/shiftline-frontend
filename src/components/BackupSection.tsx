@@ -104,7 +104,7 @@ export default function BackupSection() {
                   : t("backup.neverUsed")}
               </p>
 
-              <div className="invite-link-callout">
+              <div className="credentials-callout">
                 <span className="field-label">{t("backup.urlLabel")}</span>
                 <div className="inline-form">
                   <input value={backupUrl} readOnly />
@@ -120,7 +120,7 @@ export default function BackupSection() {
                 </div>
               </div>
 
-              <div className="invite-link-callout">
+              <div className="credentials-callout">
                 <span className="field-label">{t("backup.scriptLabel")}</span>
                 <pre className="backup-script">{script}</pre>
                 <button type="button" onClick={() => handleCopy("script", script)}>

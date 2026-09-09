@@ -4,7 +4,6 @@ import type {
   BackupTokenInfo,
   Company,
   Contract,
-  Invite,
   LeaveRequest,
   LoginResponse,
   Notification,
@@ -34,8 +33,8 @@ export function clearToken(): void {
 }
 
 // Remembered across visits, like a language or region picker -- chosen once
-// on the company-select screen and reused for every login/register/password
-// -reset attempt until the user explicitly switches companies.
+// on the company-select screen and reused for every login/password-reset
+// attempt until the user explicitly switches companies.
 export interface SelectedCompany {
   id: number;
   name: string;
@@ -111,27 +110,6 @@ async function requestBlob(path: string): Promise<Blob> {
 }
 
 export const api = {
-  register: (data: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    token: string;
-    phone?: string;
-    address?: string;
-  }) =>
-    request<{
-      id: number;
-      name: string;
-      email: string;
-      role: string;
-      companyId: number;
-      companyName: string;
-    }>("/api/auth/register", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-
   login: (email: string, password: string, companyId: number) =>
     request<LoginResponse>("/api/auth/login", {
       method: "POST",
@@ -143,6 +121,11 @@ export const api = {
   listCompanies: () => request<Company[]>("/api/companies"),
 
   listUsers: () => request<User[]>("/api/users"),
+  createEmployee: (data: { firstName: string; lastName: string; email: string; password: string }) =>
+    request<{ id: number; name: string; email: string }>("/api/users", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
   listReports: () => request<UserSummary[]>("/api/users/reports"),
   listEmployees: () => request<UserSummary[]>("/api/users/employees"),
   promoteUser: (id: number) => request<UserSummary>(`/api/users/${id}/promote`, { method: "POST" }),
@@ -293,12 +276,6 @@ export const api = {
     request<LeaveRequest>(`/api/users/${userId}/leave-requests/${requestId}`, {
       method: "DELETE",
     }),
-
-  createInvite: (email: string) =>
-    request<Invite>("/api/invites", { method: "POST", body: JSON.stringify({ email }) }),
-  listInvites: () => request<Invite[]>("/api/invites"),
-  getInviteByToken: (token: string) =>
-    request<{ email: string; companyName: string }>(`/api/invites/${token}`),
 
   subscribeToPush: (subscription: PushSubscriptionJSON) =>
     request<void>("/api/push/subscribe", { method: "POST", body: JSON.stringify(subscription) }),

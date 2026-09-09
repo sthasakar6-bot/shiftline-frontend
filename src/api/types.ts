@@ -94,15 +94,6 @@ export interface LoginResponse {
   user: User;
 }
 
-export interface Invite {
-  id: number;
-  email: string;
-  token: string;
-  status: "pending" | "accepted";
-  managerId: number;
-  expiresAt: string;
-  createdAt: string;
-}
 
 export interface PasswordResetRequest {
   id: number;

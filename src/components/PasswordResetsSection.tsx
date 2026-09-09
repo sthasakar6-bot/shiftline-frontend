@@ -36,7 +36,7 @@ export default function PasswordResetsSection() {
             <span>{r.employeeName}</span>
             <span className="actions">
               <button onClick={() => handleCopyLink(r.token)}>
-                {copiedToken === r.token ? t("invites.copied") : t("passwordResets.copyResetLink")}
+                {copiedToken === r.token ? t("common.copied") : t("passwordResets.copyResetLink")}
               </button>
             </span>
           </li>
