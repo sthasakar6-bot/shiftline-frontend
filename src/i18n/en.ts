@@ -139,7 +139,6 @@ export default {
     clockOut: "Clock Out",
     history: "History",
     noHistory: "No attendance history yet.",
-    selectShift: "Select a shift",
     pending: "Pending",
     inProgress: "In progress",
     clockInFailed: "Failed to clock in",

@@ -2292,11 +2292,6 @@
   background: var(--success);
 }
 
-.shift-card-select {
-  width: 100%;
-  margin-bottom: 12px;
-}
-
 .shift-clock-btn {
   width: 100%;
   padding: 14px;

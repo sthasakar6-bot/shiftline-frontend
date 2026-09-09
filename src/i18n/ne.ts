@@ -140,7 +140,6 @@ export default {
     clockOut: "क्लक आउट",
     history: "इतिहास",
     noHistory: "अहिलेसम्म कुनै उपस्थिति इतिहास छैन।",
-    selectShift: "शिफ्ट छान्नुहोस्",
     pending: "बाँकी",
     inProgress: "जारी छ",
     clockInFailed: "क्लक इन गर्न असफल भयो",

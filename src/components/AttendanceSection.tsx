@@ -70,7 +70,6 @@ export default function AttendanceSection() {
   const { t } = useTranslation();
   const [records, setRecords] = useState<DisplayAttendance[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
-  const [shiftId, setShiftId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(new Date());
@@ -127,13 +126,10 @@ export default function AttendanceSection() {
   const isFeaturedToday = featuredShift
     ? new Date(featuredShift.startsAt).toDateString() === now.toDateString()
     : false;
-  const needsShiftPicker = clockableShifts.length > 1;
-  const effectiveShiftId =
-    shiftId || (!needsShiftPicker && featuredShift ? String(featuredShift.id) : "");
+  const effectiveShiftId = featuredShift ? String(featuredShift.id) : "";
 
   function handleClockInClick() {
     if (!effectiveShiftId) return;
-    setShiftId(effectiveShiftId);
     setConfirmAction("in");
   }
 
@@ -144,14 +140,12 @@ export default function AttendanceSection() {
     const coords = await getCurrentCoords();
     try {
       await api.clockIn(Number(effectiveShiftId), coords);
-      setShiftId("");
       load();
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
         queueClockIn(Number(effectiveShiftId), coords);
-        setShiftId("");
         bumpPending();
       }
     } finally {
@@ -185,7 +179,7 @@ export default function AttendanceSection() {
     }
   }
 
-  const selectedShift = clockableShifts.find((s) => String(s.id) === effectiveShiftId);
+  const selectedShift = featuredShift;
   const tooEarly = selectedShift
     ? new Date(selectedShift.startsAt).getTime() - now.getTime() > EARLY_CLOCK_IN_MS
     : false;
@@ -255,21 +249,6 @@ export default function AttendanceSection() {
             </span>
           </div>
           <span className="shift-status-pill pending">{t("home.notClockedInYet")}</span>
-
-          {needsShiftPicker && (
-            <select
-              className="shift-card-select"
-              value={shiftId}
-              onChange={(e) => setShiftId(e.target.value)}
-            >
-              <option value="">{t("attendance.selectShift")}</option>
-              {clockableShifts.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {formatDateTime(s.startsAt)}
-                </option>
-              ))}
-            </select>
-          )}
 
           <button
             className="shift-clock-btn in"

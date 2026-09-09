@@ -139,7 +139,6 @@ export default {
     clockOut: "Uitklokken",
     history: "Geschiedenis",
     noHistory: "Nog geen aanwezigheidsgeschiedenis.",
-    selectShift: "Kies een dienst",
     pending: "In afwachting",
     inProgress: "Bezig",
     clockInFailed: "Inklokken is mislukt",
