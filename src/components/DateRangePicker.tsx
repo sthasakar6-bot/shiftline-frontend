@@ -109,7 +109,7 @@ export default function DateRangePicker({
       </button>
 
       {open && (
-        <div className="modal-overlay" onClick={() => setOpen(false)}>
+        <div className="modal-overlay date-range-overlay" onClick={() => setOpen(false)}>
           <div className="modal date-range-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-scroll-body">
               <p className="hint date-range-hint">

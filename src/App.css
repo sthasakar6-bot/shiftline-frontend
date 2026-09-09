@@ -2018,6 +2018,47 @@
   max-width: 360px;
 }
 
+/* On phones, anchor the picker to the bottom of the screen as a sheet
+   instead of vertically centering it. Centering depends on an accurate
+   viewport-height reading, which iOS has a long history of getting wrong
+   specifically inside an installed (standalone-mode) PWA -- a bottom sheet
+   sidesteps that by only ever depending on knowing where the bottom edge
+   is, with its own safe-area-aware margin, so the Done button can't end
+   up computed into an area that isn't actually reachable. */
+@media (max-width: 600px) {
+  .date-range-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .date-range-overlay .date-range-modal {
+    max-width: 100%;
+    width: 100%;
+    max-height: 85vh;
+    max-height: 85dvh;
+    border-radius: 16px 16px 0 0;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+    animation: modal-slide-up-sheet 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes modal-slide-up-sheet {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .date-range-overlay .date-range-modal {
+    animation: none;
+  }
+}
+
 .date-range-hint {
   margin: 0 0 14px;
   text-align: center;
