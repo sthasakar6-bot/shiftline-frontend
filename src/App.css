@@ -2037,8 +2037,18 @@
     max-height: 85vh;
     max-height: 85dvh;
     border-radius: 16px 16px 0 0;
-    padding-bottom: max(20px, env(safe-area-inset-bottom));
+    /* env(safe-area-inset-bottom) only resolves to something non-zero when
+       the page opts into viewport-fit=cover, which this app doesn't set --
+       so it's a no-op today. The flat 48px is what actually matters: it's
+       generous clearance above iOS's home-indicator swipe-up gesture zone
+       (~34px), so a tap on Done can't land where the OS may intercept it
+       as a "swipe to home" attempt instead of a tap. */
+    padding-bottom: max(48px, env(safe-area-inset-bottom));
     animation: modal-slide-up-sheet 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .date-range-overlay .modal-actions {
+    margin-bottom: 8px;
   }
 }
 
