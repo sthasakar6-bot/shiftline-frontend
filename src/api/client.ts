@@ -228,6 +228,10 @@ export const api = {
   },
   getBookkeeperContractPdf: (employeeId: number, contractId: number) =>
     requestBlob(`/api/bookkeeper/employees/${employeeId}/contracts/${contractId}/pdf`),
+  deleteBookkeeperContract: (employeeId: number, contractId: number) =>
+    request<void>(`/api/bookkeeper/employees/${employeeId}/contracts/${contractId}`, {
+      method: "DELETE",
+    }),
   createBookkeeperPayslip: (employeeId: number, data: { period: string }) =>
     request<Payslip>(`/api/bookkeeper/employees/${employeeId}/payslips`, {
       method: "POST",
@@ -243,6 +247,10 @@ export const api = {
   },
   getBookkeeperPayslipPdf: (employeeId: number, payslipId: number) =>
     requestBlob(`/api/bookkeeper/employees/${employeeId}/payslips/${payslipId}/pdf`),
+  deleteBookkeeperPayslip: (employeeId: number, payslipId: number) =>
+    request<void>(`/api/bookkeeper/employees/${employeeId}/payslips/${payslipId}`, {
+      method: "DELETE",
+    }),
 
   listShifts: () => request<Shift[]>("/api/shifts"),
   listCompanyRoster: () => request<RosterShift[]>("/api/shifts/roster"),

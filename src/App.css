@@ -1505,6 +1505,21 @@
   margin-right: 12px;
 }
 
+.bookkeeper-doc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.bookkeeper-doc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  max-width: 360px;
+}
+
 .list li.empty {
   color: var(--text);
   opacity: 0.6;
@@ -1849,6 +1864,10 @@
   color: var(--danger);
   font-size: 13px;
   margin-bottom: 8px;
+}
+
+.required-mark {
+  color: var(--danger);
 }
 
 .calendar-grid {

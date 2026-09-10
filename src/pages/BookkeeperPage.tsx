@@ -1,11 +1,14 @@
 import { type ChangeEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FileText, Receipt } from "lucide-react";
+import { FileText, Receipt, Trash2, Folder } from "lucide-react";
 import { api, ApiError } from "../api/client";
 import type { BookkeeperEmployee } from "../api/types";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import UserBox from "../components/UserBox";
 import { SkeletonRows } from "../components/Skeleton";
+import ConfirmDialog from "../components/ConfirmDialog";
+
+type DeleteTarget = { type: "payslip" | "contract"; employeeId: number; id: number; label: string };
 
 export default function BookkeeperPage() {
   const { t } = useTranslation();
@@ -21,6 +24,8 @@ export default function BookkeeperPage() {
   const [contractRoles, setContractRoles] = useState<Record<number, string>>({});
   const [contractFiles, setContractFiles] = useState<Record<number, File | null>>({});
   const [uploadingContracts, setUploadingContracts] = useState(false);
+
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
 
   function load() {
     api
@@ -108,6 +113,23 @@ export default function BookkeeperPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setError(null);
+    try {
+      if (deleteTarget.type === "payslip") {
+        await api.deleteBookkeeperPayslip(deleteTarget.employeeId, deleteTarget.id);
+      } else {
+        await api.deleteBookkeeperContract(deleteTarget.employeeId, deleteTarget.id);
+      }
+      load();
+    } catch {
+      setError(t("bookkeeper.deleteFailed"));
+    } finally {
+      setDeleteTarget(null);
+    }
+  }
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -125,13 +147,99 @@ export default function BookkeeperPage() {
         <section className="panel">
           <div className="panel-title">
             <span className="panel-title-icon">
+              <Folder size={17} />
+            </span>
+            <h2>{t("bookkeeper.history")}</h2>
+          </div>
+          {loading ? (
+            <SkeletonRows count={3} />
+          ) : (
+            <ul className="list">
+              {employees.map((e) => (
+                <li key={e.id} className="bookkeeper-history-row">
+                  <strong>{e.name}</strong>
+                  <span className="hint">{e.email}</span>
+                  <span className="hint">
+                    {t("bookkeeper.hoursThisMonth", { hours: e.hoursThisMonth })}
+                  </span>
+                  {e.payslips.length === 0 && e.contracts.length === 0 ? (
+                    <span className="hint">{t("bookkeeper.noDocuments")}</span>
+                  ) : (
+                    <div className="bookkeeper-doc-list">
+                      {e.payslips.map((p) => (
+                        <span className="bookkeeper-doc-row" key={`payslip-${p.id}`}>
+                          <button
+                            type="button"
+                            className="link-btn"
+                            onClick={() => handleViewPayslipPdf(e.id, p.id)}
+                            disabled={!p.pdfFilename}
+                          >
+                            {t("bookkeeper.payslipLabel", { period: p.period })}
+                          </button>
+                          <button
+                            type="button"
+                            className="icon-btn danger-text"
+                            aria-label={t("common.delete")}
+                            onClick={() =>
+                              setDeleteTarget({
+                                type: "payslip",
+                                employeeId: e.id,
+                                id: p.id,
+                                label: t("bookkeeper.payslipLabel", { period: p.period }),
+                              })
+                            }
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </span>
+                      ))}
+                      {e.contracts.map((c) => (
+                        <span className="bookkeeper-doc-row" key={`contract-${c.id}`}>
+                          <button
+                            type="button"
+                            className="link-btn"
+                            onClick={() => handleViewContractPdf(e.id, c.id)}
+                            disabled={!c.pdfFilename}
+                          >
+                            {t("bookkeeper.contractLabel", { role: c.role })}
+                          </button>
+                          <button
+                            type="button"
+                            className="icon-btn danger-text"
+                            aria-label={t("common.delete")}
+                            onClick={() =>
+                              setDeleteTarget({
+                                type: "contract",
+                                employeeId: e.id,
+                                id: c.id,
+                                label: t("bookkeeper.contractLabel", { role: c.role }),
+                              })
+                            }
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </li>
+              ))}
+              {employees.length === 0 && <li className="empty">{t("bookkeeper.noEmployees")}</li>}
+            </ul>
+          )}
+        </section>
+
+        <section className="panel">
+          <div className="panel-title">
+            <span className="panel-title-icon">
               <Receipt size={17} />
             </span>
             <h2>{t("bookkeeper.uploadPayslips")}</h2>
           </div>
-          <p className="hint">{t("bookkeeper.uploadPayslipsHint")}</p>
           <label className="field">
-            <span className="field-label">{t("team.payPeriod")}</span>
+            <span className="field-label">
+              {t("team.payPeriod")} <span className="required-mark">*</span>
+            </span>
             <input
               value={payslipPeriod}
               onChange={(e) => setPayslipPeriod(e.target.value)}
@@ -181,7 +289,6 @@ export default function BookkeeperPage() {
             </span>
             <h2>{t("bookkeeper.uploadContracts")}</h2>
           </div>
-          <p className="hint">{t("bookkeeper.uploadContractsHint")}</p>
           {loading ? (
             <SkeletonRows count={3} avatar={false} />
           ) : (
@@ -218,57 +325,18 @@ export default function BookkeeperPage() {
               : t("bookkeeper.uploadForCount", { count: contractTargets.length })}
           </button>
         </section>
-
-        <section className="panel">
-          <div className="panel-title">
-            <h2>{t("bookkeeper.history")}</h2>
-          </div>
-          {loading ? (
-            <SkeletonRows count={3} />
-          ) : (
-            <ul className="list">
-              {employees.map((e) => (
-                <li key={e.id} className="bookkeeper-history-row">
-                  <strong>{e.name}</strong>
-                  <span className="hint">{e.email}</span>
-                  <span className="hint">
-                    {t("bookkeeper.hoursThisMonth", { hours: e.hoursThisMonth })}
-                  </span>
-                  {e.payslips.length === 0 && e.contracts.length === 0 ? (
-                    <span className="hint">{t("bookkeeper.noDocuments")}</span>
-                  ) : (
-                    <div>
-                      {e.payslips.map((p) => (
-                        <button
-                          key={`payslip-${p.id}`}
-                          type="button"
-                          className="link-btn"
-                          onClick={() => handleViewPayslipPdf(e.id, p.id)}
-                          disabled={!p.pdfFilename}
-                        >
-                          {t("bookkeeper.payslipLabel", { period: p.period })}
-                        </button>
-                      ))}
-                      {e.contracts.map((c) => (
-                        <button
-                          key={`contract-${c.id}`}
-                          type="button"
-                          className="link-btn"
-                          onClick={() => handleViewContractPdf(e.id, c.id)}
-                          disabled={!c.pdfFilename}
-                        >
-                          {t("bookkeeper.contractLabel", { role: c.role })}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </li>
-              ))}
-              {employees.length === 0 && <li className="empty">{t("bookkeeper.noEmployees")}</li>}
-            </ul>
-          )}
-        </section>
       </main>
+
+      {deleteTarget && (
+        <ConfirmDialog
+          title={t("bookkeeper.deleteConfirmTitle")}
+          message={t("bookkeeper.deleteConfirmMessage", { label: deleteTarget.label })}
+          confirmLabel={t("common.delete")}
+          danger
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 }
