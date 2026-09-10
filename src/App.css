@@ -1530,6 +1530,15 @@
   color: var(--accent);
 }
 
+.bookkeeper-history-row {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.bookkeeper-history-row .link-btn {
+  margin-right: 12px;
+}
+
 .list li.empty {
   color: var(--text);
   opacity: 0.6;

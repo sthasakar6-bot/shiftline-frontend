@@ -2,7 +2,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  role: "employee" | "manager";
+  role: "employee" | "manager" | "bookkeeper";
   hasAvatar: boolean;
   phone: string | null;
   address: string | null;
@@ -41,6 +41,15 @@ export interface Payslip {
   userId: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface BookkeeperEmployee {
+  id: number;
+  name: string;
+  email: string;
+  hoursThisMonth: number;
+  contracts: Contract[];
+  payslips: Payslip[];
 }
 
 export interface BackupTokenInfo {

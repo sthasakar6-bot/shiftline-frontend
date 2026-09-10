@@ -2,6 +2,7 @@ import type {
   Attendance,
   BackupSnapshotMeta,
   BackupTokenInfo,
+  BookkeeperEmployee,
   Company,
   Contract,
   LeaveRequest,
@@ -126,6 +127,16 @@ export const api = {
       method: "POST",
       body: JSON.stringify(data),
     }),
+  createManager: (data: { firstName: string; lastName: string; email: string; password: string }) =>
+    request<{ id: number; name: string; email: string }>("/api/users/managers", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  createBookkeeper: (data: { firstName: string; lastName: string; email: string; password: string }) =>
+    request<{ id: number; name: string; email: string }>("/api/users/bookkeepers", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
   listReports: () => request<UserSummary[]>("/api/users/reports"),
   listEmployees: () => request<UserSummary[]>("/api/users/employees"),
   promoteUser: (id: number) => request<UserSummary>(`/api/users/${id}/promote`, { method: "POST" }),
@@ -193,6 +204,38 @@ export const api = {
     requestBlob(`/api/users/${userId}/payslips/${payslipId}/pdf`),
   deletePayslipForReport: (userId: number, payslipId: number) =>
     request<void>(`/api/users/${userId}/payslips/${payslipId}`, { method: "DELETE" }),
+
+  listBookkeeperEmployees: () => request<BookkeeperEmployee[]>("/api/bookkeeper/employees"),
+  createBookkeeperContract: (employeeId: number, data: { role: string }) =>
+    request<Contract>(`/api/bookkeeper/employees/${employeeId}/contracts`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  uploadBookkeeperContractPdf: (employeeId: number, contractId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("pdf", file);
+    return request<Contract>(`/api/bookkeeper/employees/${employeeId}/contracts/${contractId}/pdf`, {
+      method: "POST",
+      body: formData,
+    });
+  },
+  getBookkeeperContractPdf: (employeeId: number, contractId: number) =>
+    requestBlob(`/api/bookkeeper/employees/${employeeId}/contracts/${contractId}/pdf`),
+  createBookkeeperPayslip: (employeeId: number, data: { period: string }) =>
+    request<Payslip>(`/api/bookkeeper/employees/${employeeId}/payslips`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  uploadBookkeeperPayslipPdf: (employeeId: number, payslipId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("pdf", file);
+    return request<Payslip>(`/api/bookkeeper/employees/${employeeId}/payslips/${payslipId}/pdf`, {
+      method: "POST",
+      body: formData,
+    });
+  },
+  getBookkeeperPayslipPdf: (employeeId: number, payslipId: number) =>
+    requestBlob(`/api/bookkeeper/employees/${employeeId}/payslips/${payslipId}/pdf`),
 
   listShifts: () => request<Shift[]>("/api/shifts"),
 

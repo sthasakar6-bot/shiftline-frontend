@@ -71,15 +71,17 @@ export default function UserBox() {
       </button>
       {open && (
         <div className="user-box-menu">
-          <button
-            onClick={() => {
-              navigate("/profile");
-              setOpen(false);
-            }}
-          >
-            <UserIcon size={16} />
-            {t("userBox.myProfile")}
-          </button>
+          {user.role !== "bookkeeper" && (
+            <button
+              onClick={() => {
+                navigate("/profile");
+                setOpen(false);
+              }}
+            >
+              <UserIcon size={16} />
+              {t("userBox.myProfile")}
+            </button>
+          )}
           {user.role === "manager" && (
             <button
               onClick={() => {

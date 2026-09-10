@@ -8,6 +8,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import CompleteAccountPage from "./pages/CompleteAccountPage";
 import DashboardPage from "./pages/DashboardPage";
 import AdminPage from "./pages/AdminPage";
+import BookkeeperPage from "./pages/BookkeeperPage";
 import ProfilePage from "./pages/ProfilePage";
 import PullToRefresh from "./components/PullToRefresh";
 import SplashScreen from "./components/SplashScreen";
@@ -57,6 +58,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bookkeeper"
+              element={
+                <ProtectedRoute requireRole="bookkeeper">
+                  <BookkeeperPage />
                 </ProtectedRoute>
               }
             />

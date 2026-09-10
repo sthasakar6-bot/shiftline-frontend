@@ -9,7 +9,7 @@ export default function ProtectedRoute({
   requireRole,
 }: {
   children: ReactNode;
-  requireRole?: "manager";
+  requireRole?: "manager" | "bookkeeper";
 }) {
   const { t } = useTranslation();
   const { user, loading } = useAuth();
@@ -25,6 +25,17 @@ export default function ProtectedRoute({
   // details before doing anything else -- force this before any other page.
   if (user.needsOnboarding && location.pathname !== "/complete-account") {
     return <Navigate to="/complete-account" replace />;
+  }
+  // A bookkeeper gets a completely separate, restricted UI -- never the
+  // normal employee dashboard or admin panel. Exempt /complete-account too,
+  // or this fights the needsOnboarding redirect above into a loop while a
+  // bookkeeper is still finishing that mandatory step.
+  if (
+    user.role === "bookkeeper" &&
+    location.pathname !== "/bookkeeper" &&
+    location.pathname !== "/complete-account"
+  ) {
+    return <Navigate to="/bookkeeper" replace />;
   }
   if (requireRole && user.role !== requireRole) {
     return <Navigate to="/" replace />;

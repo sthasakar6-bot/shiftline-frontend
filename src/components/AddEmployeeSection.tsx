@@ -4,14 +4,28 @@ import { api, ApiError } from "../api/client";
 
 const PASSWORD_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
 
+type NewAccountRole = "employee" | "manager" | "bookkeeper";
+
 function generatePassword(): string {
   const values = new Uint32Array(12);
   crypto.getRandomValues(values);
   return Array.from(values, (v) => PASSWORD_CHARS[v % PASSWORD_CHARS.length]).join("");
 }
 
+const CREATE_BY_ROLE: Record<
+  NewAccountRole,
+  (data: { firstName: string; lastName: string; email: string; password: string }) => ReturnType<
+    typeof api.createEmployee
+  >
+> = {
+  employee: api.createEmployee,
+  manager: api.createManager,
+  bookkeeper: api.createBookkeeper,
+};
+
 export default function AddEmployeeSection() {
   const { t } = useTranslation();
+  const [role, setRole] = useState<NewAccountRole>("employee");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -28,7 +42,7 @@ export default function AddEmployeeSection() {
     setError(null);
     setSubmitting(true);
     try {
-      const user = await api.createEmployee({ firstName, lastName, email, password });
+      const user = await CREATE_BY_ROLE[role]({ firstName, lastName, email, password });
       setCreated({ name: user.name, email: user.email, password });
       setCopied(false);
       setFirstName("");
@@ -56,6 +70,11 @@ export default function AddEmployeeSection() {
       <h2>{t("addEmployee.title")}</h2>
       <p className="hint">{t("addEmployee.hint")}</p>
       <form className="inline-form" onSubmit={handleSubmit}>
+        <select value={role} onChange={(e) => setRole(e.target.value as NewAccountRole)}>
+          <option value="employee">{t("addEmployee.roleEmployee")}</option>
+          <option value="manager">{t("addEmployee.roleManager")}</option>
+          <option value="bookkeeper">{t("addEmployee.roleBookkeeper")}</option>
+        </select>
         <input
           placeholder={t("auth.firstName")}
           value={firstName}
@@ -89,6 +108,7 @@ export default function AddEmployeeSection() {
           {submitting ? t("addEmployee.creating") : t("addEmployee.createEmployee")}
         </button>
       </form>
+      {role === "bookkeeper" && <p className="hint">{t("addEmployee.bookkeeperHint")}</p>}
       {error && <div className="error">{error}</div>}
       {created && (
         <div className="credentials-callout">
