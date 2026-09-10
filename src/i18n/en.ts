@@ -119,6 +119,12 @@ export default {
     sickLeave: "Sick leave",
     shiftLabel: "Shift",
     breakMin: "Break: {{min}} min",
+    workingWithYou: "Working with you",
+  },
+  myTeam: {
+    title: "My Team",
+    hint: "Everyone at your company, for reference — read-only.",
+    empty: "No team members to show yet.",
   },
   attendance: {
     title: "Attendance",

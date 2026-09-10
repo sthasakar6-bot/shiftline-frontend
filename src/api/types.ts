@@ -76,6 +76,18 @@ export interface Shift {
   updatedAt: string;
 }
 
+export interface RosterShift extends Shift {
+  userName: string;
+}
+
+export interface TeamMember {
+  id: number;
+  name: string;
+  role: "employee" | "manager" | "bookkeeper";
+  hasAvatar: boolean;
+  online: boolean;
+}
+
 export interface Attendance {
   id: number;
   userId: number;

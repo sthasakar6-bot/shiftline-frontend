@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "../api/client";
-import type { Attendance, LeaveRequest, Shift } from "../api/types";
+import type { Attendance, LeaveRequest, RosterShift, Shift } from "../api/types";
+import { useAuth } from "../auth/AuthContext";
 import { formatTime, compactTime } from "../lib/formatDate";
 import { addDays, parseIsoDateLocal } from "../lib/dateOnly";
 import { getDateLocale } from "../i18n";
@@ -24,9 +25,11 @@ function weekdayLabels(): string[] {
 
 export default function ShiftsSection() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
+  const [companyRoster, setCompanyRoster] = useState<RosterShift[]>([]);
   const [monthCursor, setMonthCursor] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -37,6 +40,7 @@ export default function ShiftsSection() {
     api.listShifts().then(setShifts).catch(() => {});
     api.listAttendance().then(setAttendance).catch(() => {});
     api.listLeaveRequests().then(setLeaveRequests).catch(() => {});
+    api.listCompanyRoster().then(setCompanyRoster).catch(() => {});
   }, []);
 
   const completedShiftIds = useMemo(
@@ -54,6 +58,20 @@ export default function ShiftsSection() {
     }
     return map;
   }, [shifts]);
+
+  // Everyone else's shifts, so an employee can see who they're working
+  // alongside on a given day -- not just their own schedule.
+  const coworkersByDay = useMemo(() => {
+    const map = new Map<string, RosterShift[]>();
+    for (const s of companyRoster) {
+      if (s.userId === user?.id) continue;
+      const key = dateKey(new Date(s.startsAt));
+      const existing = map.get(key) ?? [];
+      existing.push(s);
+      map.set(key, existing);
+    }
+    return map;
+  }, [companyRoster, user?.id]);
 
   const leaveByDay = useMemo(() => {
     const map = new Map<string, LeaveRequest[]>();
@@ -95,6 +113,7 @@ export default function ShiftsSection() {
 
   const selectedShifts = selectedDay ? (shiftsByDay.get(dateKey(selectedDay)) ?? []) : [];
   const selectedLeave = selectedDay ? (leaveByDay.get(dateKey(selectedDay)) ?? []) : [];
+  const selectedCoworkers = selectedDay ? (coworkersByDay.get(dateKey(selectedDay)) ?? []) : [];
 
   return (
     <section className="panel">
@@ -211,6 +230,21 @@ export default function ShiftsSection() {
                 )}
               </p>
             ))}
+            {selectedCoworkers.length > 0 && (
+              <>
+                <h4 className="roster-coworkers-title">{t("roster.workingWithYou")}</h4>
+                <ul className="list">
+                  {selectedCoworkers.map((s) => (
+                    <li key={s.id}>
+                      <span>{s.userName}</span>
+                      <span>
+                        {formatTime(s.startsAt)} – {formatTime(s.endsAt)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
             <div className="modal-actions">
               <button onClick={() => setSelectedDay(null)}>{t("common.close")}</button>
             </div>

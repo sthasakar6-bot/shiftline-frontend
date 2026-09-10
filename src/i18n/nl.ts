@@ -119,6 +119,12 @@ export default {
     sickLeave: "Ziekteverlof",
     shiftLabel: "Dienst",
     breakMin: "Pauze: {{min}} min",
+    workingWithYou: "Werkt samen met jou",
+  },
+  myTeam: {
+    title: "Mijn team",
+    hint: "Iedereen bij je bedrijf, ter referentie — alleen-lezen.",
+    empty: "Nog geen teamleden om te tonen.",
   },
   attendance: {
     title: "Aanwezigheid",

@@ -10,7 +10,9 @@ import type {
   Notification,
   PasswordResetRequest,
   Payslip,
+  RosterShift,
   Shift,
+  TeamMember,
   User,
   UserSummary,
 } from "./types";
@@ -238,6 +240,8 @@ export const api = {
     requestBlob(`/api/bookkeeper/employees/${employeeId}/payslips/${payslipId}/pdf`),
 
   listShifts: () => request<Shift[]>("/api/shifts"),
+  listCompanyRoster: () => request<RosterShift[]>("/api/shifts/roster"),
+  listTeam: () => request<TeamMember[]>("/api/users/team"),
 
   createShiftForReport: (
     userId: number,
