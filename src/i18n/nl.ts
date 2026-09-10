@@ -265,6 +265,11 @@ export default {
   passwordResets: {
     title: "Wachtwoordherstelverzoeken",
     copyResetLink: "Herstellink kopiëren",
+    setNewPassword: "Nieuw wachtwoord instellen",
+    settingPassword: "Wachtwoord instellen…",
+    resolveFailed: "Instellen van wachtwoord mislukt",
+    resolvedCallout: "Nieuw wachtwoord voor {{name}}",
+    copyPassword: "Wachtwoord kopiëren",
   },
   addEmployee: {
     title: "Medewerker toevoegen",

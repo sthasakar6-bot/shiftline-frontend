@@ -352,6 +352,11 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ password }),
     }),
+  resolvePasswordResetRequest: (id: number, password: string) =>
+    request<void>(`/api/password-reset-requests/${id}/resolve`, {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    }),
   changePassword: (currentPassword: string, newPassword: string) =>
     request<void>("/api/auth/password", {
       method: "PATCH",

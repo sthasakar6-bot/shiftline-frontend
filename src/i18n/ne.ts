@@ -265,6 +265,11 @@ export default {
   passwordResets: {
     title: "पासवर्ड रिसेट अनुरोधहरू",
     copyResetLink: "रिसेट लिङ्क प्रतिलिपि गर्नुहोस्",
+    setNewPassword: "नयाँ पासवर्ड सेट गर्नुहोस्",
+    settingPassword: "पासवर्ड सेट गर्दै...",
+    resolveFailed: "पासवर्ड सेट गर्न असफल भयो",
+    resolvedCallout: "{{name}} को लागि नयाँ पासवर्ड",
+    copyPassword: "पासवर्ड प्रतिलिपि गर्नुहोस्",
   },
   addEmployee: {
     title: "कर्मचारी थप्नुहोस्",

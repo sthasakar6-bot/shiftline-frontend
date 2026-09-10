@@ -1,16 +1,9 @@
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, ApiError } from "../api/client";
-
-const PASSWORD_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+import { generatePassword } from "../lib/generatePassword";
 
 type NewAccountRole = "employee" | "manager" | "bookkeeper";
-
-function generatePassword(): string {
-  const values = new Uint32Array(12);
-  crypto.getRandomValues(values);
-  return Array.from(values, (v) => PASSWORD_CHARS[v % PASSWORD_CHARS.length]).join("");
-}
 
 const CREATE_BY_ROLE: Record<
   NewAccountRole,

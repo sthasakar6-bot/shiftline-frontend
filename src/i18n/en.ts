@@ -265,6 +265,11 @@ export default {
   passwordResets: {
     title: "Password reset requests",
     copyResetLink: "Copy reset link",
+    setNewPassword: "Set new password",
+    settingPassword: "Setting password…",
+    resolveFailed: "Failed to set password",
+    resolvedCallout: "New password for {{name}}",
+    copyPassword: "Copy password",
   },
   addEmployee: {
     title: "Add an employee",
