@@ -127,6 +127,7 @@ export default {
   myTeam: {
     title: "Mijn team",
     empty: "Nog geen teamleden om te tonen.",
+    unassigned: "Overig",
   },
   attendance: {
     title: "Aanwezigheid",
@@ -258,6 +259,8 @@ export default {
     copyAddress: "Adres kopiëren",
     noPhone: "Geen telefoonnummer bekend",
     noAddress: "Geen adres bekend",
+    locationPlaceholder: "Werklocatie (bijv. Almere)",
+    locationSaveFailed: "Locatie opslaan is mislukt",
   },
   passwordResets: {
     title: "Wachtwoordherstelverzoeken",

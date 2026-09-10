@@ -313,7 +313,11 @@ export default function ManagerSection() {
       )}
 
       {detailTarget && (
-        <EmployeeDetailModal employee={detailTarget} onClose={() => setDetailTargetId(null)} />
+        <EmployeeDetailModal
+          employee={detailTarget}
+          onClose={() => setDetailTargetId(null)}
+          onLocationChanged={loadEmployees}
+        />
       )}
 
       {removeTarget && (

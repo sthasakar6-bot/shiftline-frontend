@@ -127,6 +127,7 @@ export default {
   myTeam: {
     title: "My Team",
     empty: "No team members to show yet.",
+    unassigned: "Other",
   },
   attendance: {
     title: "Attendance",
@@ -258,6 +259,8 @@ export default {
     copyAddress: "Copy address",
     noPhone: "No phone number on file",
     noAddress: "No address on file",
+    locationPlaceholder: "Work location (e.g. Almere)",
+    locationSaveFailed: "Failed to save location",
   },
   passwordResets: {
     title: "Password reset requests",

@@ -151,6 +151,11 @@ export const api = {
     request<UserSummary>(`/api/users/${id}/deactivate`, { method: "POST" }),
   reactivateEmployee: (id: number) =>
     request<UserSummary>(`/api/users/${id}/reactivate`, { method: "POST" }),
+  setEmployeeLocation: (id: number, location: string | null) =>
+    request<UserSummary>(`/api/users/${id}/location`, {
+      method: "PATCH",
+      body: JSON.stringify({ location }),
+    }),
   uploadAvatar: (file: File) => {
     const formData = new FormData();
     formData.append("avatar", file);

@@ -127,6 +127,7 @@ export default {
   myTeam: {
     title: "मेरो टोली",
     empty: "देखाउनको लागि अहिलेसम्म कुनै टोली सदस्य छैन।",
+    unassigned: "अन्य",
   },
   attendance: {
     title: "उपस्थिति",
@@ -258,6 +259,8 @@ export default {
     copyAddress: "ठेगाना प्रतिलिपि गर्नुहोस्",
     noPhone: "फाइलमा कुनै फोन नम्बर छैन",
     noAddress: "फाइलमा कुनै ठेगाना छैन",
+    locationPlaceholder: "कार्य स्थान (जस्तै Almere)",
+    locationSaveFailed: "स्थान सुरक्षित गर्न असफल भयो",
   },
   passwordResets: {
     title: "पासवर्ड रिसेट अनुरोधहरू",

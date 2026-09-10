@@ -1,24 +1,43 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Copy, Check, Mail, Phone, MapPin } from "lucide-react";
+import { Copy, Check, Mail, Phone, MapPin, Building2 } from "lucide-react";
 import Avatar from "./Avatar";
+import { api, ApiError } from "../api/client";
 import type { UserSummary } from "../api/types";
 
 export default function EmployeeDetailModal({
   employee,
   onClose,
+  onLocationChanged,
 }: {
   employee: UserSummary;
   onClose: () => void;
+  onLocationChanged?: () => void;
 }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState<"email" | "phone" | "address" | null>(null);
+  const [locationInput, setLocationInput] = useState(employee.location ?? "");
+  const [savingLocation, setSavingLocation] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   function handleCopy(field: "email" | "phone" | "address", value: string) {
     navigator.clipboard.writeText(value).then(() => {
       setCopied(field);
       setTimeout(() => setCopied((c) => (c === field ? null : c)), 1500);
     });
+  }
+
+  async function handleSaveLocation() {
+    setLocationError(null);
+    setSavingLocation(true);
+    try {
+      await api.setEmployeeLocation(employee.id, locationInput.trim() || null);
+      onLocationChanged?.();
+    } catch (err) {
+      setLocationError(err instanceof ApiError ? err.message : t("employeeDetail.locationSaveFailed"));
+    } finally {
+      setSavingLocation(false);
+    }
   }
 
   return (
@@ -82,6 +101,19 @@ export default function EmployeeDetailModal({
               <span className="employee-detail-value muted">{t("employeeDetail.noAddress")}</span>
             )}
           </div>
+          <div className="employee-detail-row">
+            <Building2 size={16} className="employee-detail-icon" />
+            <input
+              className="employee-detail-location-input"
+              value={locationInput}
+              onChange={(e) => setLocationInput(e.target.value)}
+              placeholder={t("employeeDetail.locationPlaceholder")}
+            />
+            <button type="button" onClick={handleSaveLocation} disabled={savingLocation}>
+              {savingLocation ? t("common.save") + "…" : t("common.save")}
+            </button>
+          </div>
+          {locationError && <div className="error">{locationError}</div>}
         </div>
 
         <div className="modal-actions">

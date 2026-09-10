@@ -246,7 +246,12 @@ export default function ShiftsSection() {
                 <ul className="list">
                   {selectedCoworkers.map((s) => (
                     <li key={s.id}>
-                      <span>{s.userName}</span>
+                      <span>
+                        {s.userName}
+                        {s.userLocation && s.userLocation !== user?.location && (
+                          <span className="roster-coworker-location"> ({s.userLocation})</span>
+                        )}
+                      </span>
                       <span>
                         {formatTime(s.startsAt)} – {formatTime(s.endsAt)}
                       </span>

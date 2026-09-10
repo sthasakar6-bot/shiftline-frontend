@@ -6,6 +6,7 @@ export interface User {
   hasAvatar: boolean;
   phone: string | null;
   address: string | null;
+  location: string | null;
   needsOnboarding: boolean;
   companyId: number;
   companyName: string;
@@ -78,6 +79,7 @@ export interface Shift {
 
 export interface RosterShift extends Shift {
   userName: string;
+  userLocation: string | null;
 }
 
 export interface TeamMember {
@@ -85,6 +87,7 @@ export interface TeamMember {
   name: string;
   role: "employee" | "manager" | "bookkeeper";
   hasAvatar: boolean;
+  location: string | null;
 }
 
 export interface Attendance {
