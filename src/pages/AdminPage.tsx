@@ -130,7 +130,7 @@ export default function AdminPage() {
         </main>
       </div>
 
-      <TabBar tabs={tabs} active={active} onChange={setActive} />
+      <TabBar tabs={tabs.filter((t) => t.key !== "alerts")} active={active} onChange={setActive} />
     </div>
   );
 }

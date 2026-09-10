@@ -104,7 +104,12 @@ export default function DashboardPage() {
         </main>
       </div>
 
-      <TabBar tabs={tabs} active={active} onChange={setActive} fabKey="attendance" />
+      <TabBar
+        tabs={tabs.filter((t) => t.key !== "notifications")}
+        active={active}
+        onChange={setActive}
+        fabKey="attendance"
+      />
     </div>
   );
 }

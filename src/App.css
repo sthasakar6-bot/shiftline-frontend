@@ -945,6 +945,10 @@
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text);
+  /* The unread-count badge intentionally overflows this button's corner --
+     don't let the global button ripple clip (button { overflow: hidden }
+     in index.css) hide it. */
+  overflow: visible;
 }
 
 .header-bell:hover,
