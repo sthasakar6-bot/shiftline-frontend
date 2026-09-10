@@ -3,7 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/icon-192.png" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <!-- A URL of its own, not shared with the manifest icon above -- iOS
+         permanently caches a "no icon" result the first time it fails to
+         fetch a page's apple-touch-icon, and never retries the same URL
+         even after the file starts resolving correctly. Renaming this file
+         is the only reliable way to make an already-affected phone pick up
+         a fixed icon; bump the filename again if this ever needs a forced
+         refresh in the future. -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
