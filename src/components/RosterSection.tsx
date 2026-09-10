@@ -2,7 +2,7 @@ import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight, Plus, FileDown } from "lucide-react";
 import { api, ApiError } from "../api/client";
-import type { Shift, UserSummary } from "../api/types";
+import type { Shift, TeamMember } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "./ConfirmDialog";
 import Avatar from "./Avatar";
@@ -53,7 +53,7 @@ type ShiftModalState =
 export default function RosterSection() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [reports, setReports] = useState<UserSummary[]>([]);
+  const [colleagues, setColleagues] = useState<TeamMember[]>([]);
   const [roster, setRoster] = useState<RosterEntry[]>([]);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [removeTarget, setRemoveTarget] = useState<RosterEntry | null>(null);
@@ -79,19 +79,25 @@ export default function RosterSection() {
   const people = useMemo(
     () =>
       user
-        ? [{ id: user.id, name: `${user.name} ${youLabel}`, hasAvatar: user.hasAvatar }, ...reports]
-        : reports,
+        ? [{ id: user.id, name: `${user.name} ${youLabel}`, hasAvatar: user.hasAvatar }, ...colleagues]
+        : colleagues,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, reports],
+    [user, colleagues],
   );
 
-  function loadReports() {
-    api.listReports().then(setReports).catch(() => {});
+  function loadColleagues() {
+    // Any manager can set shifts for anyone in the company (not just their
+    // own direct reports), so the roster picker uses the full team
+    // directory rather than a managerId-scoped list.
+    api
+      .listTeam()
+      .then((team) => setColleagues(team.filter((m) => m.id !== user?.id)))
+      .catch(() => {});
   }
 
   async function loadRoster() {
     if (!user) return;
-    const targets = [{ id: user.id, name: `${user.name} ${youLabel}` }, ...reports];
+    const targets = [{ id: user.id, name: `${user.name} ${youLabel}` }, ...colleagues];
     try {
       const lists = await Promise.all(
         targets.map((target) =>
@@ -106,11 +112,11 @@ export default function RosterSection() {
     }
   }
 
-  useEffect(loadReports, []);
+  useEffect(loadColleagues, [user?.id]);
   useEffect(() => {
     loadRoster();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reports, user]);
+  }, [colleagues, user]);
 
   function openAdd(userId: number, userName: string, day: Date) {
     setModal({ mode: "add", userId, userName, day });
