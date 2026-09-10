@@ -3,7 +3,6 @@ import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Users, UserPlus, CalendarDays, Palmtree, Clock, BarChart3, Bell } from "lucide-react";
 import UserBox from "../components/UserBox";
-import QuickAccessSearch from "../components/QuickAccessSearch";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import TabBar, { type Tab } from "../components/TabBar";
 import Sidebar from "../components/Sidebar";
@@ -85,7 +84,17 @@ export default function AdminPage() {
       <header className="app-header">
         <h1>{t("nav.administration")}</h1>
         <div className="app-header-actions">
-          <QuickAccessSearch />
+          <button
+            type="button"
+            className="header-bell"
+            onClick={() => setActive("alerts")}
+            title={t("nav.alerts")}
+          >
+            <Bell size={18} />
+            {unreadCount > 0 && (
+              <span className="header-bell-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
+            )}
+          </button>
           <LanguageSwitcher />
           <UserBox />
         </div>

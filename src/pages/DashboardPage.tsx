@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { Home, CalendarDays, Watch, Palmtree, Bell, Users } from "lucide-react";
 import UserBox from "../components/UserBox";
 import AppLogo from "../components/AppLogo";
-import QuickAccessSearch from "../components/QuickAccessSearch";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import TabBar, { type Tab } from "../components/TabBar";
 import Sidebar from "../components/Sidebar";
@@ -70,7 +69,17 @@ export default function DashboardPage() {
       <header className="app-header">
         <AppLogo />
         <div className="app-header-actions">
-          <QuickAccessSearch />
+          <button
+            type="button"
+            className="header-bell"
+            onClick={() => setActive("notifications")}
+            title={t("nav.alerts")}
+          >
+            <Bell size={18} />
+            {unreadCount > 0 && (
+              <span className="header-bell-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
+            )}
+          </button>
           <LanguageSwitcher />
           <UserBox />
         </div>
