@@ -30,10 +30,6 @@ export default function TeamSection() {
               <span className="list-row-identity">
                 <Avatar userId={m.id} name={m.name} hasAvatar={m.hasAvatar} size={32} />
                 {m.name}
-                {m.online && <span className="presence-dot inline" title={t("team.online")} />}
-              </span>
-              <span className="role-badge">
-                {m.role === "manager" ? t("common.roleManager") : t("common.roleEmployee")}
               </span>
             </li>
           ))}

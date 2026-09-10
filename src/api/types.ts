@@ -85,7 +85,6 @@ export interface TeamMember {
   name: string;
   role: "employee" | "manager" | "bookkeeper";
   hasAvatar: boolean;
-  online: boolean;
 }
 
 export interface Attendance {
