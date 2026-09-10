@@ -120,10 +120,12 @@ export default {
     shiftLabel: "Shift",
     breakMin: "Break: {{min}} min",
     workingWithYou: "Working with you",
+    whosWorking: "Who's working",
+    othersWorkingShort_one: "{{count}} working",
+    othersWorkingShort_other: "{{count}} working",
   },
   myTeam: {
     title: "My Team",
-    hint: "Everyone at your company, for reference — read-only.",
     empty: "No team members to show yet.",
   },
   attendance: {

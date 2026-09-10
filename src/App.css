@@ -94,7 +94,7 @@
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
@@ -220,7 +220,7 @@
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
@@ -421,6 +421,53 @@
   font-size: 15px;
   font-weight: 700;
   text-align: center;
+}
+
+.team-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.team-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 104px;
+  padding: 18px 8px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+  color: var(--text-h);
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.team-card:hover,
+.team-card:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  transform: translateY(-2px);
+}
+
+.team-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.team-profile-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.team-profile-modal h3 {
+  margin: 0;
 }
 
 .auth-company-banner {
@@ -690,7 +737,8 @@
   padding-top: 0;
   align-items: flex-start;
   overflow: visible;
-  animation: tabbar-in 0.4s ease-out both;
+  /* No fill-mode -- see the comment on .app-content > * above. */
+  animation: tabbar-in 0.4s ease-out;
 }
 
 @keyframes tabbar-in {
@@ -698,7 +746,7 @@
     transform: translateY(100%);
   }
   to {
-    transform: translateY(0);
+    transform: none;
   }
 }
 
@@ -931,7 +979,7 @@
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
@@ -1997,6 +2045,11 @@
   opacity: 0.75;
 }
 
+.calendar-day-label.shift.others {
+  background: var(--border);
+  color: var(--text-h);
+}
+
 .calendar-day.in-range {
   background: var(--accent-bg);
   border-radius: 0;
@@ -2075,7 +2128,7 @@
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
@@ -2165,7 +2218,7 @@
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
@@ -2877,7 +2930,15 @@
 .app-content > *,
 .auth-form,
 .auth-form.wide {
-  animation: page-fade-in 260ms ease-out both;
+  /* No fill-mode: a "both"/"forwards" fill keeps the animation perpetually
+     "in effect" after it ends, which makes the browser hold the element on
+     its own compositing layer -- silently turning it into a new containing
+     block for any position:fixed descendant (e.g. a modal opened inside a
+     panel), so "fixed" modals end up positioned relative to the panel
+     instead of the viewport. The to-state below already matches the
+     element's natural resting style, so dropping the fill has no visual
+     effect once the animation completes. */
+  animation: page-fade-in 260ms ease-out;
 }
 
 @keyframes page-fade-in {
@@ -2887,7 +2948,7 @@
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
@@ -2914,7 +2975,7 @@
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 

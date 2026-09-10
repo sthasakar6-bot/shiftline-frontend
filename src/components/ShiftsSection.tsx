@@ -159,35 +159,43 @@ export default function ShiftsSection() {
         ))}
         {cells.map((day, i) => {
           if (!day) return <div key={`blank-${i}`} className="calendar-day empty" />;
-          const dayShifts = shiftsByDay.get(dateKey(day)) ?? [];
-          const dayLeave = leaveByDay.get(dateKey(day)) ?? [];
+          const key = dateKey(day);
+          const dayShifts = shiftsByDay.get(key) ?? [];
+          const dayCoworkerShifts = coworkersByDay.get(key) ?? [];
+          const dayLeave = leaveByDay.get(key) ?? [];
           const hasShift = dayShifts.length > 0;
+          const hasCoworkerShift = dayCoworkerShifts.length > 0;
           const hasLeave = dayLeave.length > 0;
+          const isClickable = hasShift || hasCoworkerShift || hasLeave;
           const leaveType = dayLeave[0]?.type;
           const isPastDay = day.getTime() < todayStart.getTime();
           // A past day always reads as "worked" (muted), even if a clock-in
           // was missed -- only a not-yet-passed day should still draw the eye
           // with the active/upcoming green highlight.
           const hasActiveShift = !isPastDay && dayShifts.some((s) => !completedShiftIds.has(s.id));
-          const isToday = dateKey(day) === dateKey(new Date());
+          const isToday = key === dateKey(new Date());
           return (
             <button
               type="button"
-              key={dateKey(day)}
+              key={key}
               className={`calendar-day${isToday ? " today" : ""}${hasLeave ? ` has-leave ${leaveType}` : ""}`}
-              onClick={() => (hasShift || hasLeave) && setSelectedDay(day)}
-              disabled={!hasShift && !hasLeave}
+              onClick={() => isClickable && setSelectedDay(day)}
+              disabled={!isClickable}
             >
               <span className="calendar-day-num">{day.getDate()}</span>
               {hasLeave ? (
                 <span className={`calendar-day-label ${leaveType}`}>
                   {leaveType === "sick" ? t("roster.legendSick") : t("roster.vacShort")}
                 </span>
+              ) : hasShift ? (
+                <span className={`calendar-day-label shift${hasActiveShift ? "" : " done"}`}>
+                  {compactTime(dayShifts[0].startsAt)}-{compactTime(dayShifts[0].endsAt)}
+                  {dayShifts.length > 1 && ` +${dayShifts.length - 1}`}
+                </span>
               ) : (
-                hasShift && (
-                  <span className={`calendar-day-label shift${hasActiveShift ? "" : " done"}`}>
-                    {compactTime(dayShifts[0].startsAt)}-{compactTime(dayShifts[0].endsAt)}
-                    {dayShifts.length > 1 && ` +${dayShifts.length - 1}`}
+                hasCoworkerShift && (
+                  <span className="calendar-day-label shift others">
+                    {t("roster.othersWorkingShort", { count: dayCoworkerShifts.length })}
                   </span>
                 )
               )}
@@ -232,7 +240,9 @@ export default function ShiftsSection() {
             ))}
             {selectedCoworkers.length > 0 && (
               <>
-                <h4 className="roster-coworkers-title">{t("roster.workingWithYou")}</h4>
+                <h4 className="roster-coworkers-title">
+                  {selectedShifts.length > 0 ? t("roster.workingWithYou") : t("roster.whosWorking")}
+                </h4>
                 <ul className="list">
                   {selectedCoworkers.map((s) => (
                     <li key={s.id}>

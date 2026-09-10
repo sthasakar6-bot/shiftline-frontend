@@ -120,10 +120,12 @@ export default {
     shiftLabel: "शिफ्ट",
     breakMin: "विश्राम: {{min}} मिनेट",
     workingWithYou: "तपाईंसँगै काम गर्दै",
+    whosWorking: "कोको काम गर्दैछन्",
+    othersWorkingShort_one: "{{count}} काम गर्दै",
+    othersWorkingShort_other: "{{count}} काम गर्दै",
   },
   myTeam: {
     title: "मेरो टोली",
-    hint: "तपाईंको कम्पनीका सबै सदस्यहरू, सन्दर्भको लागि — पढ्नमात्र।",
     empty: "देखाउनको लागि अहिलेसम्म कुनै टोली सदस्य छैन।",
   },
   attendance: {

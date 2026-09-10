@@ -9,6 +9,7 @@ export default function TeamSection() {
   const { t } = useTranslation();
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<TeamMember | null>(null);
 
   useEffect(() => {
     api
@@ -21,20 +22,42 @@ export default function TeamSection() {
   return (
     <section className="panel">
       <h2>{t("myTeam.title")}</h2>
-      <p className="hint">{t("myTeam.hint")}</p>
-      <ul className="list">
-        {loading && <SkeletonRows count={5} />}
-        {!loading &&
-          team.map((m) => (
-            <li key={m.id}>
-              <span className="list-row-identity">
-                <Avatar userId={m.id} name={m.name} hasAvatar={m.hasAvatar} size={32} />
-                {m.name}
-              </span>
-            </li>
+      {loading ? (
+        <SkeletonRows count={5} />
+      ) : team.length === 0 ? (
+        <p className="empty">{t("myTeam.empty")}</p>
+      ) : (
+        <div className="team-grid">
+          {team.map((m) => (
+            <button
+              type="button"
+              key={m.id}
+              className="team-card"
+              onClick={() => setSelected(m)}
+            >
+              <Avatar userId={m.id} name={m.name} hasAvatar={m.hasAvatar} size={64} />
+              <span className="team-card-name">{m.name}</span>
+            </button>
           ))}
-        {!loading && team.length === 0 && <li className="empty">{t("myTeam.empty")}</li>}
-      </ul>
+        </div>
+      )}
+
+      {selected && (
+        <div className="modal-overlay" onClick={() => setSelected(null)}>
+          <div className="modal team-profile-modal" onClick={(e) => e.stopPropagation()}>
+            <Avatar
+              userId={selected.id}
+              name={selected.name}
+              hasAvatar={selected.hasAvatar}
+              size={140}
+            />
+            <h3>{selected.name}</h3>
+            <div className="modal-actions">
+              <button onClick={() => setSelected(null)}>{t("common.close")}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

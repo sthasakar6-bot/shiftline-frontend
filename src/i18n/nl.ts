@@ -120,10 +120,12 @@ export default {
     shiftLabel: "Dienst",
     breakMin: "Pauze: {{min}} min",
     workingWithYou: "Werkt samen met jou",
+    whosWorking: "Wie werkt er",
+    othersWorkingShort_one: "{{count}} werkt",
+    othersWorkingShort_other: "{{count}} werken",
   },
   myTeam: {
     title: "Mijn team",
-    hint: "Iedereen bij je bedrijf, ter referentie — alleen-lezen.",
     empty: "Nog geen teamleden om te tonen.",
   },
   attendance: {
