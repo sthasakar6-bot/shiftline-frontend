@@ -4,7 +4,7 @@ import { Share, PlusSquare } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { enablePushNotifications, isPushSupported } from "../lib/push";
 import { getCurrentCoords } from "../lib/geolocation";
-import { isIos, isStandalone } from "../lib/platform";
+import { isChromeIos, isIos, isStandalone } from "../lib/platform";
 import { getDeferredInstallPrompt, clearDeferredInstallPrompt } from "../lib/installPrompt";
 
 function storageKey(userId: number) {
@@ -107,16 +107,23 @@ export default function OnboardingPrompt() {
       <div className="modal-overlay" onClick={() => setStep("permissions")}>
         <div className="modal" onClick={(e) => e.stopPropagation()}>
           <h3>{t("onboarding.addToHomeScreen")}</h3>
-          <p>{t("onboarding.iosBody")}</p>
-          <ol className="install-steps">
-            <li>
-              {t("onboarding.iosStep1")} <Share size={14} className="install-step-icon" />
-            </li>
-            <li>
-              {t("onboarding.iosStep2")} <strong>{t("onboarding.addToHomeScreenAction")}</strong>{" "}
-              <PlusSquare size={14} className="install-step-icon" />
-            </li>
-          </ol>
+          {isChromeIos() ? (
+            <p>{t("onboarding.chromeIosBody")}</p>
+          ) : (
+            <>
+              <p>{t("onboarding.iosBody")}</p>
+              <ol className="install-steps">
+                <li>
+                  {t("onboarding.iosStep1")} <Share size={14} className="install-step-icon" />
+                </li>
+                <li>
+                  {t("onboarding.iosStep2")}{" "}
+                  <strong>{t("onboarding.addToHomeScreenAction")}</strong>{" "}
+                  <PlusSquare size={14} className="install-step-icon" />
+                </li>
+              </ol>
+            </>
+          )}
           <div className="modal-actions">
             <button onClick={() => setStep("permissions")}>{t("onboarding.gotIt")}</button>
           </div>

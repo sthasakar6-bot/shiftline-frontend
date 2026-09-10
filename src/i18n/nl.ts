@@ -464,6 +464,8 @@ export default {
     installing: "Bezig met installeren...",
     install: "Installeren",
     iosBody: "Zet Shiftline op je beginscherm voor snelle toegang en meldingen:",
+    chromeIosBody:
+      "Chrome op de iPhone kan het Shiftline-icoon niet toevoegen aan je beginscherm -- het blijft dan leeg. Open deze pagina in Safari en tik op Delen en \"Zet op beginscherm\" om het volledige icoon te krijgen.",
     iosStep1: "Tik op het deelicoon in de werkbalk van Safari",
     iosStep2: "Scroll naar beneden en tik op",
     addToHomeScreenAction: "Zet op beginscherm",

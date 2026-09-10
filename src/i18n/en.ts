@@ -463,6 +463,8 @@ export default {
     installing: "Installing...",
     install: "Install",
     iosBody: "For quick access and notifications, add Shiftline to your Home Screen:",
+    chromeIosBody:
+      "Chrome on iPhone can't add the Shiftline icon to your Home Screen -- it'll show up blank. Open this page in Safari instead, then tap Share and \"Add to Home Screen\" to get the full icon.",
     iosStep1: "Tap the Share icon in Safari's toolbar",
     iosStep2: "Scroll down and tap",
     addToHomeScreenAction: "Add to Home Screen",

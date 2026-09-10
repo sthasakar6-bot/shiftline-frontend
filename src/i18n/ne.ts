@@ -463,6 +463,8 @@ export default {
     installing: "इन्स्टल हुँदैछ...",
     install: "इन्स्टल गर्नुहोस्",
     iosBody: "द्रुत पहुँच र सूचनाहरूको लागि, Shiftline लाई आफ्नो होम स्क्रिनमा थप्नुहोस्:",
+    chromeIosBody:
+      "iPhone मा Chrome ले Shiftline को आइकन तपाईंको होम स्क्रिनमा थप्न सक्दैन -- यो खाली देखिनेछ। बरु यो पृष्ठ Safari मा खोल्नुहोस्, त्यसपछि Share मा ट्याप गर्नुहोस् र पूरा आइकन पाउन \"Add to Home Screen\" थिच्नुहोस्।",
     iosStep1: "Safari को टूलबारमा Share आइकनमा थिच्नुहोस्",
     iosStep2: "तल स्क्रोल गर्नुहोस् र थिच्नुहोस्",
     addToHomeScreenAction: "होम स्क्रिनमा थप्नुहोस्",
