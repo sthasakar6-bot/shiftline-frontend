@@ -264,6 +264,7 @@ export default {
   },
   passwordResets: {
     title: "पासवर्ड रिसेट अनुरोधहरू",
+    none: "कुनै पेन्डिङ अनुरोध छैन।",
     copyResetLink: "रिसेट लिङ्क प्रतिलिपि गर्नुहोस्",
     setNewPassword: "नयाँ पासवर्ड सेट गर्नुहोस्",
     settingPassword: "पासवर्ड सेट गर्दै...",

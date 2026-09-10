@@ -264,6 +264,7 @@ export default {
   },
   passwordResets: {
     title: "Password reset requests",
+    none: "No pending requests.",
     copyResetLink: "Copy reset link",
     setNewPassword: "Set new password",
     settingPassword: "Setting password…",

@@ -55,8 +55,6 @@ export default function PasswordResetsSection() {
     });
   }
 
-  if (requests.length === 0 && !resolved) return null;
-
   return (
     <section className="panel">
       <h2>{t("passwordResets.title")}</h2>
@@ -76,6 +74,7 @@ export default function PasswordResetsSection() {
             </span>
           </li>
         ))}
+        {requests.length === 0 && <li className="empty">{t("passwordResets.none")}</li>}
       </ul>
       {error && <div className="error">{error}</div>}
       {resolved && (

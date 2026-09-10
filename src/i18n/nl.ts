@@ -264,6 +264,7 @@ export default {
   },
   passwordResets: {
     title: "Wachtwoordherstelverzoeken",
+    none: "Geen openstaande verzoeken.",
     copyResetLink: "Herstellink kopiëren",
     setNewPassword: "Nieuw wachtwoord instellen",
     settingPassword: "Wachtwoord instellen…",
