@@ -127,7 +127,17 @@ export const api = {
     lastName: string;
     email: string;
     password: string;
-  }) => request<LoginResponse>("/api/signup", { method: "POST", body: JSON.stringify(data) }),
+    logo: File;
+  }) => {
+    const formData = new FormData();
+    formData.append("companyName", data.companyName);
+    formData.append("firstName", data.firstName);
+    formData.append("lastName", data.lastName);
+    formData.append("email", data.email);
+    formData.append("password", data.password);
+    formData.append("logo", data.logo);
+    return request<LoginResponse>("/api/signup", { method: "POST", body: formData });
+  },
 
   listCompanies: () => request<Company[]>("/api/companies"),
 

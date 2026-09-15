@@ -90,6 +90,9 @@ export default {
   signup: {
     title: "आफ्नो कम्पनी सिर्जना गर्नुहोस्",
     companyName: "कम्पनीको नाम",
+    uploadLogo: "कम्पनीको लोगो अपलोड गर्नुहोस्",
+    logoRequired: "कम्पनीको लोगो आवश्यक छ",
+    logoUploaded: "लोगो चयन गरियो",
     password: "पासवर्ड",
     confirmPassword: "पासवर्ड पुष्टि गर्नुहोस्",
     passwordMismatch: "पासवर्डहरू मेल खाँदैनन्",

@@ -90,6 +90,9 @@ export default {
   signup: {
     title: "Create your company",
     companyName: "Company name",
+    uploadLogo: "Upload company logo",
+    logoRequired: "A company logo is required",
+    logoUploaded: "Logo selected",
     password: "Password",
     confirmPassword: "Confirm password",
     passwordMismatch: "Passwords don't match",

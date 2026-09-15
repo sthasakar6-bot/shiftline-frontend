@@ -90,6 +90,9 @@ export default {
   signup: {
     title: "Maak je bedrijf aan",
     companyName: "Bedrijfsnaam",
+    uploadLogo: "Bedrijfslogo uploaden",
+    logoRequired: "Een bedrijfslogo is verplicht",
+    logoUploaded: "Logo geselecteerd",
     password: "Wachtwoord",
     confirmPassword: "Bevestig wachtwoord",
     passwordMismatch: "Wachtwoorden komen niet overeen",

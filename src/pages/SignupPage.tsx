@@ -1,6 +1,7 @@
-import { type FormEvent, useState } from "react";
+import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Camera } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
@@ -11,25 +12,43 @@ export default function SignupPage() {
   const { t } = useTranslation();
   const { signup } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [companyName, setCompanyName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [logo, setLogo] = useState<File | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!logo) return;
+    const url = URL.createObjectURL(logo);
+    setLogoPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [logo]);
+
+  function handleLogoChange(e: ChangeEvent<HTMLInputElement>) {
+    setLogo(e.target.files?.[0] ?? null);
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!logo) {
+      setError(t("signup.logoRequired"));
+      return;
+    }
     if (password !== confirmPassword) {
       setError(t("signup.passwordMismatch"));
       return;
     }
     setSubmitting(true);
     try {
-      const user = await signup({ companyName, firstName, lastName, email, password });
+      const user = await signup({ companyName, firstName, lastName, email, password, logo });
       navigate(user.role === "manager" ? "/admin" : "/");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("signup.failed"));
@@ -58,6 +77,33 @@ export default function SignupPage() {
             minLength={2}
           />
         </label>
+
+        <div className="profile-avatar-wrap complete-account-avatar">
+          <div className="signup-logo-preview" aria-hidden={!logoPreviewUrl}>
+            {logoPreviewUrl ? (
+              <img src={logoPreviewUrl} alt="" />
+            ) : (
+              <Camera size={20} />
+            )}
+          </div>
+          <button
+            type="button"
+            className="avatar-edit-btn"
+            onClick={() => fileInputRef.current?.click()}
+            title={t("signup.uploadLogo")}
+          >
+            <Camera size={14} />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleLogoChange}
+            hidden
+          />
+        </div>
+        <p className="hint">{logo ? t("signup.logoUploaded") : t("signup.logoRequired")}</p>
+
         <div className="auth-form-row">
           <label className="field">
             <span className="field-label">{t("auth.firstName")}</span>
@@ -93,7 +139,7 @@ export default function SignupPage() {
           />
         </label>
 
-        <button type="submit" disabled={submitting}>
+        <button type="submit" disabled={submitting || !logo}>
           {submitting ? t("signup.submitting") : t("signup.submit")}
         </button>
         <p>
