@@ -9,13 +9,7 @@ import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
-// Matched against the backend's trial-expiry message (identity/service.ts
-// login()) -- that endpoint has no structured error code today, only a
-// plain-English message, same as every other backend error this app
-// surfaces via ApiError.message.
-function isTrialExpiredError(message: string): boolean {
-  return message.toLowerCase().includes("trial has ended");
-}
+const LOCKOUT_CODES = new Set(["TRIAL_EXPIRED", "SUBSCRIPTION_CANCELED"]);
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -25,7 +19,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [trialExpired, setTrialExpired] = useState(false);
+  const [showBillingActions, setShowBillingActions] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const company = getSelectedCompany();
 
@@ -39,7 +33,7 @@ export default function LoginPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    setTrialExpired(false);
+    setShowBillingActions(false);
     setSubmitting(true);
     try {
       const user = await login(email, password);
@@ -52,7 +46,7 @@ export default function LoginPage() {
     } catch (err) {
       const message = err instanceof ApiError ? err.message : t("auth.loginFailed");
       setError(message);
-      setTrialExpired(err instanceof ApiError && isTrialExpiredError(err.message));
+      setShowBillingActions(err instanceof ApiError && !!err.code && LOCKOUT_CODES.has(err.code));
     } finally {
       setSubmitting(false);
     }
@@ -98,7 +92,7 @@ export default function LoginPage() {
         {error && (
           <div className="error">
             {error}
-            {trialExpired && (
+            {showBillingActions && (
               <div className="trial-expired-actions">
                 <a href={PRICING_URL} target="_blank" rel="noreferrer">
                   {t("auth.seePlans")}

@@ -67,9 +67,11 @@ export function clearSelectedCompany(): void {
 
 export class ApiError extends Error {
   status: number;
-  constructor(status: number, message: string) {
+  code?: string;
+  constructor(status: number, message: string, code?: string) {
     super(message);
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -93,7 +95,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const body = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    throw new ApiError(res.status, body.error || `Request failed with status ${res.status}`);
+    throw new ApiError(res.status, body.error || `Request failed with status ${res.status}`, body.code);
   }
 
   return body as T;
@@ -124,6 +126,24 @@ export const api = {
     }),
 
   me: () => request<User>("/api/auth/me"),
+
+  getBillingStatus: () =>
+    request<{
+      plan: string;
+      trialEndsAt: string | null;
+      billingProvider: string | null;
+      billingInterval: string | null;
+      subscriptionStatus: string | null;
+    }>("/api/billing/status"),
+  createBillingCheckout: (data: {
+    plan: "starter" | "unlimited";
+    interval: "monthly" | "yearly";
+    provider: "mollie" | "stripe";
+  }) =>
+    request<{ redirectUrl: string }>("/api/billing/checkout", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 
   signup: (data: {
     companyName: string;

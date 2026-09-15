@@ -1,5 +1,5 @@
 import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Camera } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
@@ -8,10 +8,13 @@ import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
+const INTENDED_PLAN_KEY = "shiftline_intended_plan";
+
 export default function SignupPage() {
   const { t } = useTranslation();
   const { signup } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [companyName, setCompanyName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -30,6 +33,22 @@ export default function SignupPage() {
     setLogoPreviewUrl(url);
     return () => URL.revokeObjectURL(url);
   }, [logo]);
+
+  // Remembers what the visitor clicked on the marketing site's pricing page
+  // (e.g. Starter vs. Unlimited) so the billing tab can pre-select it after
+  // signup -- signup itself collects no payment, so this is purely a
+  // same-session UI nicety, never sent to the backend.
+  useEffect(() => {
+    const plan = searchParams.get("intendedPlan");
+    const interval = searchParams.get("interval");
+    if (plan === "starter" || plan === "unlimited") {
+      localStorage.setItem(
+        INTENDED_PLAN_KEY,
+        JSON.stringify({ plan, interval: interval === "yearly" ? "yearly" : "monthly" }),
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleLogoChange(e: ChangeEvent<HTMLInputElement>) {
     setLogo(e.target.files?.[0] ?? null);
