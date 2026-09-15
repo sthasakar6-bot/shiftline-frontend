@@ -1496,6 +1496,260 @@
   color: var(--accent);
 }
 
+.roster-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.roster-toolbar .roster-week-nav {
+  margin-bottom: 0;
+}
+
+.roster-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.icon-btn.danger {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.roster-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.roster-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.roster-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.roster-dept-row td {
+  background: var(--bg);
+  font-weight: 700;
+  font-size: 12.5px;
+  color: var(--text-h);
+  text-align: left;
+  padding: 8px 10px;
+}
+
+.roster-dept-bar {
+  display: inline-block;
+  width: 4px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.roster-open-label,
+.roster-events-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text);
+  opacity: 0.6;
+  text-align: left;
+}
+
+.roster-open-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  margin-bottom: 4px;
+  padding: 5px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-h);
+  border: 1px dashed var(--border);
+  white-space: nowrap;
+}
+
+.roster-open-chip-count {
+  font-weight: 800;
+  opacity: 0.75;
+}
+
+.roster-event-pill {
+  display: block;
+  width: 100%;
+  margin-bottom: 4px;
+  padding: 5px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 7px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: none;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.roster-event-pill-time {
+  display: block;
+  font-weight: 500;
+  opacity: 0.8;
+  font-size: 10px;
+}
+
+.roster-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--bg);
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.roster-fullscreen-title {
+  margin: 0 0 12px;
+}
+
+.roster-config-modal {
+  max-width: 420px;
+}
+
+.roster-config-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.roster-config-tabs button {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel-bg);
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.roster-config-tabs button.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.roster-config-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.roster-config-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.roster-config-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.roster-config-name {
+  flex: 1;
+  font-size: 13.5px;
+  color: var(--text-h);
+}
+
+.roster-config-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.roster-config-form input[type="text"],
+.roster-config-form input:not([type]) {
+  flex: 1;
+}
+
+.roster-config-color-input {
+  width: 36px;
+  height: 32px;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+}
+
+.roster-open-assign-section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.roster-open-assign-section h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text-h);
+}
+
+.roster-open-assign-list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+}
+
+.roster-open-assign-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.roster-open-assign-form {
+  display: flex;
+  gap: 8px;
+}
+
+.roster-open-assign-form select {
+  flex: 1;
+}
+
+.field-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 13.5px;
+  color: var(--text);
+}
+
 .bookkeeper-history-row {
   flex-direction: column;
   align-items: flex-start;
@@ -2682,6 +2936,16 @@
 }
 
 .employee-detail-location-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
+  color: var(--text-h);
+  padding: 0;
+}
+
+.employee-detail-department-select {
   flex: 1;
   min-width: 0;
   border: none;

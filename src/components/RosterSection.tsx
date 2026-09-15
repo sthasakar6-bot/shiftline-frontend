@@ -1,70 +1,68 @@
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { Fragment, type FormEvent, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, Plus, FileDown } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  FileDown,
+  Settings,
+  Maximize2,
+  Minimize2,
+} from "lucide-react";
 import { api, ApiError } from "../api/client";
-import type { Shift, TeamMember } from "../api/types";
+import type { Department, OpenShift, RosterEvent, RosterShift, ShiftType, TeamMember } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import ConfirmDialog from "./ConfirmDialog";
 import Avatar from "./Avatar";
+import RosterConfigModal from "./RosterConfigModal";
+import OpenShiftModal from "./OpenShiftModal";
+import EventModal from "./EventModal";
 import { formatTime, compactTime } from "../lib/formatDate";
 import { getDateLocale } from "../i18n";
+import { dateKey, startOfWeek, toDatetimeLocal, toIso, toLocalInput } from "../lib/rosterDates";
 
-interface RosterEntry extends Shift {
-  employeeName: string;
-}
-
-// datetime-local gives a plain string with no timezone (e.g. "2026-09-01T09:00")
-// -- interpreting it via `new Date(...)` reads it as the browser's local time,
-// and toISOString() converts that to the correct UTC instant to send, instead
-// of the server assuming UTC for the naive string and silently shifting it.
-function toIso(localValue: string): string {
-  return new Date(localValue).toISOString();
-}
-
-function startOfWeek(d: Date): Date {
-  const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  date.setDate(date.getDate() - date.getDay());
-  return date;
-}
-
-function dateKey(d: Date): string {
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-}
-
-function toDatetimeLocal(day: Date, hour: number, minute: number): string {
-  const y = day.getFullYear();
-  const m = String(day.getMonth() + 1).padStart(2, "0");
-  const d = String(day.getDate()).padStart(2, "0");
-  const hh = String(hour).padStart(2, "0");
-  const mm = String(minute).padStart(2, "0");
-  return `${y}-${m}-${d}T${hh}:${mm}`;
-}
-
-function toLocalInput(iso: string): string {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+interface PersonEntry {
+  id: number;
+  name: string;
+  hasAvatar: boolean;
+  departmentId: number | null;
 }
 
 type ShiftModalState =
   | { mode: "add"; userId: number; userName: string; day: Date }
-  | { mode: "edit"; entry: RosterEntry };
+  | { mode: "edit"; entry: RosterShift };
+
+type OpenShiftModalState =
+  | { mode: "add"; day: Date; departmentId?: number }
+  | { mode: "edit"; openShift: OpenShift };
+
+type EventModalState = { mode: "add"; day: Date } | { mode: "edit"; event: RosterEvent };
 
 export default function RosterSection() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [colleagues, setColleagues] = useState<TeamMember[]>([]);
-  const [roster, setRoster] = useState<RosterEntry[]>([]);
+  const [roster, setRoster] = useState<RosterShift[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [shiftTypes, setShiftTypes] = useState<ShiftType[]>([]);
+  const [openShifts, setOpenShifts] = useState<OpenShift[]>([]);
+  const [events, setEvents] = useState<RosterEvent[]>([]);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
-  const [removeTarget, setRemoveTarget] = useState<RosterEntry | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<RosterShift | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [modal, setModal] = useState<ShiftModalState | null>(null);
   const [mStart, setMStart] = useState("");
   const [mEnd, setMEnd] = useState("");
   const [mBreak, setMBreak] = useState("");
+  const [mShiftTypeId, setMShiftTypeId] = useState("");
   const [mError, setMError] = useState<string | null>(null);
   const [mSaving, setMSaving] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [configOpen, setConfigOpen] = useState(false);
+  const [openShiftModal, setOpenShiftModal] = useState<OpenShiftModalState | null>(null);
+  const [eventModal, setEventModal] = useState<EventModalState | null>(null);
+  const [fullscreen, setFullscreen] = useState(false);
 
   const BREAK_OPTIONS = [
     { label: t("adminRoster.breakNone"), value: "" },
@@ -76,11 +74,29 @@ export default function RosterSection() {
 
   const youLabel = `(${t("common.you")})`;
 
-  const people = useMemo(
+  const people = useMemo<PersonEntry[]>(
     () =>
       user
-        ? [{ id: user.id, name: `${user.name} ${youLabel}`, hasAvatar: user.hasAvatar }, ...colleagues]
-        : colleagues,
+        ? [
+            {
+              id: user.id,
+              name: `${user.name} ${youLabel}`,
+              hasAvatar: user.hasAvatar,
+              departmentId: user.departmentId,
+            },
+            ...colleagues.map((c) => ({
+              id: c.id,
+              name: c.name,
+              hasAvatar: c.hasAvatar,
+              departmentId: c.departmentId,
+            })),
+          ]
+        : colleagues.map((c) => ({
+            id: c.id,
+            name: c.name,
+            hasAvatar: c.hasAvatar,
+            departmentId: c.departmentId,
+          })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [user, colleagues],
   );
@@ -95,42 +111,67 @@ export default function RosterSection() {
       .catch(() => {});
   }
 
-  async function loadRoster() {
-    if (!user) return;
-    const targets = [{ id: user.id, name: `${user.name} ${youLabel}` }, ...colleagues];
-    try {
-      const lists = await Promise.all(
-        targets.map((target) =>
-          api
-            .listShiftsForReport(target.id)
-            .then((shifts) => shifts.map((s) => ({ ...s, employeeName: target.name }))),
-        ),
-      );
-      setRoster(lists.flat());
-    } catch {
-      // ignore, keep last known roster
-    }
+  function loadRoster() {
+    api
+      .listCompanyRoster()
+      .then(setRoster)
+      .catch(() => {});
+  }
+
+  function loadDepartments() {
+    api.listDepartments().then(setDepartments).catch(() => {});
+  }
+
+  function loadShiftTypes() {
+    api.listShiftTypes().then(setShiftTypes).catch(() => {});
+  }
+
+  function loadOpenShifts() {
+    api.listOpenShifts().then(setOpenShifts).catch(() => {});
+  }
+
+  function loadEvents() {
+    api.listEvents().then(setEvents).catch(() => {});
   }
 
   useEffect(loadColleagues, [user?.id]);
+  useEffect(loadRoster, []);
+  useEffect(loadDepartments, []);
+  useEffect(loadShiftTypes, []);
+  useEffect(loadOpenShifts, []);
+  useEffect(loadEvents, []);
+
   useEffect(() => {
-    loadRoster();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colleagues, user]);
+    if (!fullscreen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFullscreen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [fullscreen]);
+
+  const shiftTypeById = useMemo(() => new Map(shiftTypes.map((s) => [s.id, s])), [shiftTypes]);
 
   function openAdd(userId: number, userName: string, day: Date) {
     setModal({ mode: "add", userId, userName, day });
     setMStart(toDatetimeLocal(day, 9, 0));
     setMEnd(toDatetimeLocal(day, 17, 0));
     setMBreak("");
+    setMShiftTypeId("");
     setMError(null);
   }
 
-  function openEdit(entry: RosterEntry) {
+  function openEdit(entry: RosterShift) {
     setModal({ mode: "edit", entry });
     setMStart(toLocalInput(entry.startsAt));
     setMEnd(toLocalInput(entry.endsAt));
     setMBreak(entry.breakMinutes ? String(entry.breakMinutes) : "");
+    setMShiftTypeId(entry.shiftTypeId ? String(entry.shiftTypeId) : "");
     setMError(null);
   }
 
@@ -140,17 +181,20 @@ export default function RosterSection() {
     setMSaving(true);
     setMError(null);
     try {
+      const shiftTypeId = mShiftTypeId ? Number(mShiftTypeId) : undefined;
       if (modal.mode === "add") {
         await api.createShiftForReport(modal.userId, {
           startsAt: toIso(mStart),
           endsAt: toIso(mEnd),
           breakMinutes: mBreak ? Number(mBreak) : undefined,
+          shiftTypeId,
         });
       } else {
         await api.updateShiftForReport(modal.entry.userId, modal.entry.id, {
           startsAt: toIso(mStart),
           endsAt: toIso(mEnd),
           breakMinutes: mBreak ? Number(mBreak) : undefined,
+          shiftTypeId: shiftTypeId ?? null,
         });
       }
       setModal(null);
@@ -162,12 +206,12 @@ export default function RosterSection() {
     }
   }
 
-  function requestRemove(entry: RosterEntry) {
+  function requestRemove(entry: RosterShift) {
     setModal(null);
     setRemoveTarget(entry);
   }
 
-  async function handleRemove(entry: RosterEntry) {
+  async function handleRemove(entry: RosterShift) {
     setError(null);
     try {
       await api.deleteShiftForReport(entry.userId, entry.id);
@@ -198,7 +242,7 @@ export default function RosterSection() {
   }, [weekStart]);
 
   const shiftsByPersonAndDay = useMemo(() => {
-    const map = new Map<string, RosterEntry[]>();
+    const map = new Map<string, RosterShift[]>();
     for (const s of roster) {
       const start = new Date(s.startsAt);
       if (start >= weekStart && start < weekEnd) {
@@ -211,7 +255,80 @@ export default function RosterSection() {
     return map;
   }, [roster, weekStart, weekEnd]);
 
+  const eventsByDay = useMemo(() => {
+    const map = new Map<string, RosterEvent[]>();
+    for (const ev of events) {
+      const start = new Date(ev.startsAt);
+      if (start >= weekStart && start < weekEnd) {
+        const key = dateKey(start);
+        const existing = map.get(key) ?? [];
+        existing.push(ev);
+        map.set(key, existing);
+      }
+    }
+    return map;
+  }, [events, weekStart, weekEnd]);
+
+  const openShiftsByGroupAndDay = useMemo(() => {
+    const map = new Map<string, OpenShift[]>();
+    for (const os of openShifts) {
+      const start = new Date(os.startsAt);
+      if (start >= weekStart && start < weekEnd) {
+        const groupKey = os.departmentId ?? "none";
+        const key = `${groupKey}_${dateKey(start)}`;
+        const existing = map.get(key) ?? [];
+        existing.push(os);
+        map.set(key, existing);
+      }
+    }
+    return map;
+  }, [openShifts, weekStart, weekEnd]);
+
+  // Groups employees (and their open shifts) by department, sorted by
+  // Department.order, with a trailing "Unassigned" group -- dropped entirely
+  // when nothing falls into it, so companies with no departments configured
+  // yet just see one flat list, matching the pre-department behavior.
+  const departmentGroups = useMemo(() => {
+    type Group = { department: Department | null; people: PersonEntry[] };
+    const groups = new Map<number | "none", Group>();
+    for (const dept of [...departments].sort((a, b) => a.order - b.order)) {
+      groups.set(dept.id, { department: dept, people: [] });
+    }
+    groups.set("none", { department: null, people: [] });
+    for (const p of people) {
+      const key = p.departmentId ?? "none";
+      if (!groups.has(key)) groups.set(key, { department: null, people: [] });
+      groups.get(key)!.people.push(p);
+    }
+    const hasAnyOpenShiftInGroup = (key: number | "none") =>
+      openShifts.some((os) => (os.departmentId ?? "none") === key);
+    return Array.from(groups.entries())
+      .filter(
+        ([key, g]) => g.department !== null || g.people.length > 0 || hasAnyOpenShiftInGroup(key),
+      )
+      .map(([key, g]) => ({ key, ...g }));
+  }, [departments, people, openShifts]);
+
   const today = dateKey(new Date());
+
+  function openAddOpenShift(day: Date, departmentId?: number) {
+    setOpenShiftModal({ mode: "add", day, departmentId });
+  }
+
+  function openEditOpenShift(openShift: OpenShift) {
+    setOpenShiftModal({ mode: "edit", openShift });
+  }
+
+  function handleOpenShiftSaved() {
+    setOpenShiftModal(null);
+    loadOpenShifts();
+    loadRoster();
+  }
+
+  function handleEventSaved() {
+    setEventModal(null);
+    loadEvents();
+  }
 
   async function handleDownloadPdf() {
     setPdfBusy(true);
@@ -257,61 +374,78 @@ export default function RosterSection() {
     }
   }
 
-  return (
-    <section className="panel">
-      <h2>{t("adminRoster.title")}</h2>
-      <p className="hint">{t("adminRoster.gridHint")}</p>
-      {error && <div className="error">{error}</div>}
-
-      <div className="roster-week-nav">
-        <button
-          type="button"
-          className="roster-nav-btn"
-          onClick={() =>
-            setWeekStart((w) => {
-              const d = new Date(w);
-              d.setDate(d.getDate() - 7);
-              return d;
-            })
-          }
-        >
-          <ChevronLeft size={18} />
-        </button>
-        <button
-          type="button"
-          className="roster-week-label"
-          onClick={() => setWeekStart(startOfWeek(new Date()))}
-        >
-          {weekLabel}
-        </button>
-        <button
-          type="button"
-          className="roster-nav-btn"
-          onClick={() =>
-            setWeekStart((w) => {
-              const d = new Date(w);
-              d.setDate(d.getDate() + 7);
-              return d;
-            })
-          }
-        >
-          <ChevronRight size={18} />
-        </button>
-      </div>
-
-      {people.length > 0 && (
-        <div className="roster-pdf-row">
+  const body = (
+    <>
+      <div className="roster-toolbar">
+        <div className="roster-week-nav">
+          <button
+            type="button"
+            className="roster-nav-btn"
+            onClick={() =>
+              setWeekStart((w) => {
+                const d = new Date(w);
+                d.setDate(d.getDate() - 7);
+                return d;
+              })
+            }
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            type="button"
+            className="roster-week-label"
+            onClick={() => setWeekStart(startOfWeek(new Date()))}
+          >
+            {weekLabel}
+          </button>
+          <button
+            type="button"
+            className="roster-nav-btn"
+            onClick={() =>
+              setWeekStart((w) => {
+                const d = new Date(w);
+                d.setDate(d.getDate() + 7);
+                return d;
+              })
+            }
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
+        <div className="roster-toolbar-actions">
+          {people.length > 0 && (
+            <button type="button" className="icon-btn" onClick={handleDownloadPdf} disabled={pdfBusy}>
+              <FileDown size={14} />
+              {pdfBusy ? t("adminRoster.generatingPdf") : t("adminRoster.downloadPdf")}
+            </button>
+          )}
+          <button type="button" className="icon-btn" onClick={() => setConfigOpen(true)}>
+            <Settings size={14} />
+            {t("adminRoster.manage")}
+          </button>
           <button
             type="button"
             className="icon-btn"
-            onClick={handleDownloadPdf}
-            disabled={pdfBusy}
+            onClick={() => setFullscreen((f) => !f)}
+            aria-label={fullscreen ? t("adminRoster.fullscreenExit") : t("adminRoster.fullscreenEnter")}
           >
-            <FileDown size={14} />
-            {pdfBusy ? t("adminRoster.generatingPdf") : t("adminRoster.downloadPdf")}
+            {fullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
           </button>
         </div>
+      </div>
+
+      {shiftTypes.length > 0 && (
+        <div className="roster-legend">
+          {shiftTypes.map((s) => (
+            <span key={s.id} className="roster-legend-item">
+              <span className="roster-legend-swatch" style={{ background: s.color }} />
+              {s.name}
+            </span>
+          ))}
+        </div>
       )}
+
+      {error && <div className="error">{error}</div>}
 
       {people.length === 0 ? (
         <p className="empty-state">{t("adminRoster.noEmployees")}</p>
@@ -322,10 +456,7 @@ export default function RosterSection() {
               <tr>
                 <th className="roster-grid-corner" />
                 {weekDays.map((d) => (
-                  <th
-                    key={dateKey(d)}
-                    className={dateKey(d) === today ? "today" : ""}
-                  >
+                  <th key={dateKey(d)} className={dateKey(d) === today ? "today" : ""}>
                     <span className="roster-grid-day-name">
                       {d.toLocaleDateString(getDateLocale(), { weekday: "short" })}
                     </span>
@@ -335,40 +466,130 @@ export default function RosterSection() {
               </tr>
             </thead>
             <tbody>
-              {people.map((p) => (
-                <tr key={p.id}>
-                  <th className="roster-grid-person">
-                    <span className="roster-grid-person-inner">
-                      <Avatar userId={p.id} name={p.name} hasAvatar={p.hasAvatar} size={26} />
-                      <span className="roster-grid-person-name">{p.name}</span>
-                    </span>
-                  </th>
-                  {weekDays.map((d) => {
-                    const cellShifts = shiftsByPersonAndDay.get(`${p.id}_${dateKey(d)}`) ?? [];
-                    return (
-                      <td key={dateKey(d)} className={dateKey(d) === today ? "today" : ""}>
-                        {cellShifts.map((s) => (
-                          <button
-                            key={s.id}
-                            className="roster-grid-chip"
-                            onClick={() => openEdit(s)}
-                            title={`${formatTime(s.startsAt)} – ${formatTime(s.endsAt)}${s.breakMinutes ? t("adminRoster.breakMinSuffix", { min: s.breakMinutes }) : ""}`}
-                          >
-                            {compactTime(s.startsAt)}-{compactTime(s.endsAt)}
-                          </button>
-                        ))}
+              <tr className="roster-events-row">
+                <th className="roster-grid-corner roster-events-label">{t("adminRoster.eventsRow")}</th>
+                {weekDays.map((d) => {
+                  const dayEvents = eventsByDay.get(dateKey(d)) ?? [];
+                  return (
+                    <td key={dateKey(d)} className={dateKey(d) === today ? "today" : ""}>
+                      {dayEvents.map((ev) => (
                         <button
-                          type="button"
-                          className="roster-grid-add"
-                          onClick={() => openAdd(p.id, p.name, d)}
-                          aria-label={t("adminRoster.quickAddTitle", { name: p.name })}
+                          key={ev.id}
+                          className="roster-event-pill"
+                          onClick={() => setEventModal({ mode: "edit", event: ev })}
                         >
-                          <Plus size={14} />
+                          {ev.title}
+                          {ev.endsAt && (
+                            <span className="roster-event-pill-time">
+                              {compactTime(ev.startsAt)}-{compactTime(ev.endsAt)}
+                            </span>
+                          )}
                         </button>
+                      ))}
+                      <button
+                        type="button"
+                        className="roster-grid-add"
+                        onClick={() => setEventModal({ mode: "add", day: d })}
+                        aria-label={t("adminRoster.addEvent")}
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </td>
+                  );
+                })}
+              </tr>
+
+              {departmentGroups.map((group) => (
+                <Fragment key={group.key}>
+                  {group.department && (
+                    <tr className="roster-dept-row">
+                      <td className="roster-grid-corner" colSpan={weekDays.length + 1}>
+                        <span className="roster-dept-bar" style={{ background: group.department.color }} />
+                        {group.department.name}
                       </td>
-                    );
-                  })}
-                </tr>
+                    </tr>
+                  )}
+                  <tr className="roster-open-row">
+                    <th className="roster-grid-corner roster-open-label">
+                      {t("adminRoster.openShiftsRow")}
+                    </th>
+                    {weekDays.map((d) => {
+                      const key = `${group.key}_${dateKey(d)}`;
+                      const dayOpenShifts = openShiftsByGroupAndDay.get(key) ?? [];
+                      return (
+                        <td key={dateKey(d)} className={dateKey(d) === today ? "today" : ""}>
+                          {dayOpenShifts.map((os) => (
+                            <button
+                              key={os.id}
+                              className="roster-open-chip"
+                              style={
+                                os.shiftTypeId
+                                  ? { borderColor: shiftTypeById.get(os.shiftTypeId)?.color }
+                                  : undefined
+                              }
+                              onClick={() => openEditOpenShift(os)}
+                            >
+                              {compactTime(os.startsAt)}-{compactTime(os.endsAt)}
+                              <span className="roster-open-chip-count">
+                                {os.filledCount}/{os.requiredCount}
+                              </span>
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            className="roster-grid-add"
+                            onClick={() =>
+                              openAddOpenShift(d, group.department ? group.department.id : undefined)
+                            }
+                            aria-label={t("adminRoster.addOpenShift")}
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  {group.people.map((p) => (
+                    <tr key={p.id}>
+                      <th className="roster-grid-person">
+                        <span className="roster-grid-person-inner">
+                          <Avatar userId={p.id} name={p.name} hasAvatar={p.hasAvatar} size={26} />
+                          <span className="roster-grid-person-name">{p.name}</span>
+                        </span>
+                      </th>
+                      {weekDays.map((d) => {
+                        const cellShifts = shiftsByPersonAndDay.get(`${p.id}_${dateKey(d)}`) ?? [];
+                        return (
+                          <td key={dateKey(d)} className={dateKey(d) === today ? "today" : ""}>
+                            {cellShifts.map((s) => (
+                              <button
+                                key={s.id}
+                                className="roster-grid-chip"
+                                style={{
+                                  background: s.shiftTypeId
+                                    ? shiftTypeById.get(s.shiftTypeId)?.color
+                                    : undefined,
+                                }}
+                                onClick={() => openEdit(s)}
+                                title={`${formatTime(s.startsAt)} – ${formatTime(s.endsAt)}${s.breakMinutes ? t("adminRoster.breakMinSuffix", { min: s.breakMinutes }) : ""}`}
+                              >
+                                {compactTime(s.startsAt)}-{compactTime(s.endsAt)}
+                              </button>
+                            ))}
+                            <button
+                              type="button"
+                              className="roster-grid-add"
+                              onClick={() => openAdd(p.id, p.name, d)}
+                              aria-label={t("adminRoster.quickAddTitle", { name: p.name })}
+                            >
+                              <Plus size={14} />
+                            </button>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -379,7 +600,7 @@ export default function RosterSection() {
         <ConfirmDialog
           title={t("adminRoster.removeShiftQuestion")}
           message={t("adminRoster.removeShiftConfirm", {
-            name: removeTarget.employeeName,
+            name: removeTarget.userName,
             date: new Date(removeTarget.startsAt).toLocaleDateString(getDateLocale()),
           })}
           confirmLabel={t("team.remove")}
@@ -394,7 +615,7 @@ export default function RosterSection() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>
               {t("adminRoster.quickAddTitle", {
-                name: modal.mode === "add" ? modal.userName : modal.entry.employeeName,
+                name: modal.mode === "add" ? modal.userName : modal.entry.userName,
               })}
             </h3>
             <p className="hint">
@@ -432,6 +653,19 @@ export default function RosterSection() {
                   ))}
                 </select>
               </label>
+              {shiftTypes.length > 0 && (
+                <label className="field">
+                  <span className="field-label">{t("adminRoster.shiftTypeLabel")}</span>
+                  <select value={mShiftTypeId} onChange={(e) => setMShiftTypeId(e.target.value)}>
+                    <option value="">{t("adminRoster.shiftTypeNone")}</option>
+                    {shiftTypes.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               {mError && <div className="error">{mError}</div>}
               <div className="modal-actions">
                 {modal.mode === "edit" && (
@@ -454,6 +688,64 @@ export default function RosterSection() {
           </div>
         </div>
       )}
+
+      {configOpen && (
+        <RosterConfigModal
+          departments={departments}
+          shiftTypes={shiftTypes}
+          onClose={() => setConfigOpen(false)}
+          onChanged={() => {
+            loadDepartments();
+            loadShiftTypes();
+          }}
+        />
+      )}
+
+      {openShiftModal && (
+        <OpenShiftModal
+          state={openShiftModal}
+          departments={departments}
+          shiftTypes={shiftTypes}
+          people={colleagues.concat(
+            user
+              ? [
+                  {
+                    id: user.id,
+                    name: `${user.name} ${youLabel}`,
+                    role: "manager",
+                    hasAvatar: user.hasAvatar,
+                    location: user.location,
+                    departmentId: user.departmentId,
+                  },
+                ]
+              : [],
+          )}
+          onClose={() => setOpenShiftModal(null)}
+          onSaved={handleOpenShiftSaved}
+        />
+      )}
+
+      {eventModal && (
+        <EventModal state={eventModal} onClose={() => setEventModal(null)} onSaved={handleEventSaved} />
+      )}
+    </>
+  );
+
+  if (fullscreen) {
+    return createPortal(
+      <div className="roster-fullscreen">
+        <h2 className="roster-fullscreen-title">{t("adminRoster.title")}</h2>
+        {body}
+      </div>,
+      document.body,
+    );
+  }
+
+  return (
+    <section className="panel">
+      <h2>{t("adminRoster.title")}</h2>
+      <p className="hint">{t("adminRoster.gridHint")}</p>
+      {body}
     </section>
   );
 }

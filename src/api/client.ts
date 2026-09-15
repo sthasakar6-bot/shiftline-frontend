@@ -5,13 +5,17 @@ import type {
   BookkeeperEmployee,
   Company,
   Contract,
+  Department,
   LeaveRequest,
   LoginResponse,
   Notification,
+  OpenShift,
   PasswordResetRequest,
   Payslip,
+  RosterEvent,
   RosterShift,
   Shift,
+  ShiftType,
   TeamMember,
   User,
   UserSummary,
@@ -174,6 +178,11 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify({ location }),
     }),
+  setEmployeeDepartment: (id: number, departmentId: number | null) =>
+    request<UserSummary>(`/api/users/${id}/department`, {
+      method: "PATCH",
+      body: JSON.stringify({ departmentId }),
+    }),
   uploadAvatar: (file: File) => {
     const formData = new FormData();
     formData.append("avatar", file);
@@ -276,14 +285,19 @@ export const api = {
 
   createShiftForReport: (
     userId: number,
-    data: { startsAt: string; endsAt: string; breakMinutes?: number },
+    data: { startsAt: string; endsAt: string; breakMinutes?: number; shiftTypeId?: number },
   ) =>
     request<Shift>(`/api/users/${userId}/shifts`, { method: "POST", body: JSON.stringify(data) }),
   listShiftsForReport: (userId: number) => request<Shift[]>(`/api/users/${userId}/shifts`),
   updateShiftForReport: (
     userId: number,
     shiftId: number,
-    data: Partial<{ startsAt: string; endsAt: string; breakMinutes: number }>,
+    data: Partial<{
+      startsAt: string;
+      endsAt: string;
+      breakMinutes: number;
+      shiftTypeId: number | null;
+    }>,
   ) =>
     request<Shift>(`/api/users/${userId}/shifts/${shiftId}`, {
       method: "PATCH",
@@ -291,6 +305,81 @@ export const api = {
     }),
   deleteShiftForReport: (userId: number, shiftId: number) =>
     request<void>(`/api/users/${userId}/shifts/${shiftId}`, { method: "DELETE" }),
+
+  listDepartments: () => request<Department[]>("/api/departments"),
+  createDepartment: (data: { name: string; color: string; order?: number }) =>
+    request<Department>("/api/departments", { method: "POST", body: JSON.stringify(data) }),
+  updateDepartment: (
+    id: number,
+    data: Partial<{ name: string; color: string; order: number }>,
+  ) =>
+    request<Department>(`/api/departments/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteDepartment: (id: number) =>
+    request<void>(`/api/departments/${id}`, { method: "DELETE" }),
+
+  listShiftTypes: () => request<ShiftType[]>("/api/shift-types"),
+  createShiftType: (data: { name: string; color: string; order?: number }) =>
+    request<ShiftType>("/api/shift-types", { method: "POST", body: JSON.stringify(data) }),
+  updateShiftType: (
+    id: number,
+    data: Partial<{ name: string; color: string; order: number }>,
+  ) =>
+    request<ShiftType>(`/api/shift-types/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteShiftType: (id: number) =>
+    request<void>(`/api/shift-types/${id}`, { method: "DELETE" }),
+
+  listOpenShifts: () => request<OpenShift[]>("/api/open-shifts"),
+  createOpenShift: (data: {
+    departmentId?: number;
+    shiftTypeId?: number;
+    startsAt: string;
+    endsAt: string;
+    breakMinutes?: number;
+    requiredCount?: number;
+    notes?: string;
+  }) => request<OpenShift>("/api/open-shifts", { method: "POST", body: JSON.stringify(data) }),
+  updateOpenShift: (
+    id: number,
+    data: Partial<{
+      departmentId: number | null;
+      shiftTypeId: number | null;
+      startsAt: string;
+      endsAt: string;
+      breakMinutes: number;
+      requiredCount: number;
+      notes: string | null;
+    }>,
+  ) =>
+    request<OpenShift>(`/api/open-shifts/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteOpenShift: (id: number) =>
+    request<void>(`/api/open-shifts/${id}`, { method: "DELETE" }),
+  assignOpenShift: (
+    id: number,
+    data: { userId: number; startsAt?: string; endsAt?: string; breakMinutes?: number },
+  ) =>
+    request<OpenShift>(`/api/open-shifts/${id}/assign`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  listEvents: () => request<RosterEvent[]>("/api/events"),
+  createEvent: (data: { title: string; startsAt: string; endsAt?: string | null }) =>
+    request<RosterEvent>("/api/events", { method: "POST", body: JSON.stringify(data) }),
+  updateEvent: (
+    id: number,
+    data: Partial<{ title: string; startsAt: string; endsAt: string | null }>,
+  ) =>
+    request<RosterEvent>(`/api/events/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteEvent: (id: number) => request<void>(`/api/events/${id}`, { method: "DELETE" }),
 
   listAttendance: () => request<Attendance[]>("/api/attendance"),
   clockIn: (shiftId: number, coords?: { lat: number; lng: number }, clockedAt?: string) =>

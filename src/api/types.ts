@@ -7,6 +7,7 @@ export interface User {
   phone: string | null;
   address: string | null;
   location: string | null;
+  departmentId: number | null;
   needsOnboarding: boolean;
   companyId: number;
   companyName: string;
@@ -73,6 +74,8 @@ export interface Shift {
   startsAt: string;
   endsAt: string;
   breakMinutes: number | null;
+  shiftTypeId: number | null;
+  openShiftId: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -80,6 +83,7 @@ export interface Shift {
 export interface RosterShift extends Shift {
   userName: string;
   userLocation: string | null;
+  userDepartmentId: number | null;
 }
 
 export interface TeamMember {
@@ -88,6 +92,48 @@ export interface TeamMember {
   role: "employee" | "manager" | "bookkeeper";
   hasAvatar: boolean;
   location: string | null;
+  departmentId: number | null;
+}
+
+export interface Department {
+  id: number;
+  name: string;
+  color: string;
+  order: number;
+}
+
+export interface ShiftType {
+  id: number;
+  name: string;
+  color: string;
+  order: number;
+}
+
+export interface OpenShiftAssignment {
+  shiftId: number;
+  userId: number;
+  userName: string;
+}
+
+export interface OpenShift {
+  id: number;
+  departmentId: number | null;
+  shiftTypeId: number | null;
+  startsAt: string;
+  endsAt: string;
+  breakMinutes: number | null;
+  requiredCount: number;
+  notes: string | null;
+  filledShifts: OpenShiftAssignment[];
+  filledCount: number;
+  remaining: number;
+}
+
+export interface RosterEvent {
+  id: number;
+  title: string;
+  startsAt: string;
+  endsAt: string | null;
 }
 
 export interface Attendance {

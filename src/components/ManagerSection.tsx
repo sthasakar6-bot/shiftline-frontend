@@ -317,6 +317,7 @@ export default function ManagerSection() {
           employee={detailTarget}
           onClose={() => setDetailTargetId(null)}
           onLocationChanged={loadEmployees}
+          onDepartmentChanged={loadEmployees}
         />
       )}
 

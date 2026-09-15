@@ -1,24 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Copy, Check, Mail, Phone, MapPin, Building2 } from "lucide-react";
+import { Copy, Check, Mail, Phone, MapPin, Building2, Users } from "lucide-react";
 import Avatar from "./Avatar";
 import { api, ApiError } from "../api/client";
-import type { UserSummary } from "../api/types";
+import type { Department, UserSummary } from "../api/types";
 
 export default function EmployeeDetailModal({
   employee,
   onClose,
   onLocationChanged,
+  onDepartmentChanged,
 }: {
   employee: UserSummary;
   onClose: () => void;
   onLocationChanged?: () => void;
+  onDepartmentChanged?: () => void;
 }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState<"email" | "phone" | "address" | null>(null);
   const [locationInput, setLocationInput] = useState(employee.location ?? "");
   const [savingLocation, setSavingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [departmentId, setDepartmentId] = useState(employee.departmentId ?? "");
+  const [savingDepartment, setSavingDepartment] = useState(false);
+  const [departmentError, setDepartmentError] = useState<string | null>(null);
+
+  useEffect(() => {
+    api.listDepartments().then(setDepartments).catch(() => {});
+  }, []);
 
   function handleCopy(field: "email" | "phone" | "address", value: string) {
     navigator.clipboard.writeText(value).then(() => {
@@ -37,6 +47,22 @@ export default function EmployeeDetailModal({
       setLocationError(err instanceof ApiError ? err.message : t("employeeDetail.locationSaveFailed"));
     } finally {
       setSavingLocation(false);
+    }
+  }
+
+  async function handleSaveDepartment(value: string) {
+    setDepartmentId(value);
+    setDepartmentError(null);
+    setSavingDepartment(true);
+    try {
+      await api.setEmployeeDepartment(employee.id, value ? Number(value) : null);
+      onDepartmentChanged?.();
+    } catch (err) {
+      setDepartmentError(
+        err instanceof ApiError ? err.message : t("employeeDetail.departmentSaveFailed"),
+      );
+    } finally {
+      setSavingDepartment(false);
     }
   }
 
@@ -114,6 +140,23 @@ export default function EmployeeDetailModal({
             </button>
           </div>
           {locationError && <div className="error">{locationError}</div>}
+          <div className="employee-detail-row">
+            <Users size={16} className="employee-detail-icon" />
+            <select
+              className="employee-detail-department-select"
+              value={departmentId}
+              onChange={(e) => handleSaveDepartment(e.target.value)}
+              disabled={savingDepartment}
+            >
+              <option value="">{t("employeeDetail.departmentNone")}</option>
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {departmentError && <div className="error">{departmentError}</div>}
         </div>
 
         <div className="modal-actions">
