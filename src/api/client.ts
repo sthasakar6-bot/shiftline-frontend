@@ -370,6 +370,16 @@ export const api = {
       method: "POST",
       body: JSON.stringify(data),
     }),
+  requestOpenShift: (id: number) =>
+    request<{ id: number; status: string }>(`/api/open-shifts/${id}/requests`, { method: "POST" }),
+  cancelOpenShiftRequest: (requestId: number) =>
+    request<void>(`/api/open-shift-requests/${requestId}`, { method: "DELETE" }),
+  approveOpenShiftRequest: (requestId: number) =>
+    request<OpenShift>(`/api/open-shift-requests/${requestId}/approve`, { method: "POST" }),
+  rejectOpenShiftRequest: (requestId: number) =>
+    request<{ id: number; status: string }>(`/api/open-shift-requests/${requestId}/reject`, {
+      method: "POST",
+    }),
 
   listEvents: () => request<RosterEvent[]>("/api/events"),
   createEvent: (data: { title: string; startsAt: string; endsAt?: string | null }) =>

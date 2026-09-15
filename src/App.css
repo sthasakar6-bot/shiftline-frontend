@@ -1737,6 +1737,17 @@
   gap: 8px;
 }
 
+.roster-open-request-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.roster-open-request-actions button {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
 .roster-open-assign-form select {
   flex: 1;
 }
@@ -2393,6 +2404,27 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
+}
+
+.open-shift-requests {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.open-shift-request-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text);
+  opacity: 0.85;
+}
+
+.open-shift-request-status button {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: 12px;
 }
 
 .calendar-legend-swatch {

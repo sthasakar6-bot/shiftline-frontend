@@ -112,6 +112,28 @@ export default function OpenShiftModal({
     }
   }
 
+  async function handleApproveRequest(requestId: number) {
+    setError(null);
+    try {
+      await api.approveOpenShiftRequest(requestId);
+      onSaved();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t("adminRoster.openShiftAssignFailed"));
+    }
+  }
+
+  async function handleRejectRequest(requestId: number) {
+    setError(null);
+    try {
+      await api.rejectOpenShiftRequest(requestId);
+      onSaved();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t("adminRoster.openShiftRequestRejectFailed"));
+    }
+  }
+
+  const pendingRequests = existing?.requests.filter((r) => r.status === "pending") ?? [];
+
   const assignedUserIds = new Set(existing?.filledShifts.map((f) => f.userId) ?? []);
   const eligiblePeople = people.filter((p) => !assignedUserIds.has(p.id));
 
@@ -190,6 +212,27 @@ export default function OpenShiftModal({
             </button>
           </div>
         </form>
+
+        {existing && pendingRequests.length > 0 && (
+          <div className="roster-open-assign-section">
+            <h4>{t("adminRoster.openShiftRequestsTitle")}</h4>
+            <ul className="roster-open-assign-list">
+              {pendingRequests.map((r) => (
+                <li key={r.id}>
+                  <span>{r.userName}</span>
+                  <span className="roster-open-request-actions">
+                    <button type="button" onClick={() => handleApproveRequest(r.id)}>
+                      {t("adminRoster.openShiftApproveRequest")}
+                    </button>
+                    <button type="button" className="danger" onClick={() => handleRejectRequest(r.id)}>
+                      {t("adminRoster.openShiftRejectRequest")}
+                    </button>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {existing && (
           <div className="roster-open-assign-section">

@@ -115,6 +115,13 @@ export interface OpenShiftAssignment {
   userName: string;
 }
 
+export interface OpenShiftRequestSummary {
+  id: number;
+  userId: number;
+  userName: string;
+  status: "pending" | "approved" | "rejected";
+}
+
 export interface OpenShift {
   id: number;
   departmentId: number | null;
@@ -127,6 +134,9 @@ export interface OpenShift {
   filledShifts: OpenShiftAssignment[];
   filledCount: number;
   remaining: number;
+  requests: OpenShiftRequestSummary[];
+  myRequestId: number | null;
+  myRequestStatus: "pending" | "approved" | "rejected" | null;
 }
 
 export interface RosterEvent {

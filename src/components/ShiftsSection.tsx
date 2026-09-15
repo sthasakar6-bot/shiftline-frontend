@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { api } from "../api/client";
-import type { Attendance, LeaveRequest, RosterShift, Shift } from "../api/types";
+import { api, ApiError } from "../api/client";
+import type { Attendance, LeaveRequest, OpenShift, RosterShift, Shift } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { formatTime, compactTime } from "../lib/formatDate";
 import { addDays, parseIsoDateLocal } from "../lib/dateOnly";
@@ -30,18 +30,66 @@ export default function ShiftsSection() {
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
   const [companyRoster, setCompanyRoster] = useState<RosterShift[]>([]);
+  const [openShifts, setOpenShifts] = useState<OpenShift[]>([]);
+  const [openShiftError, setOpenShiftError] = useState<string | null>(null);
+  const [openShiftBusyId, setOpenShiftBusyId] = useState<number | null>(null);
   const [monthCursor, setMonthCursor] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
+  function loadOpenShifts() {
+    api.listOpenShifts().then(setOpenShifts).catch(() => {});
+  }
+
   useEffect(() => {
     api.listShifts().then(setShifts).catch(() => {});
     api.listAttendance().then(setAttendance).catch(() => {});
     api.listLeaveRequests().then(setLeaveRequests).catch(() => {});
     api.listCompanyRoster().then(setCompanyRoster).catch(() => {});
+    loadOpenShifts();
   }, []);
+
+  // Slots this employee could still act on: not already assigned to them,
+  // still needs someone (or they already have a pending/rejected request on
+  // it worth showing), and not already in the past.
+  const availableOpenShifts = useMemo(() => {
+    const now = Date.now();
+    return openShifts
+      .filter((os) => !os.filledShifts.some((f) => f.userId === user?.id))
+      .filter((os) => os.remaining > 0 || os.myRequestStatus !== null)
+      .filter((os) => new Date(os.endsAt).getTime() >= now)
+      .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
+  }, [openShifts, user?.id]);
+
+  async function handleRequestOpenShift(id: number) {
+    setOpenShiftError(null);
+    setOpenShiftBusyId(id);
+    try {
+      await api.requestOpenShift(id);
+      loadOpenShifts();
+    } catch (err) {
+      setOpenShiftError(err instanceof ApiError ? err.message : t("adminRoster.openShiftRequestSaveFailed"));
+    } finally {
+      setOpenShiftBusyId(null);
+    }
+  }
+
+  async function handleCancelOpenShiftRequest(requestId: number) {
+    setOpenShiftError(null);
+    setOpenShiftBusyId(requestId);
+    try {
+      await api.cancelOpenShiftRequest(requestId);
+      loadOpenShifts();
+    } catch (err) {
+      setOpenShiftError(
+        err instanceof ApiError ? err.message : t("adminRoster.openShiftRequestCancelFailed"),
+      );
+    } finally {
+      setOpenShiftBusyId(null);
+    }
+  }
 
   const completedShiftIds = useMemo(
     () => new Set(attendance.filter((a) => a.clockOut).map((a) => a.shiftId)),
@@ -216,6 +264,54 @@ export default function ShiftsSection() {
           <span className="calendar-legend-swatch vacation" /> {t("roster.legendVacation")}
         </span>
       </div>
+
+      {availableOpenShifts.length > 0 && (
+        <div className="open-shift-requests">
+          <h3 className="roster-coworkers-title">{t("adminRoster.openShiftRequestSection")}</h3>
+          <p className="hint">{t("adminRoster.openShiftRequestHint")}</p>
+          {openShiftError && <div className="error">{openShiftError}</div>}
+          <ul className="list">
+            {availableOpenShifts.map((os) => (
+              <li key={os.id} className="open-shift-request-row">
+                <span>
+                  {new Date(os.startsAt).toLocaleDateString(getDateLocale(), {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                  {" · "}
+                  {formatTime(os.startsAt)} – {formatTime(os.endsAt)}
+                </span>
+                {os.myRequestStatus === "pending" ? (
+                  <span className="open-shift-request-status">
+                    {t("adminRoster.openShiftRequestPending")}
+                    <button
+                      type="button"
+                      onClick={() => os.myRequestId && handleCancelOpenShiftRequest(os.myRequestId)}
+                      disabled={openShiftBusyId === os.myRequestId}
+                    >
+                      {t("adminRoster.openShiftRequestCancel")}
+                    </button>
+                  </span>
+                ) : (
+                  <span className="open-shift-request-status">
+                    {os.myRequestStatus === "rejected" && (
+                      <span className="hint">{t("adminRoster.openShiftRequestRejectedNote")}</span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleRequestOpenShift(os.id)}
+                      disabled={openShiftBusyId === os.id}
+                    >
+                      {t("adminRoster.openShiftRequestButton")}
+                    </button>
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {selectedDay && (
         <div className="modal-overlay" onClick={() => setSelectedDay(null)}>
