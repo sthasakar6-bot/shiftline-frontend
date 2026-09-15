@@ -20,7 +20,12 @@ export default function TabBar({
 }) {
   function renderTab({ key, label, icon: Icon, badge }: Tab) {
     return (
-      <button key={key} className={key === active ? "active" : ""} onClick={() => onChange(key)}>
+      <button
+        key={key}
+        data-tab={key}
+        className={key === active ? "active" : ""}
+        onClick={() => onChange(key)}
+      >
         <span className="tab-icon">
           <Icon size={22} />
           {Boolean(badge) && (
@@ -51,6 +56,7 @@ export default function TabBar({
         <span className="tab-fab-halo" />
         <button
           type="button"
+          data-tab={fabTab.key}
           className={`tab-fab${fabTab.key === active ? " active" : ""}`}
           onClick={() => onChange(fabTab.key)}
         >

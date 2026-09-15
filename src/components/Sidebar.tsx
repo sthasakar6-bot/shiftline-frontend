@@ -17,6 +17,7 @@ export default function Sidebar({
       {tabs.map(({ key, label, icon: Icon, badge }) => (
         <button
           key={key}
+          data-tab={key}
           className={key === active ? "active" : ""}
           onClick={() => onChange(key)}
         >

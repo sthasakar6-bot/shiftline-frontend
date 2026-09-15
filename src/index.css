@@ -1,17 +1,43 @@
 :root {
-  /* Slate/navy palette -- deliberately muted rather than bright, for a
-     professional/corporate feel instead of a colorful startup one. */
+  /* A warm, editorial palette -- a saturated terracotta primary instead of
+     the expected SaaS blue, plus a small family of named hues used to give
+     each nav section its own identity color (see --nav-* below) rather
+     than tinting everything with one accent. */
   --text: #334155;
   --text-h: #0f172a;
   --bg: #f8fafc;
   --panel-bg: #fff;
   --border: #e2e8f0;
-  --accent: #1e3a5f;
-  --accent-bg: rgba(30, 58, 95, 0.07);
+  --accent: #ea580c;
+  --accent-bg: rgba(234, 88, 12, 0.09);
+  /* Separate from --accent: a solid button fill needs its own contrast
+     against the white label sitting on top of it, which the lighter
+     dark-mode --accent (tuned for readability as text/icons against the
+     dark page background) isn't dark/saturated enough to provide. */
+  --accent-solid: #ea580c;
   --danger: #b91c1c;
   --danger-bg: rgba(185, 28, 28, 0.08);
   --success: #15803d;
   --success-bg: rgba(21, 128, 61, 0.1);
+
+  --nav-team: #7c3aed;
+  --nav-team-bg: rgba(124, 58, 237, 0.1);
+  --nav-roster: #ea580c;
+  --nav-roster-bg: rgba(234, 88, 12, 0.09);
+  --nav-invite: #0d9488;
+  --nav-invite-bg: rgba(13, 148, 136, 0.1);
+  --nav-leave: #db2777;
+  --nav-leave-bg: rgba(219, 39, 119, 0.09);
+  --nav-attendance: #2563eb;
+  --nav-attendance-bg: rgba(37, 99, 235, 0.09);
+  --nav-summary: #b45309;
+  --nav-summary-bg: rgba(180, 83, 9, 0.1);
+  --nav-billing: #059669;
+  --nav-billing-bg: rgba(5, 150, 105, 0.1);
+  --nav-alerts: #dc2626;
+  --nav-alerts-bg: rgba(220, 38, 38, 0.09);
+  --nav-home: #0891b2;
+  --nav-home-bg: rgba(8, 145, 178, 0.1);
 
   font: 16px/1.5 system-ui, "Segoe UI", Roboto, sans-serif;
   color-scheme: light dark;
@@ -26,12 +52,32 @@
     --bg: #0f172a;
     --panel-bg: #1e293b;
     --border: #334155;
-    --accent: #7ea6cc;
-    --accent-bg: rgba(126, 166, 204, 0.14);
+    --accent: #fb923c;
+    --accent-bg: rgba(251, 146, 60, 0.16);
+    --accent-solid: #c2410c;
     --danger: #f87171;
     --danger-bg: rgba(248, 113, 113, 0.14);
     --success: #4ade80;
     --success-bg: rgba(74, 222, 128, 0.14);
+
+    --nav-team: #a78bfa;
+    --nav-team-bg: rgba(167, 139, 250, 0.16);
+    --nav-roster: #fb923c;
+    --nav-roster-bg: rgba(251, 146, 60, 0.16);
+    --nav-invite: #2dd4bf;
+    --nav-invite-bg: rgba(45, 212, 191, 0.16);
+    --nav-leave: #f472b6;
+    --nav-leave-bg: rgba(244, 114, 182, 0.16);
+    --nav-attendance: #60a5fa;
+    --nav-attendance-bg: rgba(96, 165, 250, 0.16);
+    --nav-summary: #facc15;
+    --nav-summary-bg: rgba(250, 204, 21, 0.16);
+    --nav-billing: #34d399;
+    --nav-billing-bg: rgba(52, 211, 153, 0.16);
+    --nav-alerts: #f87171;
+    --nav-alerts-bg: rgba(248, 113, 113, 0.16);
+    --nav-home: #22d3ee;
+    --nav-home-bg: rgba(34, 211, 238, 0.16);
   }
 }
 
@@ -71,6 +117,36 @@ button {
 
 button:hover {
   border-color: var(--accent);
+}
+
+/* Every primary action in the app is an explicit type="submit" button (Save,
+   Assign, Log in, Create, Request, ...) -- verified by grepping every use of
+   type="submit" across src/. Styling that one attribute gives every primary
+   button in the app a real, solid pop of color for free, with no per-form
+   changes needed and no risk of also painting secondary/cancel buttons,
+   which are always explicitly type="button" or live outside a form. */
+button[type="submit"] {
+  background: var(--accent-solid);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 700;
+  transition:
+    opacity 0.15s ease,
+    transform 0.1s ease;
+}
+
+button[type="submit"]:hover {
+  opacity: 0.9;
+  border-color: transparent;
+}
+
+button[type="submit"]:active {
+  transform: scale(0.98);
+}
+
+button[type="submit"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 a {
