@@ -57,6 +57,8 @@ export default {
     loggingIn: "Logging in...",
     logInToAdmin: "Log in to Administration",
     notAdminAccount: "This account doesn't have administrator access.",
+    seePlans: "See our plans",
+    contactUs: "Contact us",
     loginFailed: "Login failed",
     forgotPassword: "Forgot password?",
     firstName: "First name",

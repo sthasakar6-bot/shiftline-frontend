@@ -1866,6 +1866,34 @@
   margin-bottom: 8px;
 }
 
+.trial-expired-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.trial-expired-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.trial-expired-actions a:first-child {
+  background: var(--accent);
+  color: white;
+}
+
+.trial-expired-actions a:last-child {
+  background: rgba(37, 211, 102, 0.12);
+  color: #1a9c4a;
+}
+
 .required-mark {
   color: var(--danger);
 }

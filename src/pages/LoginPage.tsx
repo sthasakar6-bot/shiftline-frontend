@@ -1,12 +1,21 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, MessageCircle } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { ApiError, getSelectedCompany } from "../api/client";
+import { PRICING_URL, WHATSAPP_URL } from "../config";
 import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+
+// Matched against the backend's trial-expiry message (identity/service.ts
+// login()) -- that endpoint has no structured error code today, only a
+// plain-English message, same as every other backend error this app
+// surfaces via ApiError.message.
+function isTrialExpiredError(message: string): boolean {
+  return message.toLowerCase().includes("trial has ended");
+}
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -16,6 +25,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [trialExpired, setTrialExpired] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const company = getSelectedCompany();
 
@@ -29,6 +39,7 @@ export default function LoginPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setTrialExpired(false);
     setSubmitting(true);
     try {
       const user = await login(email, password);
@@ -39,7 +50,9 @@ export default function LoginPage() {
       }
       navigate(mode === "administration" ? "/admin" : "/");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("auth.loginFailed"));
+      const message = err instanceof ApiError ? err.message : t("auth.loginFailed");
+      setError(message);
+      setTrialExpired(err instanceof ApiError && isTrialExpiredError(err.message));
     } finally {
       setSubmitting(false);
     }
@@ -82,7 +95,22 @@ export default function LoginPage() {
             {t("auth.administration")}
           </button>
         </div>
-        {error && <div className="error">{error}</div>}
+        {error && (
+          <div className="error">
+            {error}
+            {trialExpired && (
+              <div className="trial-expired-actions">
+                <a href={PRICING_URL} target="_blank" rel="noreferrer">
+                  {t("auth.seePlans")}
+                </a>
+                <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+                  <MessageCircle size={14} />
+                  {t("auth.contactUs")}
+                </a>
+              </div>
+            )}
+          </div>
+        )}
         <label>
           {t("auth.email")}
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />

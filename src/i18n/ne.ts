@@ -57,6 +57,8 @@ export default {
     loggingIn: "लग इन हुँदैछ...",
     logInToAdmin: "प्रशासनमा लग इन गर्नुहोस्",
     notAdminAccount: "यो खातामा प्रशासक पहुँच छैन।",
+    seePlans: "हाम्रा योजनाहरू हेर्नुहोस्",
+    contactUs: "सम्पर्क गर्नुहोस्",
     loginFailed: "लग इन असफल भयो",
     forgotPassword: "पासवर्ड बिर्सनुभयो?",
     firstName: "पहिलो नाम",

@@ -57,6 +57,8 @@ export default {
     loggingIn: "Bezig met inloggen...",
     logInToAdmin: "Inloggen bij Administratie",
     notAdminAccount: "Dit account heeft geen beheerderstoegang.",
+    seePlans: "Bekijk onze abonnementen",
+    contactUs: "Neem contact op",
     loginFailed: "Inloggen mislukt",
     forgotPassword: "Wachtwoord vergeten?",
     firstName: "Voornaam",
