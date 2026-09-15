@@ -1,11 +1,25 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { api, clearToken, getSelectedCompany, getToken, setToken } from "../api/client";
+import {
+  api,
+  clearToken,
+  getSelectedCompany,
+  getToken,
+  setSelectedCompany,
+  setToken,
+} from "../api/client";
 import type { User } from "../api/types";
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
+  signup: (data: {
+    companyName: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+  }) => Promise<User>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -39,6 +53,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res.user;
   }
 
+  async function signup(data: {
+    companyName: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+  }) {
+    const res = await api.signup(data);
+    setToken(res.token);
+    setUser(res.user);
+    // Signup skips the company-picker entirely, so nothing else would set
+    // this -- needed for a later /login visit on this device.
+    setSelectedCompany({ id: res.user.companyId, name: res.user.companyName });
+    return res.user;
+  }
+
   function logout() {
     clearToken();
     setUser(null);
@@ -50,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

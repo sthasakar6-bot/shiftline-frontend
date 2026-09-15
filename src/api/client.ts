@@ -121,6 +121,14 @@ export const api = {
 
   me: () => request<User>("/api/auth/me"),
 
+  signup: (data: {
+    companyName: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+  }) => request<LoginResponse>("/api/signup", { method: "POST", body: JSON.stringify(data) }),
+
   listCompanies: () => request<Company[]>("/api/companies"),
 
   listUsers: () => request<User[]>("/api/users"),
