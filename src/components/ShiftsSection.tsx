@@ -265,11 +265,13 @@ export default function ShiftsSection() {
         </span>
       </div>
 
-      {availableOpenShifts.length > 0 && (
-        <div className="open-shift-requests">
-          <h3 className="roster-coworkers-title">{t("adminRoster.openShiftRequestSection")}</h3>
-          <p className="hint">{t("adminRoster.openShiftRequestHint")}</p>
-          {openShiftError && <div className="error">{openShiftError}</div>}
+      <div className="open-shift-requests">
+        <h3 className="roster-coworkers-title">{t("adminRoster.openShiftRequestSection")}</h3>
+        <p className="hint">{t("adminRoster.openShiftRequestHint")}</p>
+        {openShiftError && <div className="error">{openShiftError}</div>}
+        {availableOpenShifts.length === 0 ? (
+          <p className="empty-state">{t("adminRoster.openShiftRequestNone")}</p>
+        ) : (
           <ul className="list">
             {availableOpenShifts.map((os) => (
               <li key={os.id} className="open-shift-request-row">
@@ -310,8 +312,8 @@ export default function ShiftsSection() {
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        )}
+      </div>
 
       {selectedDay && (
         <div className="modal-overlay" onClick={() => setSelectedDay(null)}>
