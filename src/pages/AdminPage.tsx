@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Users, UserPlus, CalendarDays, Palmtree, Clock, BarChart3, Bell, CreditCard } from "lucide-react";
+import { Users, UserPlus, CalendarDays, Palmtree, Clock, BarChart3, Bell, CreditCard, MessageCircle } from "lucide-react";
 import UserBox from "../components/UserBox";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import TabBar, { type Tab } from "../components/TabBar";
@@ -16,11 +16,12 @@ import EmployeeSummarySection from "../components/EmployeeSummarySection";
 import BackupOverviewSection from "../components/BackupOverviewSection";
 import NotificationsSection from "../components/NotificationsSection";
 import BillingSection from "../components/BillingSection";
+import ChatSection from "../components/ChatSection";
 import { api } from "../api/client";
 import type { Notification } from "../api/types";
 import { updateAppBadge } from "../lib/appBadge";
 
-const tabKeys = ["team", "roster", "invite", "leave", "attendance", "summary", "billing", "alerts"];
+const tabKeys = ["team", "roster", "invite", "leave", "attendance", "summary", "billing", "chat", "alerts"];
 
 export default function AdminPage() {
   const { t } = useTranslation();
@@ -78,6 +79,7 @@ export default function AdminPage() {
     { key: "attendance", label: t("nav.attendance"), icon: Clock },
     { key: "summary", label: t("nav.summary"), icon: BarChart3 },
     { key: "billing", label: t("nav.billing"), icon: CreditCard },
+    { key: "chat", label: t("nav.chat"), icon: MessageCircle },
     { key: "alerts", label: t("nav.alerts"), icon: Bell, badge: unreadCount },
   ];
 
@@ -123,6 +125,7 @@ export default function AdminPage() {
             </>
           )}
           {active === "billing" && <BillingSection />}
+          {active === "chat" && <ChatSection />}
           {active === "alerts" && (
             <NotificationsSection
               notifications={notifications}

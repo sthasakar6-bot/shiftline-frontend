@@ -41,6 +41,7 @@ export default {
     invite: "Add",
     summary: "Summary",
     billing: "Billing",
+    chat: "Chat",
     administration: "Administration",
   },
   language: {
@@ -254,6 +255,14 @@ export default {
     mollieManageHint: "To change your plan or update your card, contact us:",
     stripeManageHint: "Manage your plan and payment method from your Stripe receipt email.",
     finishSignupPrompt: "Your account is ready — choose a payment method below to activate your plan.",
+  },
+  chat: {
+    title: "Team chat",
+    loadFailed: "Failed to load messages",
+    sendFailed: "Could not send message. Please try again.",
+    empty: "No messages yet. Say hello!",
+    placeholder: "Type a message...",
+    send: "Send",
   },
   team: {
     title: "Manage team",

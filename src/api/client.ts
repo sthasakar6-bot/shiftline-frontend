@@ -3,6 +3,7 @@ import type {
   BackupSnapshotMeta,
   BackupTokenInfo,
   BookkeeperEmployee,
+  ChatMessage,
   Company,
   Contract,
   Department,
@@ -144,6 +145,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify(data),
     }),
+
+  getMessages: () => request<ChatMessage[]>("/api/messages"),
+  sendMessage: (body: string) =>
+    request<ChatMessage>("/api/messages", { method: "POST", body: JSON.stringify({ body }) }),
 
   signup: (data: {
     companyName: string;

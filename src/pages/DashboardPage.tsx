@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Home, CalendarDays, Watch, Palmtree, Bell, Users } from "lucide-react";
+import { Home, CalendarDays, Watch, Palmtree, Bell, Users, MessageCircle } from "lucide-react";
 import UserBox from "../components/UserBox";
 import AppLogo from "../components/AppLogo";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -13,11 +13,12 @@ import AttendanceSection from "../components/AttendanceSection";
 import NotificationsSection from "../components/NotificationsSection";
 import LeaveSection from "../components/LeaveSection";
 import TeamSection from "../components/TeamSection";
+import ChatSection from "../components/ChatSection";
 import { api } from "../api/client";
 import type { Notification } from "../api/types";
 import { updateAppBadge } from "../lib/appBadge";
 
-const tabKeys = ["home", "roster", "attendance", "leave", "team", "notifications"];
+const tabKeys = ["home", "roster", "attendance", "leave", "team", "chat", "notifications"];
 
 export default function DashboardPage() {
   const { t } = useTranslation();
@@ -61,6 +62,7 @@ export default function DashboardPage() {
     { key: "attendance", label: t("nav.attendance"), icon: Watch },
     { key: "leave", label: t("nav.leave"), icon: Palmtree },
     { key: "team", label: t("nav.team"), icon: Users },
+    { key: "chat", label: t("nav.chat"), icon: MessageCircle },
     { key: "notifications", label: t("nav.alerts"), icon: Bell, badge: unreadCount },
   ];
 
@@ -94,6 +96,7 @@ export default function DashboardPage() {
           {active === "attendance" && <AttendanceSection />}
           {active === "leave" && <LeaveSection />}
           {active === "team" && <TeamSection />}
+          {active === "chat" && <ChatSection />}
           {active === "notifications" && (
             <NotificationsSection
               notifications={notifications}
