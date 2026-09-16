@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MoreVertical } from "lucide-react";
 import { api, ApiError } from "../api/client";
@@ -10,6 +10,7 @@ import EmployeeDetailModal from "./EmployeeDetailModal";
 import { SkeletonRows } from "./Skeleton";
 
 const PRESENCE_POLL_MS = 15000;
+const UNASSIGNED = Symbol("unassigned");
 
 function TeamRowMenu({
   employee,
@@ -116,6 +117,24 @@ export default function ManagerSection() {
 
   const detailTarget = employees.find((e) => e.id === detailTargetId) ?? null;
 
+  // Same grouping as the employee-facing Team tab -- only worth its own
+  // heading once more than one location is actually in play.
+  const groups = useMemo(() => {
+    const map = new Map<string | typeof UNASSIGNED, UserSummary[]>();
+    for (const e of employees) {
+      const key = e.location?.trim() || UNASSIGNED;
+      const existing = map.get(key) ?? [];
+      existing.push(e);
+      map.set(key, existing);
+    }
+    return [...map.entries()].sort(([a], [b]) => {
+      if (a === UNASSIGNED) return 1;
+      if (b === UNASSIGNED) return -1;
+      return (a as string).localeCompare(b as string);
+    });
+  }, [employees]);
+  const showGroupHeadings = groups.length > 1;
+
   async function handleAddToTeam(id: number) {
     setError(null);
     try {
@@ -162,40 +181,50 @@ export default function ManagerSection() {
     }
   }
 
+  function renderCard(e: UserSummary) {
+    return (
+      <div className="team-card-wrap" key={e.id}>
+        <button type="button" className="team-card" onClick={() => setDetailTargetId(e.id)}>
+          <Avatar userId={e.id} name={e.name} hasAvatar={e.hasAvatar} size={64} />
+          <span className="team-card-name">
+            {e.name}
+            {e.online && <span className="presence-dot inline" title={t("team.online")} />}
+          </span>
+          {e.role === "manager" && (
+            <span className="plan-badge plan-badge-paid">{t("team.coManager")}</span>
+          )}
+        </button>
+        <TeamRowMenu
+          employee={e}
+          isOwnReport={e.managerId === user?.id}
+          onToggleTeam={() =>
+            e.managerId === user?.id ? setRemoveTarget(e) : handleAddToTeam(e.id)
+          }
+          onRemovePermanently={() => setDeactivateTarget(e)}
+        />
+      </div>
+    );
+  }
+
   return (
     <section className="panel">
       <h2>{t("team.title")}</h2>
-      <ul className="list">
-        {employeesLoading && <SkeletonRows count={4} />}
-        {!employeesLoading &&
-          employees.map((e) => (
-            <li key={e.id}>
-              <button
-                type="button"
-                className="list-row-identity"
-                onClick={() => setDetailTargetId(e.id)}
-              >
-                <Avatar userId={e.id} name={e.name} hasAvatar={e.hasAvatar} size={32} />
-                {e.name}
-                {e.role === "manager" && (
-                  <span className="plan-badge plan-badge-paid">{t("team.coManager")}</span>
-                )}
-                {e.online && <span className="presence-dot inline" title={t("team.online")} />}
-              </button>
-              <TeamRowMenu
-                employee={e}
-                isOwnReport={e.managerId === user?.id}
-                onToggleTeam={() =>
-                  e.managerId === user?.id ? setRemoveTarget(e) : handleAddToTeam(e.id)
-                }
-                onRemovePermanently={() => setDeactivateTarget(e)}
-              />
-            </li>
-          ))}
-        {!employeesLoading && employees.length === 0 && (
-          <li className="empty">{t("team.empty")}</li>
-        )}
-      </ul>
+      {employeesLoading ? (
+        <SkeletonRows count={4} />
+      ) : employees.length === 0 ? (
+        <p className="empty">{t("team.empty")}</p>
+      ) : showGroupHeadings ? (
+        groups.map(([key, members]) => (
+          <div key={typeof key === "string" ? key : "unassigned"} className="team-location-group">
+            <h3 className="team-location-title">
+              {key === UNASSIGNED ? t("myTeam.unassigned") : key}
+            </h3>
+            <div className="team-grid">{members.map(renderCard)}</div>
+          </div>
+        ))
+      ) : (
+        <div className="team-grid">{employees.map(renderCard)}</div>
+      )}
       {error && <div className="error">{error}</div>}
 
       <button

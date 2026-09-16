@@ -458,6 +458,26 @@
   overflow-wrap: anywhere;
 }
 
+.team-card-wrap {
+  position: relative;
+}
+
+.team-card-wrap .team-card {
+  width: 128px;
+}
+
+.team-card-wrap .row-menu {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+
+.team-card-wrap .row-menu-trigger {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+}
+
 .team-profile-modal {
   display: flex;
   flex-direction: column;
