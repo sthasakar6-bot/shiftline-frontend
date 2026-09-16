@@ -148,7 +148,7 @@ export default function BillingSection() {
       </div>
 
       {isPaid && (
-        <p className="hint">
+        <p className="hint billing-manage-hint">
           {t("billing.mollieManageHint")}{" "}
           <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">
             {t("auth.contactUs")}

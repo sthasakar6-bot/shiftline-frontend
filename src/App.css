@@ -3403,6 +3403,7 @@ td.attendance-grid-person-col {
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   max-width: 900px;
+  margin-bottom: 20px;
 }
 
 @media (max-width: 860px) {
@@ -3410,6 +3411,15 @@ td.attendance-grid-person-col {
     grid-template-columns: 1fr;
     max-width: 420px;
   }
+}
+
+/* .hint's default -8px top margin is meant to tuck a hint right under a
+   title/button -- after a full card grid it drags the text up into the
+   last card's padding, most visible on mobile where the grid stacks to a
+   single column and there's no side-by-side card to visually separate
+   from. */
+.billing-manage-hint {
+  margin-top: 4px;
 }
 
 .billing-card {
