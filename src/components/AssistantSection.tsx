@@ -31,11 +31,28 @@ function summarizeProposal(shifts: AssistantProposedShift[]): string {
   return shifts.map((s) => `${s.userName}: ${s.date} ${s.startTime}-${s.endTime}`).join("; ");
 }
 
+const TURNS_STORAGE_KEY = "shiftline_assistant_turns";
+
+// The conversation is never persisted server-side (see the backend plan --
+// a deliberate scope cut), so without this it would vanish every time the
+// manager switches to another admin tab and back, since that unmounts this
+// component entirely. sessionStorage survives that; it's cleared when the
+// browser tab/window closes, which is fine for a conversation this
+// disposable.
+function loadStoredTurns(): DisplayTurn[] {
+  try {
+    const raw = sessionStorage.getItem(TURNS_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as DisplayTurn[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export default function AssistantSection() {
   const { t } = useTranslation();
   const [entitled, setEntitled] = useState<boolean | null>(null);
   const [checkingOut, setCheckingOut] = useState(false);
-  const [turns, setTurns] = useState<DisplayTurn[]>([]);
+  const [turns, setTurns] = useState<DisplayTurn[]>(loadStoredTurns);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +66,19 @@ export default function AssistantSection() {
       })
       .catch(() => setEntitled(false));
   }, []);
+
+  useEffect(() => {
+    try {
+      if (turns.length === 0) {
+        sessionStorage.removeItem(TURNS_STORAGE_KEY);
+      } else {
+        sessionStorage.setItem(TURNS_STORAGE_KEY, JSON.stringify(turns));
+      }
+    } catch {
+      // sessionStorage can throw in private-browsing edge cases -- losing
+      // persistence there is an acceptable degrade, not worth surfacing.
+    }
+  }, [turns]);
 
   useEffect(() => {
     listEndRef.current?.scrollIntoView({ block: "end" });
