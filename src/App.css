@@ -2221,6 +2221,32 @@
   font-style: italic;
 }
 
+.attendance-person-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 14px;
+}
+
+.attendance-person-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px 5px 5px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.attendance-person-chip.active {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent-solid);
+}
+
 .attendance-track-header {
   display: flex;
   align-items: center;

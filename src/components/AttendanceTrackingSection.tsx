@@ -118,26 +118,22 @@ export default function AttendanceTrackingSection() {
   return (
     <section className="panel">
       <h2>{t("attendanceTracking.title")}</h2>
-      <div className="inline-form">
-        <select value={selected} onChange={(e) => setSelected(e.target.value)}>
-          <option value="">{t("team.selectEmployee")}</option>
-          {people.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.name}
-            </option>
-          ))}
-        </select>
+      <div className="attendance-person-picker">
+        {people.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            className={`attendance-person-chip${String(p.id) === selected ? " active" : ""}`}
+            onClick={() => setSelected(String(p.id))}
+          >
+            <Avatar userId={p.id} name={p.name} hasAvatar={p.hasAvatar} size={28} />
+            <span>{p.name}</span>
+          </button>
+        ))}
       </div>
 
       {selected && selectedPerson && (
         <div className="attendance-track-header">
-          <Avatar
-            userId={selectedPerson.id}
-            name={selectedPerson.name}
-            hasAvatar={selectedPerson.hasAvatar}
-            size={30}
-          />
-          <span className="attendance-track-header-name">{selectedPerson.name}</span>
           <span className="attendance-track-header-count">
             {t("attendanceTracking.record", { count: sortedRecords.length })}
           </span>
@@ -186,9 +182,6 @@ export default function AttendanceTrackingSection() {
                         day: "numeric",
                       })
                     : t("attendance.unknownDate")}
-                  {r.manualEntry && (
-                    <span className="status-badge pending">{t("attendanceTracking.manualBadge")}</span>
-                  )}
                 </span>
                 <span className="attendance-track-range">
                   {r.clockIn ? formatTime(r.clockIn) : "-"} –{" "}
