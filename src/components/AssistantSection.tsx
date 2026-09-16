@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Sparkles, Check, X } from "lucide-react";
 import { api, ApiError } from "../api/client";
 import type { AssistantChatTurn, AssistantProposedShift } from "../api/types";
+import { useAuth } from "../auth/AuthContext";
+import { autoResizeTextarea } from "../lib/autoResizeTextarea";
 
 interface DisplayTurn {
   id: string;
@@ -50,6 +52,7 @@ function loadStoredTurns(): DisplayTurn[] {
 
 export default function AssistantSection() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [entitled, setEntitled] = useState<boolean | null>(null);
   const [checkingOut, setCheckingOut] = useState(false);
   const [turns, setTurns] = useState<DisplayTurn[]>(loadStoredTurns);
@@ -88,10 +91,7 @@ export default function AssistantSection() {
   // Grows the composer with the message instead of scrolling the typed
   // text off sideways inside a single-line box.
   useEffect(() => {
-    const el = inputRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
+    if (inputRef.current) autoResizeTextarea(inputRef.current);
   }, [draft]);
 
   function handleComposerKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -212,9 +212,16 @@ export default function AssistantSection() {
       {error && <div className="error">{error}</div>}
 
       <div className="chat-messages">
-        {turns.length === 0
-          ? null
-          : turns.map((turn) => (
+        {turns.length === 0 ? (
+          <div className="chat-bubble-row">
+            <div className="chat-bubble">
+              <div className="chat-bubble-body">
+                {t("assistant.greeting", { name: user?.name?.split(" ")[0] || t("assistant.greetingFallbackName") })}
+              </div>
+            </div>
+          </div>
+        ) : (
+          turns.map((turn) => (
             <div
               key={turn.id}
               className={`chat-bubble-row ${turn.role === "user" ? "chat-bubble-row-mine" : ""}`}
@@ -250,7 +257,8 @@ export default function AssistantSection() {
                 </div>
               )}
             </div>
-          ))}
+          ))
+        )}
         <div ref={listEndRef} />
       </div>
 

@@ -5,6 +5,7 @@ import { api, ApiError, API_URL, getToken } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import Avatar from "./Avatar";
 import type { ChatMessage } from "../api/types";
+import { autoResizeTextarea } from "../lib/autoResizeTextarea";
 
 function wsUrl(): string {
   const token = getToken() ?? "";
@@ -131,10 +132,7 @@ export default function ChatSection() {
   // text off sideways inside a single-line box -- also shrinks it back
   // down once a message is sent and draft clears.
   useEffect(() => {
-    const el = inputRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
+    if (inputRef.current) autoResizeTextarea(inputRef.current);
   }, [draft]);
 
   async function handleSend(e: FormEvent) {

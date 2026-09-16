@@ -279,6 +279,8 @@ export default {
     subscribe: "Subscribe",
     redirecting: "Redirecting...",
     checkoutFailed: "Could not start checkout. Please try again.",
+    greeting: "Hey {{name}}, how can I help you today?",
+    greetingFallbackName: "there",
     placeholder: "Type a scheduling request...",
     send: "Send",
     sending: "Sending...",
