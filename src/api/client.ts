@@ -185,6 +185,29 @@ export const api = {
     return request<LoginResponse>("/api/signup", { method: "POST", body: formData });
   },
 
+  startPurchase: (data: { email: string; plan: "starter" | "unlimited"; interval: "monthly" | "yearly" }) =>
+    request<{ redirectUrl: string }>("/api/signup/checkout", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  completeSignup: (data: {
+    email: string;
+    companyName: string;
+    firstName: string;
+    lastName: string;
+    password: string;
+    logo: File;
+  }) => {
+    const formData = new FormData();
+    formData.append("email", data.email);
+    formData.append("companyName", data.companyName);
+    formData.append("firstName", data.firstName);
+    formData.append("lastName", data.lastName);
+    formData.append("password", data.password);
+    formData.append("logo", data.logo);
+    return request<LoginResponse>("/api/signup/complete", { method: "POST", body: formData });
+  },
+
   listCompanies: () => request<Company[]>("/api/companies"),
 
   listUsers: () => request<User[]>("/api/users"),

@@ -1,5 +1,5 @@
 import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Camera } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
@@ -8,21 +8,28 @@ import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
-export default function SignupPage() {
+export default function CompleteSignupPage() {
   const { t } = useTranslation();
-  const { signup } = useAuth();
+  const { completeSignup } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const email = searchParams.get("email") ?? "";
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [companyName, setCompanyName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [logo, setLogo] = useState<File | null>(null);
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!email) {
+      navigate("/purchase", { replace: true });
+    }
+  }, [email, navigate]);
 
   useEffect(() => {
     if (!logo) return;
@@ -48,13 +55,24 @@ export default function SignupPage() {
     }
     setSubmitting(true);
     try {
-      const user = await signup({ companyName, firstName, lastName, email, password, logo });
+      const user = await completeSignup({ email, companyName, firstName, lastName, password, logo });
       navigate(user.role === "manager" ? "/admin" : "/");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("signup.failed"));
+      // A real race, not just defensive: the webhook that confirms payment
+      // can land a few seconds after Mollie's own redirect back here, so
+      // the very first submit attempt genuinely can be too early.
+      if (err instanceof ApiError && err.code === "PAYMENT_NOT_CONFIRMED") {
+        setError(t("completeSignup.confirmingPayment"));
+      } else {
+        setError(err instanceof ApiError ? err.message : t("signup.failed"));
+      }
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (!email) {
+    return null;
   }
 
   return (
@@ -64,8 +82,8 @@ export default function SignupPage() {
       </div>
       <AuthBrand />
       <form className="auth-form wide" onSubmit={handleSubmit}>
-        <h1>{t("signup.title")}</h1>
-        <p className="hint">{t("signup.trialNote")}</p>
+        <h1>{t("completeSignup.title")}</h1>
+        <p className="hint">{t("completeSignup.paidNote")}</p>
         {error && <div className="error">{error}</div>}
 
         <label>
@@ -80,11 +98,7 @@ export default function SignupPage() {
 
         <div className="profile-avatar-wrap complete-account-avatar">
           <div className="signup-logo-preview" aria-hidden={!logoPreviewUrl}>
-            {logoPreviewUrl ? (
-              <img src={logoPreviewUrl} alt="" />
-            ) : (
-              <Camera size={20} />
-            )}
+            {logoPreviewUrl ? <img src={logoPreviewUrl} alt="" /> : <Camera size={20} />}
           </div>
           <button
             type="button"
@@ -94,13 +108,7 @@ export default function SignupPage() {
           >
             <Camera size={14} />
           </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleLogoChange}
-            hidden
-          />
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleLogoChange} hidden />
         </div>
         <p className="hint">{logo ? t("signup.logoUploaded") : t("signup.logoRequired")}</p>
 
@@ -116,7 +124,7 @@ export default function SignupPage() {
         </div>
         <label>
           {t("auth.email")}
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <input type="email" value={email} disabled />
         </label>
         <label>
           {t("signup.password")}
@@ -140,11 +148,8 @@ export default function SignupPage() {
         </label>
 
         <button type="submit" disabled={submitting || !logo}>
-          {submitting ? t("signup.submitting") : t("signup.submit")}
+          {submitting ? t("signup.submitting") : t("completeSignup.submit")}
         </button>
-        <p>
-          {t("signup.alreadyHaveAccount")} <Link to="/select-company">{t("signup.logIn")}</Link>
-        </p>
       </form>
       <AuthFooter />
     </div>

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import { WHATSAPP_URL } from "../config";
 
@@ -15,15 +14,8 @@ interface BillingStatus {
   subscriptionStatus: string | null;
 }
 
-const INTENDED_PLAN_KEY = "shiftline_intended_plan";
-
 export default function BillingSection() {
   const { t } = useTranslation();
-  const [searchParams, setSearchParams] = useSearchParams();
-  // Set by SignupPage when the visitor picked Starter/Unlimited (not the
-  // free trial) on the marketing site -- their account was just created,
-  // and this tab is where they land to actually pay for it.
-  const [justSignedUpToPay] = useState(() => searchParams.get("checkout") === "start");
   const [status, setStatus] = useState<BillingStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<PlanKey>("starter");
@@ -32,38 +24,12 @@ export default function BillingSection() {
   const [checkingOut, setCheckingOut] = useState(false);
 
   useEffect(() => {
-    if (searchParams.has("checkout")) {
-      searchParams.delete("checkout");
-      setSearchParams(searchParams, { replace: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     api
       .getBillingStatus()
       .then(setStatus)
       .catch((err) => setError(err instanceof ApiError ? err.message : t("billing.loadFailed")))
       .finally(() => setLoading(false));
   }, [t]);
-
-  // Pre-select whatever the visitor clicked on the marketing site's pricing
-  // page before signing up, if anything -- a same-session UI nicety, read
-  // once and cleared, never sent to the backend.
-  useEffect(() => {
-    const raw = localStorage.getItem(INTENDED_PLAN_KEY);
-    if (!raw) return;
-    try {
-      const intended = JSON.parse(raw) as { plan?: PlanKey; interval?: Interval };
-      if (intended.plan === "starter" || intended.plan === "unlimited") setPlan(intended.plan);
-      if (intended.interval === "monthly" || intended.interval === "yearly") {
-        setInterval(intended.interval);
-      }
-    } catch {
-      // ignore malformed value
-    }
-    localStorage.removeItem(INTENDED_PLAN_KEY);
-  }, []);
 
   async function handleCheckout() {
     setError(null);
@@ -91,10 +57,6 @@ export default function BillingSection() {
   return (
     <section className="panel">
       <h2>{t("billing.title")}</h2>
-
-      {justSignedUpToPay && !isPaid && (
-        <div className="hint billing-signup-prompt">{t("billing.finishSignupPrompt")}</div>
-      )}
 
       {status && (
         <p className="hint">

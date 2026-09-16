@@ -4,6 +4,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import SelectCompanyPage from "./pages/SelectCompanyPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import PurchasePage from "./pages/PurchasePage";
+import CompleteSignupPage from "./pages/CompleteSignupPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import CompleteAccountPage from "./pages/CompleteAccountPage";
@@ -29,6 +31,8 @@ function App() {
             <Route path="/select-company" element={<SelectCompanyPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/purchase" element={<PurchasePage />} />
+            <Route path="/complete-signup" element={<CompleteSignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route

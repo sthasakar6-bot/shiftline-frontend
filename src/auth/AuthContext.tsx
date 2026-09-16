@@ -21,6 +21,14 @@ interface AuthContextValue {
     password: string;
     logo: File;
   }) => Promise<User>;
+  completeSignup: (data: {
+    email: string;
+    companyName: string;
+    firstName: string;
+    lastName: string;
+    password: string;
+    logo: File;
+  }) => Promise<User>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -71,6 +79,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res.user;
   }
 
+  async function completeSignup(data: {
+    email: string;
+    companyName: string;
+    firstName: string;
+    lastName: string;
+    password: string;
+    logo: File;
+  }) {
+    const res = await api.completeSignup(data);
+    setToken(res.token);
+    setUser(res.user);
+    setSelectedCompany({ id: res.user.companyId, name: res.user.companyName });
+    return res.user;
+  }
+
   function logout() {
     clearToken();
     setUser(null);
@@ -82,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, completeSignup, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

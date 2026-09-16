@@ -256,7 +256,22 @@ export default {
     redirecting: "Redirecting...",
     checkoutFailed: "Could not start checkout. Please try again.",
     mollieManageHint: "To change your plan or update your card, contact us:",
-    finishSignupPrompt: "Your account is ready — choose a payment method below to activate your plan.",
+  },
+  purchase: {
+    title: "Complete your purchase",
+    perMonth: "/month",
+    perYear: "/year",
+    emailHint: "Already have a Shiftline account? Enter the same email and this will apply to your existing company.",
+    continueToPayment: "Continue to payment",
+    redirecting: "Redirecting...",
+    failed: "Could not start checkout. Please try again.",
+    existingAccountHint: "Already have an account? Just enter your email above -- we'll apply this to your existing company.",
+  },
+  completeSignup: {
+    title: "You're all set -- just a few details",
+    paidNote: "Your payment went through. Finish setting up your company to get started.",
+    submit: "Create my account",
+    confirmingPayment: "We're still confirming your payment. Please wait a moment and try again.",
   },
   chat: {
     title: "Team chat",
