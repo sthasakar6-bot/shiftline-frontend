@@ -43,6 +43,7 @@ export default {
     summary: "Summary",
     billing: "Billing",
     payroll: "Payroll",
+    backup: "Backup",
     chat: "Chat",
     administration: "Administration",
   },

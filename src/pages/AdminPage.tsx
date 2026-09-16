@@ -22,7 +22,7 @@ import { api } from "../api/client";
 import type { Notification } from "../api/types";
 import { updateAppBadge } from "../lib/appBadge";
 
-const tabKeys = ["team", "payroll", "roster", "invite", "leave", "attendance", "summary", "billing", "chat", "alerts"];
+const tabKeys = ["team", "payroll", "roster", "invite", "leave", "attendance", "summary", "billing", "backup", "chat", "alerts"];
 
 export default function AdminPage() {
   const { t } = useTranslation();
@@ -123,12 +123,8 @@ export default function AdminPage() {
           )}
           {active === "leave" && <LeaveApprovalsSection />}
           {active === "attendance" && <AttendanceTrackingSection />}
-          {active === "summary" && (
-            <>
-              <EmployeeSummarySection />
-              <BackupOverviewSection />
-            </>
-          )}
+          {active === "summary" && <EmployeeSummarySection />}
+          {active === "backup" && <BackupOverviewSection />}
           {active === "billing" && <BillingSection />}
           {active === "chat" && <ChatSection />}
           {active === "alerts" && (

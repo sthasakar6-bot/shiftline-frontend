@@ -184,6 +184,14 @@ export default function ChatSection() {
       </div>
 
       <form className="chat-composer" onSubmit={handleSend}>
+        <input
+          ref={inputRef}
+          type="text"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder={t("chat.placeholder")}
+          maxLength={2000}
+        />
         <div className="chat-emoji-wrap" ref={emojiPickerRef}>
           <button
             type="button"
@@ -194,7 +202,7 @@ export default function ChatSection() {
             <Smile size={18} />
           </button>
           {emojiOpen && (
-            <div className="chat-emoji-picker">
+            <div className="chat-emoji-picker chat-emoji-picker-right">
               {EMOJI_OPTIONS.map((emoji) => (
                 <button type="button" key={emoji} onClick={() => insertEmoji(emoji)}>
                   {emoji}
@@ -203,14 +211,6 @@ export default function ChatSection() {
             </div>
           )}
         </div>
-        <input
-          ref={inputRef}
-          type="text"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder={t("chat.placeholder")}
-          maxLength={2000}
-        />
         <button type="submit" disabled={sending || !draft.trim()}>
           {t("chat.send")}
         </button>

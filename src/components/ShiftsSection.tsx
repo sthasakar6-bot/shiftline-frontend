@@ -166,7 +166,6 @@ export default function ShiftsSection() {
   return (
     <section className="panel">
       <h2>{t("roster.title")}</h2>
-      <p className="hint">{t("roster.hint")}</p>
 
       <div className="roster-week-nav">
         <button
@@ -267,7 +266,6 @@ export default function ShiftsSection() {
 
       <div className="open-shift-requests">
         <h3 className="roster-coworkers-title">{t("adminRoster.openShiftRequestSection")}</h3>
-        <p className="hint">{t("adminRoster.openShiftRequestHint")}</p>
         {openShiftError && <div className="error">{openShiftError}</div>}
         {availableOpenShifts.length === 0 ? (
           <p className="empty-state">{t("adminRoster.openShiftRequestNone")}</p>

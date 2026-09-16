@@ -61,7 +61,6 @@ export default function AddEmployeeSection() {
   return (
     <section className="panel">
       <h2>{t("addEmployee.title")}</h2>
-      <p className="hint">{t("addEmployee.hint")}</p>
       <form className="inline-form" onSubmit={handleSubmit}>
         <select value={role} onChange={(e) => setRole(e.target.value as NewAccountRole)}>
           <option value="employee">{t("addEmployee.roleEmployee")}</option>

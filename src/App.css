@@ -3392,6 +3392,11 @@ td.attendance-grid-person-col {
   bottom: calc(100% + 6px);
   left: 0;
   z-index: 20;
+}
+
+.chat-emoji-picker-right {
+  left: auto;
+  right: 0;
   background: var(--panel-bg);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -3656,35 +3661,33 @@ td.attendance-grid-person-col {
   align-self: flex-start;
 }
 
-.profile-card {
-  padding: 0;
-  overflow: hidden;
+.profile-header-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.profile-banner {
-  position: relative;
-  height: 88px;
-  overflow: hidden;
-  background: linear-gradient(135deg, var(--accent-solid), var(--text-h));
+.profile-header-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
 }
 
-.profile-banner-glow {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.16), transparent 55%),
-    radial-gradient(circle at 85% 100%, rgba(255, 255, 255, 0.12), transparent 50%);
+.profile-header-text h2 {
+  margin: 0;
+  font-size: 20px;
 }
 
-.profile-body {
-  padding: 0 20px 28px;
-  margin-top: -52px;
-  text-align: center;
+.profile-header-text .hint {
+  margin: 2px 0 0;
 }
 
 .profile-avatar-wrap {
   position: relative;
   display: inline-block;
+  flex: none;
 }
 
 .complete-account-avatar {
@@ -3733,16 +3736,6 @@ td.attendance-grid-person-col {
   object-fit: contain;
 }
 
-.profile-body h2 {
-  margin-top: 14px;
-  margin-bottom: 8px;
-  font-size: 21px;
-}
-
-.profile-body .hint {
-  margin: 0 0 8px;
-}
-
 .profile-section-kicker {
   display: block;
   font-size: 11px;
@@ -3754,56 +3747,57 @@ td.attendance-grid-person-col {
   margin-bottom: 10px;
 }
 
-.stat-row {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.stat-tile {
-  flex: 1;
+.profile-stats-panel {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 18px 14px;
-  text-align: center;
+  gap: 18px;
 }
 
-.stat-icon-circle {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+.profile-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.profile-stat-card {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 10px;
-  background: var(--accent-bg);
-  color: var(--accent);
+  flex-direction: column;
+  gap: 6px;
+  border-radius: 14px;
+  padding: 16px;
+  color: var(--text-h);
 }
 
-.stat-icon-circle.success {
+.profile-stat-card.accent {
+  background: var(--accent-bg);
+  color: var(--accent-solid);
+}
+
+.profile-stat-card.accent-2 {
+  background: var(--accent-2-bg);
+  color: var(--accent-2-solid);
+}
+
+.profile-stat-card.success {
   background: var(--success-bg);
   color: var(--success);
 }
 
-.stat-icon-circle.danger {
+.profile-stat-card.danger {
   background: var(--danger-bg);
   color: var(--danger);
 }
 
-.stat-value {
-  font-size: 24px;
+.profile-stat-value {
+  font-size: 26px;
   font-weight: 800;
   color: var(--text-h);
 }
 
-.stat-label {
+.profile-stat-label {
   font-size: 12px;
-  opacity: 0.75;
-  margin-top: 2px;
+  font-weight: 600;
+  opacity: 0.8;
 }
 
 /* ---- Button press ripple (injected by ButtonRipple.tsx) ---- */

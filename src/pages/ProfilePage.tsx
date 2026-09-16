@@ -95,29 +95,26 @@ export default function ProfilePage() {
       </header>
 
       <main className="app-content">
-        <section className="panel profile-card">
-          <div className="profile-banner">
-            <div className="profile-banner-glow" />
+        <section className="panel profile-header-card">
+          <div className="profile-avatar-wrap">
+            <Avatar userId={user.id} name={user.name} hasAvatar={user.hasAvatar} size={72} />
+            <button
+              className="avatar-edit-btn"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              title={t("profile.changePhoto")}
+            >
+              <Camera size={14} />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              hidden
+            />
           </div>
-          <div className="profile-body">
-            <div className="profile-avatar-wrap">
-              <Avatar userId={user.id} name={user.name} hasAvatar={user.hasAvatar} size={88} />
-              <button
-                className="avatar-edit-btn"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                title={t("profile.changePhoto")}
-              >
-                <Camera size={14} />
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                hidden
-              />
-            </div>
+          <div className="profile-header-text">
             <h2>{user.name}</h2>
             <span className="role-badge">
               {user.role === "manager" ? t("common.roleManager") : t("common.roleEmployee")}
@@ -127,42 +124,36 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        <section className="panel">
-          <span className="profile-section-kicker">{t("profile.thisMonth")}</span>
-          <div className="stat-row">
-            <div className="stat-tile">
-              <span className="stat-icon-circle">
-                <CalendarCheck size={18} />
-              </span>
-              <div className="stat-value">{stats.daysWorked}</div>
-              <div className="stat-label">{t("profile.daysWorked")}</div>
-            </div>
-            <div className="stat-tile">
-              <span className="stat-icon-circle">
-                <Clock size={18} />
-              </span>
-              <div className="stat-value">{formatDuration(stats.workedMs)}</div>
-              <div className="stat-label">{t("profile.hoursWorked")}</div>
+        <section className="panel profile-stats-panel">
+          <div className="profile-stat-group">
+            <span className="profile-section-kicker">{t("profile.thisMonth")}</span>
+            <div className="profile-stat-grid">
+              <div className="profile-stat-card accent">
+                <CalendarCheck size={20} />
+                <div className="profile-stat-value">{stats.daysWorked}</div>
+                <div className="profile-stat-label">{t("profile.daysWorked")}</div>
+              </div>
+              <div className="profile-stat-card accent-2">
+                <Clock size={20} />
+                <div className="profile-stat-value">{formatDuration(stats.workedMs)}</div>
+                <div className="profile-stat-label">{t("profile.hoursWorked")}</div>
+              </div>
             </div>
           </div>
 
-          <hr className="section-divider" />
-
-          <span className="profile-section-kicker">{t("profile.thisYear")}</span>
-          <div className="stat-row">
-            <div className="stat-tile">
-              <span className="stat-icon-circle success">
-                <Palmtree size={18} />
-              </span>
-              <div className="stat-value">{stats.vacationDays}</div>
-              <div className="stat-label">{t("profile.vacationDaysTaken")}</div>
-            </div>
-            <div className="stat-tile">
-              <span className="stat-icon-circle danger">
-                <Thermometer size={18} />
-              </span>
-              <div className="stat-value">{stats.sickDays}</div>
-              <div className="stat-label">{t("profile.sickDaysTaken")}</div>
+          <div className="profile-stat-group">
+            <span className="profile-section-kicker">{t("profile.thisYear")}</span>
+            <div className="profile-stat-grid">
+              <div className="profile-stat-card success">
+                <Palmtree size={20} />
+                <div className="profile-stat-value">{stats.vacationDays}</div>
+                <div className="profile-stat-label">{t("profile.vacationDaysTaken")}</div>
+              </div>
+              <div className="profile-stat-card danger">
+                <Thermometer size={20} />
+                <div className="profile-stat-value">{stats.sickDays}</div>
+                <div className="profile-stat-label">{t("profile.sickDaysTaken")}</div>
+              </div>
             </div>
           </div>
         </section>

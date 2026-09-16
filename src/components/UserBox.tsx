@@ -13,6 +13,7 @@ import {
   CreditCard,
   UserPlus,
   BarChart3,
+  Shield,
 } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import Avatar from "./Avatar";
@@ -120,6 +121,10 @@ export default function UserBox() {
                   <button onClick={() => goTo("/admin?tab=summary")}>
                     <BarChart3 size={16} />
                     {t("nav.summary")}
+                  </button>
+                  <button onClick={() => goTo("/admin?tab=backup")}>
+                    <Shield size={16} />
+                    {t("nav.backup")}
                   </button>
                   <div className="side-drawer-divider" />
                 </>
