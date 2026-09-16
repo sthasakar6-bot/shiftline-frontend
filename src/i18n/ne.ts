@@ -445,7 +445,6 @@ export default {
   },
   adminRoster: {
     title: "रोस्टर",
-    gridHint: "शिफ्ट थप्न कुनै सेलमा + थिच्नुहोस्, वा सम्पादन वा हटाउन कुनै अवस्थित शिफ्टमा थिच्नुहोस्।",
     shiftStarts: "शिफ्ट सुरु",
     shiftEnds: "शिफ्ट अन्त्य",
     breakLabel: "विश्राम",

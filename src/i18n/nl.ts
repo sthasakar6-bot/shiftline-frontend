@@ -446,7 +446,6 @@ export default {
   },
   adminRoster: {
     title: "Rooster",
-    gridHint: "Tik op + in een cel om een dienst toe te voegen, of tik op een bestaande dienst om te bewerken of te verwijderen.",
     shiftStarts: "Dienst begint",
     shiftEnds: "Dienst eindigt",
     breakLabel: "Pauze",

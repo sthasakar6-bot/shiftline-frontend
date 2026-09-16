@@ -12,6 +12,24 @@ export function startOfWeek(d: Date): Date {
   return date;
 }
 
+// Not ISO-8601 (which starts weeks on Monday) -- deliberately counts
+// Sunday-start weeks like every other week boundary in this app, so the
+// number always matches the Sun-Sat range actually shown on screen.
+export function getWeekNumber(weekStart: Date): number {
+  const jan1WeekStart = startOfWeek(new Date(weekStart.getFullYear(), 0, 1));
+  const diffDays = Math.round((weekStart.getTime() - jan1WeekStart.getTime()) / 86400000);
+  return Math.floor(diffDays / 7) + 1;
+}
+
+// Inverse of getWeekNumber -- the Sunday that starts the given week number
+// in the given year.
+export function weekStartFromNumber(year: number, weekNumber: number): Date {
+  const jan1WeekStart = startOfWeek(new Date(year, 0, 1));
+  const d = new Date(jan1WeekStart);
+  d.setDate(d.getDate() + (weekNumber - 1) * 7);
+  return d;
+}
+
 export function dateKey(d: Date): string {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }

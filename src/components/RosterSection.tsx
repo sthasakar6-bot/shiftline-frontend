@@ -1,4 +1,4 @@
-import { Fragment, type FormEvent, useEffect, useMemo, useState } from "react";
+import { Fragment, type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -20,7 +20,15 @@ import OpenShiftModal from "./OpenShiftModal";
 import EventModal from "./EventModal";
 import { formatTime, compactTime } from "../lib/formatDate";
 import { getDateLocale } from "../i18n";
-import { dateKey, startOfWeek, toDatetimeLocal, toIso, toLocalInput } from "../lib/rosterDates";
+import {
+  dateKey,
+  startOfWeek,
+  toDatetimeLocal,
+  toIso,
+  toLocalInput,
+  getWeekNumber,
+  weekStartFromNumber,
+} from "../lib/rosterDates";
 
 interface PersonEntry {
   id: number;
@@ -59,6 +67,10 @@ export default function RosterSection() {
   const [mError, setMError] = useState<string | null>(null);
   const [mSaving, setMSaving] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [pdfMenuOpen, setPdfMenuOpen] = useState(false);
+  const [chooseWeekOpen, setChooseWeekOpen] = useState(false);
+  const [chooseWeekValue, setChooseWeekValue] = useState("");
+  const pdfMenuRef = useRef<HTMLDivElement>(null);
   const [configOpen, setConfigOpen] = useState(false);
   const [openShiftModal, setOpenShiftModal] = useState<OpenShiftModalState | null>(null);
   const [eventModal, setEventModal] = useState<EventModalState | null>(null);
@@ -230,6 +242,7 @@ export default function RosterSection() {
   }, [weekStart]);
 
   const weekLabel = `${weekStart.toLocaleDateString(getDateLocale(), { month: "short", day: "numeric" })} – ${new Date(weekEnd.getTime() - 86400000).toLocaleDateString(getDateLocale(), { month: "short", day: "numeric", year: "numeric" })}`;
+  const weekNumber = useMemo(() => getWeekNumber(weekStart), [weekStart]);
 
   const weekDays = useMemo(() => {
     const days: Date[] = [];
@@ -330,33 +343,62 @@ export default function RosterSection() {
     loadEvents();
   }
 
-  async function handleDownloadPdf() {
+  function weekLabelFor(start: Date): string {
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    return `${start.toLocaleDateString(getDateLocale(), { month: "short", day: "numeric" })} – ${end.toLocaleDateString(getDateLocale(), { month: "short", day: "numeric", year: "numeric" })}`;
+  }
+
+  // Builds one PDF table section for an arbitrary week -- not just the
+  // currently-displayed one -- since a month export needs several weeks at
+  // once and "choose week" needs a week that isn't on screen at all. Reads
+  // straight from the full `roster` array (loaded once, unscoped by date)
+  // rather than the memoized shiftsByPersonAndDay, which is deliberately
+  // only built for the on-screen week.
+  function buildSection(start: Date, emptyCellText: string) {
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+    const days: Date[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      days.push(d);
+    }
+    const dayHeaders = days.map((d) =>
+      d.toLocaleDateString(getDateLocale(), { weekday: "short", day: "numeric" }).toUpperCase(),
+    );
+    const byPersonAndDay = new Map<string, RosterShift[]>();
+    for (const s of roster) {
+      const shiftStart = new Date(s.startsAt);
+      if (shiftStart >= start && shiftStart < end) {
+        const key = `${s.userId}_${dateKey(shiftStart)}`;
+        const existing = byPersonAndDay.get(key) ?? [];
+        existing.push(s);
+        byPersonAndDay.set(key, existing);
+      }
+    }
+    const rows = people.map((p) => ({
+      name: p.name,
+      cells: days.map((d) => {
+        const dayShifts = byPersonAndDay.get(`${p.id}_${dateKey(d)}`) ?? [];
+        if (dayShifts.length === 0) return emptyCellText;
+        return dayShifts.map((s) => `${compactTime(s.startsAt)}-${compactTime(s.endsAt)}`).join("\n");
+      }),
+    }));
+    return { label: weekLabelFor(start), dayHeaders, rows };
+  }
+
+  async function exportPdf(title: string, sections: { label: string; dayHeaders: string[]; rows: { name: string; cells: string[] }[] }[], fileSlug: string) {
     setPdfBusy(true);
+    setPdfMenuOpen(false);
     try {
       // Loaded on demand -- jsPDF pulls in a heavy html2canvas/dompurify
       // dependency chain that only a manager exporting the roster needs.
       const { downloadRosterPdf } = await import("../lib/rosterPdf");
-      const dayHeaders = weekDays.map((d) =>
-        d.toLocaleDateString(getDateLocale(), { weekday: "short", day: "numeric" }).toUpperCase(),
-      );
-      const emptyCellText = t("adminRoster.pdfEmptyCell");
-      const rows = people.map((p) => ({
-        name: p.name,
-        cells: weekDays.map((d) => {
-          const dayShifts = shiftsByPersonAndDay.get(`${p.id}_${dateKey(d)}`) ?? [];
-          if (dayShifts.length === 0) return emptyCellText;
-          return dayShifts
-            .map((s) => `${compactTime(s.startsAt)}-${compactTime(s.endsAt)}`)
-            .join("\n");
-        }),
-      }));
-      const rangeSlug = `${weekStart.toISOString().slice(0, 10)}_to_${new Date(weekEnd.getTime() - 86400000).toISOString().slice(0, 10)}`;
-
       await downloadRosterPdf({
         businessName: user?.companyName,
-        weekLabel: weekLabel,
-        dayHeaders,
-        rows,
+        title,
+        sections,
         generatedByLine: t("adminRoster.pdfGeneratedBy", {
           date: new Date().toLocaleDateString(getDateLocale(), {
             year: "numeric",
@@ -366,18 +408,63 @@ export default function RosterSection() {
           name: user?.name ?? "",
         }),
         employeeColumnLabel: t("adminRoster.pdfEmployeeColumn"),
-        fileName: `Shiftline-Roster_${rangeSlug}.pdf`,
-        emptyCellText,
+        fileName: `Shiftline-Roster_${fileSlug}.pdf`,
+        emptyCellText: t("adminRoster.pdfEmptyCell"),
       });
     } finally {
       setPdfBusy(false);
     }
   }
 
+  function handleDownloadWeek() {
+    const emptyCellText = t("adminRoster.pdfEmptyCell");
+    const section = buildSection(weekStart, emptyCellText);
+    const rangeSlug = `${weekStart.toISOString().slice(0, 10)}_to_${new Date(weekEnd.getTime() - 86400000).toISOString().slice(0, 10)}`;
+    exportPdf(t("adminRoster.pdfWeeklyTitle"), [section], rangeSlug);
+  }
+
+  function handleDownloadMonth() {
+    const emptyCellText = t("adminRoster.pdfEmptyCell");
+    const monthStart = new Date(weekStart.getFullYear(), weekStart.getMonth(), 1);
+    const monthEnd = new Date(weekStart.getFullYear(), weekStart.getMonth() + 1, 1);
+    const sections = [];
+    for (let cursor = startOfWeek(monthStart); cursor < monthEnd; ) {
+      sections.push(buildSection(new Date(cursor), emptyCellText));
+      cursor.setDate(cursor.getDate() + 7);
+    }
+    const monthTitle = monthStart.toLocaleDateString(getDateLocale(), { month: "long", year: "numeric" });
+    const monthSlug = `${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, "0")}`;
+    exportPdf(monthTitle, sections, monthSlug);
+  }
+
+  function handleDownloadChosenWeek(e: FormEvent) {
+    e.preventDefault();
+    const n = Number(chooseWeekValue);
+    if (!n || n < 1 || n > 53) return;
+    const chosenStart = weekStartFromNumber(weekStart.getFullYear(), n);
+    const emptyCellText = t("adminRoster.pdfEmptyCell");
+    const section = buildSection(chosenStart, emptyCellText);
+    exportPdf(t("adminRoster.pdfWeeklyTitle"), [section], `week-${n}_${weekStart.getFullYear()}`);
+    setChooseWeekOpen(false);
+    setChooseWeekValue("");
+  }
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (pdfMenuRef.current && !pdfMenuRef.current.contains(e.target as Node)) {
+        setPdfMenuOpen(false);
+        setChooseWeekOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
   const body = (
     <>
       <div className="roster-toolbar">
         <div className="roster-week-nav">
+          <span className="roster-week-number">{t("adminRoster.weekNumber", { n: weekNumber })}</span>
           <button
             type="button"
             className="roster-nav-btn"
@@ -414,10 +501,44 @@ export default function RosterSection() {
         </div>
         <div className="roster-toolbar-actions">
           {people.length > 0 && (
-            <button type="button" className="icon-btn" onClick={handleDownloadPdf} disabled={pdfBusy}>
-              <FileDown size={14} />
-              {pdfBusy ? t("adminRoster.generatingPdf") : t("adminRoster.downloadPdf")}
-            </button>
+            <div className="pdf-menu-wrap" ref={pdfMenuRef}>
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => setPdfMenuOpen((v) => !v)}
+                disabled={pdfBusy}
+              >
+                <FileDown size={14} />
+                {pdfBusy ? t("adminRoster.generatingPdf") : t("adminRoster.downloadPdf")}
+              </button>
+              {pdfMenuOpen && (
+                <div className="pdf-menu">
+                  <button type="button" onClick={handleDownloadWeek}>
+                    {t("adminRoster.pdfThisWeek")}
+                  </button>
+                  <button type="button" onClick={handleDownloadMonth}>
+                    {t("adminRoster.pdfThisMonth")}
+                  </button>
+                  <button type="button" onClick={() => setChooseWeekOpen(true)}>
+                    {t("adminRoster.pdfChooseWeek")}
+                  </button>
+                  {chooseWeekOpen && (
+                    <form className="pdf-menu-choose-week" onSubmit={handleDownloadChosenWeek}>
+                      <input
+                        type="number"
+                        min={1}
+                        max={53}
+                        placeholder={t("adminRoster.pdfWeekNumberPlaceholder")}
+                        value={chooseWeekValue}
+                        onChange={(e) => setChooseWeekValue(e.target.value)}
+                        autoFocus
+                      />
+                      <button type="submit">{t("adminRoster.pdfGo")}</button>
+                    </form>
+                  )}
+                </div>
+              )}
+            </div>
           )}
           <button type="button" className="icon-btn" onClick={() => setConfigOpen(true)}>
             <Settings size={14} />
@@ -744,7 +865,6 @@ export default function RosterSection() {
   return (
     <section className="panel">
       <h2>{t("adminRoster.title")}</h2>
-      <p className="hint">{t("adminRoster.gridHint")}</p>
       {body}
     </section>
   );

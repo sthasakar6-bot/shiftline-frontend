@@ -665,7 +665,7 @@
 }
 
 .app-content.wide {
-  max-width: 1400px;
+  max-width: 1900px;
 }
 
 .status-badge {
@@ -1001,6 +1001,15 @@
 
   .app-content {
     padding-bottom: 24px;
+    /* The 700px mobile-reading-width cap is right for a phone but reads
+       as a small floating box with a wall of empty space on either side
+       on an actual desktop monitor -- let content use the room next to
+       the sidebar instead, capped just enough to keep very wide (4K/
+       ultrawide) monitors from stretching a table into an unreadable
+       single line. */
+    max-width: 1600px;
+    padding-left: 32px;
+    padding-right: 32px;
   }
 }
 
@@ -1424,6 +1433,61 @@
   justify-content: center;
   gap: 10px;
   margin-bottom: 18px;
+}
+
+.roster-week-number {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-2-solid);
+  background: var(--accent-2-bg);
+  border-radius: 999px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.pdf-menu-wrap {
+  position: relative;
+}
+
+.pdf-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+}
+
+.pdf-menu button {
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.pdf-menu button:hover {
+  background: var(--accent-bg);
+  border-color: transparent;
+}
+
+.pdf-menu-choose-week {
+  display: flex;
+  gap: 6px;
+  padding: 6px 4px 2px;
+}
+
+.pdf-menu-choose-week input {
+  width: 70px;
+  padding: 6px 8px;
 }
 
 .roster-pdf-row {
@@ -2925,11 +2989,28 @@
 
 .chat-bubble-row {
   display: flex;
+  align-items: flex-end;
+  gap: 6px;
   justify-content: flex-start;
 }
 
 .chat-bubble-row-mine {
   justify-content: flex-end;
+}
+
+.chat-delete-btn {
+  flex: none;
+  align-self: center;
+  border: none;
+  background: transparent;
+  padding: 4px;
+  opacity: 0.5;
+  color: var(--danger);
+}
+
+.chat-delete-btn:hover {
+  opacity: 1;
+  border-color: transparent;
 }
 
 .chat-bubble {
