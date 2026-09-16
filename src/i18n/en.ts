@@ -269,6 +269,8 @@ export default {
     delete: "Delete message",
     deleteFailed: "Could not delete message. Please try again.",
     emoji: "Emoji",
+    reply: "Reply",
+    replyingTo: "Replying to {{name}}",
   },
   team: {
     title: "Manage team",

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Trash2, Smile } from "lucide-react";
+import { Trash2, Smile, Reply, X } from "lucide-react";
 import { api, ApiError, API_URL, getToken } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import Avatar from "./Avatar";
@@ -34,10 +34,21 @@ export default function ChatSection() {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const [replyTarget, setReplyTarget] = useState<ChatMessage | null>(null);
   const listEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
+  const messageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const [highlightId, setHighlightId] = useState<number | null>(null);
+
+  function scrollToMessage(id: number) {
+    const el = messageRefs.current.get(id);
+    if (!el) return;
+    el.scrollIntoView({ block: "center", behavior: "smooth" });
+    setHighlightId(id);
+    setTimeout(() => setHighlightId((h) => (h === id ? null : h)), 1200);
+  }
 
   useEffect(() => {
     if (!emojiOpen) return;
@@ -123,8 +134,9 @@ export default function ChatSection() {
     setSending(true);
     setError(null);
     try {
-      await api.sendMessage(body);
+      await api.sendMessage(body, replyTarget?.id ?? null);
       setDraft("");
+      setReplyTarget(null);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("chat.sendFailed"));
     } finally {
@@ -161,27 +173,65 @@ export default function ChatSection() {
                 {!isMine && (
                   <Avatar userId={m.userId} name={m.userName} hasAvatar={m.hasAvatar} size={28} />
                 )}
-                <div className="chat-bubble">
+                <div
+                  className={`chat-bubble${highlightId === m.id ? " chat-bubble-highlight" : ""}`}
+                  ref={(el) => {
+                    if (el) messageRefs.current.set(m.id, el);
+                    else messageRefs.current.delete(m.id);
+                  }}
+                >
                   {!isMine && <div className="chat-bubble-author">{m.userName}</div>}
+                  {m.replyTo && (
+                    <button
+                      type="button"
+                      className="chat-bubble-quote"
+                      onClick={() => scrollToMessage(m.replyTo!.id)}
+                    >
+                      <span className="chat-bubble-quote-author">{m.replyTo.userName}</span>
+                      <span className="chat-bubble-quote-body">{m.replyTo.bodySnippet}</span>
+                    </button>
+                  )}
                   <div className="chat-bubble-body">{m.body}</div>
                   <div className="chat-bubble-time">{formatTime(m.createdAt)}</div>
                 </div>
-                {isMine && (
+                <div className="chat-bubble-actions">
                   <button
                     type="button"
-                    className="chat-delete-btn"
-                    onClick={() => handleDelete(m.id)}
-                    title={t("chat.delete")}
+                    className="chat-reply-btn"
+                    onClick={() => setReplyTarget(m)}
+                    title={t("chat.reply")}
                   >
-                    <Trash2 size={14} />
+                    <Reply size={14} />
                   </button>
-                )}
+                  {isMine && (
+                    <button
+                      type="button"
+                      className="chat-delete-btn"
+                      onClick={() => handleDelete(m.id)}
+                      title={t("chat.delete")}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })
         )}
         <div ref={listEndRef} />
       </div>
+
+      {replyTarget && (
+        <div className="chat-reply-preview">
+          <div className="chat-reply-preview-text">
+            <span className="chat-bubble-quote-author">{t("chat.replyingTo", { name: replyTarget.userName })}</span>
+            <span className="chat-bubble-quote-body">{replyTarget.body}</span>
+          </div>
+          <button type="button" onClick={() => setReplyTarget(null)} title={t("common.cancel")}>
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       <form className="chat-composer" onSubmit={handleSend}>
         <input

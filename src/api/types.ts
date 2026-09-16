@@ -16,12 +16,19 @@ export interface User {
   companyTrialEndsAt: string | null;
 }
 
+export interface ChatMessageReplyTo {
+  id: number;
+  userName: string;
+  bodySnippet: string;
+}
+
 export interface ChatMessage {
   id: number;
   userId: number;
   userName: string;
   hasAvatar: boolean;
   body: string;
+  replyTo: ChatMessageReplyTo | null;
   createdAt: string;
 }
 

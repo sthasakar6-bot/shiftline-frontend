@@ -146,8 +146,11 @@ export const api = {
     }),
 
   getMessages: () => request<ChatMessage[]>("/api/messages"),
-  sendMessage: (body: string) =>
-    request<ChatMessage>("/api/messages", { method: "POST", body: JSON.stringify({ body }) }),
+  sendMessage: (body: string, replyToId: number | null = null) =>
+    request<ChatMessage>("/api/messages", {
+      method: "POST",
+      body: JSON.stringify({ body, replyToId }),
+    }),
   deleteMessage: (id: number) => request<void>(`/api/messages/${id}`, { method: "DELETE" }),
 
   signup: (data: {
