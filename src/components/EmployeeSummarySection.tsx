@@ -180,35 +180,68 @@ export default function EmployeeSummarySection() {
           </button>
 
           <h3>{t("summary.shifts")}</h3>
-          <ul className="list">
-            {shiftsInRange.map((s) => (
-              <li key={s.id}>
-                <span>
-                  {new Date(s.startsAt).toLocaleDateString(getDateLocale(), {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })}{" "}
-                  — {formatTime(s.startsAt)} – {formatTime(s.endsAt)}
-                  {s.breakMinutes && t("summary.breakSuffix", { min: s.breakMinutes })}
-                </span>
-              </li>
-            ))}
-            {shiftsInRange.length === 0 && <li className="empty">{t("summary.noShiftsRange")}</li>}
-          </ul>
+          {shiftsInRange.length === 0 ? (
+            <p className="empty-state">{t("summary.noShiftsRange")}</p>
+          ) : (
+            <div className="summary-grid-scroll">
+              <table className="summary-grid">
+                <thead>
+                  <tr>
+                    <th>{t("summary.csvDate")}</th>
+                    <th>{t("summary.csvStart")}</th>
+                    <th>{t("summary.csvEnd")}</th>
+                    <th>{t("summary.csvBreakMin")}</th>
+                    <th>{t("summary.csvHours")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shiftsInRange.map((s) => (
+                    <tr key={s.id}>
+                      <td>
+                        {new Date(s.startsAt).toLocaleDateString(getDateLocale(), {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </td>
+                      <td>{formatTime(s.startsAt)}</td>
+                      <td>{formatTime(s.endsAt)}</td>
+                      <td>{s.breakMinutes ?? 0}</td>
+                      <td>{shiftHours(s).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           <h3>{t("summary.leave")}</h3>
-          <ul className="list">
-            {leaveInRange.map((l) => (
-              <li key={l.id}>
-                <span>
-                  {t(`leave.${l.type}`)} — {new Date(l.startDate).toLocaleDateString(getDateLocale())} to{" "}
-                  {new Date(l.endDate).toLocaleDateString(getDateLocale())} ({t(`leave.${l.status}`)})
-                </span>
-              </li>
-            ))}
-            {leaveInRange.length === 0 && <li className="empty">{t("summary.noLeaveRange")}</li>}
-          </ul>
+          {leaveInRange.length === 0 ? (
+            <p className="empty-state">{t("summary.noLeaveRange")}</p>
+          ) : (
+            <div className="summary-grid-scroll">
+              <table className="summary-grid">
+                <thead>
+                  <tr>
+                    <th>{t("summary.csvType")}</th>
+                    <th>{t("summary.csvStartDate")}</th>
+                    <th>{t("summary.csvEndDate")}</th>
+                    <th>{t("summary.csvStatus")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaveInRange.map((l) => (
+                    <tr key={l.id}>
+                      <td>{t(`leave.${l.type}`)}</td>
+                      <td>{new Date(l.startDate).toLocaleDateString(getDateLocale())}</td>
+                      <td>{new Date(l.endDate).toLocaleDateString(getDateLocale())}</td>
+                      <td>{t(`leave.${l.status}`)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </>
       )}
     </section>
