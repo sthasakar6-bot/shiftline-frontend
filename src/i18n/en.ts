@@ -555,6 +555,12 @@ export default {
     notificationsUpdateFailed: "Failed to update notifications",
     logOut: "Log out",
     account: "Account",
+    menu: "Menu",
+    role: {
+      manager: "Manager",
+      employee: "Employee",
+      bookkeeper: "Bookkeeper",
+    },
   },
   footer: {
     rights: "© {{year}} Shiftline. All rights reserved.",
