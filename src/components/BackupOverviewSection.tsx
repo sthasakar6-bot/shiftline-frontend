@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Shield } from "lucide-react";
 import BackupHistorySection from "./BackupHistorySection";
-import BackupSection from "./BackupSection";
 
 export default function BackupOverviewSection() {
   const { t } = useTranslation();
@@ -16,7 +15,6 @@ export default function BackupOverviewSection() {
       </div>
 
       <BackupHistorySection />
-      <BackupSection />
     </section>
   );
 }

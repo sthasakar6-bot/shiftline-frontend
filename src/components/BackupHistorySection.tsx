@@ -51,7 +51,6 @@ export default function BackupHistorySection() {
           <Cloud size={15} />
         </span>
         <h3>{t("backup.autoTitle")}</h3>
-        <span className="panel-title-badge">{t("backup.recommended")}</span>
         <ChevronDown size={16} className={`panel-subtitle-chevron${open ? " open" : ""}`} />
       </button>
 

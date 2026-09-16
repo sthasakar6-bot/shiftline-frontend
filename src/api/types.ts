@@ -65,14 +65,6 @@ export interface BookkeeperEmployee {
   payslips: Payslip[];
 }
 
-export interface BackupTokenInfo {
-  id: number;
-  userId: number;
-  token: string;
-  createdAt: string;
-  lastUsedAt: string | null;
-}
-
 export interface BackupSnapshotMeta {
   id: number;
   userId: number;

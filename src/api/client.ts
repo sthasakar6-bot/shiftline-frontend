@@ -1,7 +1,6 @@
 import type {
   Attendance,
   BackupSnapshotMeta,
-  BackupTokenInfo,
   BookkeeperEmployee,
   ChatMessage,
   Company,
@@ -447,10 +446,6 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(data),
     }),
-
-  getBackupToken: () => request<BackupTokenInfo | null>("/api/backup-token"),
-  createBackupToken: () => request<BackupTokenInfo>("/api/backup-token", { method: "POST" }),
-  deleteBackupToken: () => request<void>("/api/backup-token", { method: "DELETE" }),
 
   listBackupHistory: () => request<BackupSnapshotMeta[]>("/api/backup-history"),
   getBackupHistoryCsv: (id: number) => requestBlob(`/api/backup-history/${id}`),
