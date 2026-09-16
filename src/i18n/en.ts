@@ -279,7 +279,6 @@ export default {
     subscribe: "Subscribe",
     redirecting: "Redirecting...",
     checkoutFailed: "Could not start checkout. Please try again.",
-    empty: "Ask me to schedule someone -- for example \"put Anita on shift Monday to Friday, 9am-5pm\".",
     placeholder: "Type a scheduling request...",
     send: "Send",
     sending: "Sending...",

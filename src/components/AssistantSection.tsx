@@ -165,10 +165,9 @@ export default function AssistantSection() {
       {error && <div className="error">{error}</div>}
 
       <div className="chat-messages">
-        {turns.length === 0 ? (
-          <p className="hint">{t("assistant.empty")}</p>
-        ) : (
-          turns.map((turn) => (
+        {turns.length === 0
+          ? null
+          : turns.map((turn) => (
             <div
               key={turn.id}
               className={`chat-bubble-row ${turn.role === "user" ? "chat-bubble-row-mine" : ""}`}
@@ -204,8 +203,7 @@ export default function AssistantSection() {
                 </div>
               )}
             </div>
-          ))
-        )}
+          ))}
         <div ref={listEndRef} />
       </div>
 
