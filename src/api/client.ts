@@ -1,5 +1,9 @@
 import type {
   Attendance,
+  AssistantChatTurn,
+  AssistantConfirmResult,
+  AssistantConfirmShift,
+  AssistantProposedShift,
   BackupSnapshotMeta,
   BookkeeperEmployee,
   ChatMessage,
@@ -134,6 +138,7 @@ export const api = {
       billingProvider: string | null;
       billingInterval: string | null;
       subscriptionStatus: string | null;
+      aiAssistantStatus: string | null;
     }>("/api/billing/status"),
   createBillingCheckout: (data: {
     plan: "starter" | "unlimited";
@@ -143,6 +148,22 @@ export const api = {
     request<{ redirectUrl: string }>("/api/billing/checkout", {
       method: "POST",
       body: JSON.stringify(data),
+    }),
+  createAddonCheckout: (provider: "mollie" | "stripe") =>
+    request<{ redirectUrl: string }>("/api/billing/addon/checkout", {
+      method: "POST",
+      body: JSON.stringify({ provider }),
+    }),
+
+  sendAssistantMessage: (history: AssistantChatTurn[], message: string) =>
+    request<{ reply: string; proposedShifts: AssistantProposedShift[] }>("/api/assistant/chat", {
+      method: "POST",
+      body: JSON.stringify({ history, message }),
+    }),
+  confirmAssistantShifts: (shifts: AssistantConfirmShift[]) =>
+    request<{ results: AssistantConfirmResult[] }>("/api/assistant/confirm", {
+      method: "POST",
+      body: JSON.stringify({ shifts }),
     }),
 
   getMessages: () => request<ChatMessage[]>("/api/messages"),

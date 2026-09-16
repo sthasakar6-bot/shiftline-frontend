@@ -3335,6 +3335,28 @@ td.attendance-grid-person-col {
   min-height: 320px;
 }
 
+.assistant-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.assistant-paywall-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent-solid);
+  margin: 4px 0 16px;
+}
+
+.assistant-proposal {
+  margin: 4px 0 4px 34px;
+  max-width: 420px;
+}
+
+.assistant-proposal .list {
+  margin-bottom: 8px;
+}
+
 .chat-messages {
   flex: 1;
   overflow-y: auto;

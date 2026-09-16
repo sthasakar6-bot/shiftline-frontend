@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Users, CalendarDays, Palmtree, Clock, Bell, MessageCircle, Wallet } from "lucide-react";
+import { Users, CalendarDays, Palmtree, Clock, Bell, MessageCircle, Wallet, Sparkles } from "lucide-react";
 import UserBox from "../components/UserBox";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import TabBar, { type Tab } from "../components/TabBar";
@@ -18,11 +18,12 @@ import BackupOverviewSection from "../components/BackupOverviewSection";
 import NotificationsSection from "../components/NotificationsSection";
 import BillingSection from "../components/BillingSection";
 import ChatSection from "../components/ChatSection";
+import AssistantSection from "../components/AssistantSection";
 import { api } from "../api/client";
 import type { Notification } from "../api/types";
 import { updateAppBadge } from "../lib/appBadge";
 
-const tabKeys = ["team", "payroll", "roster", "invite", "leave", "attendance", "summary", "billing", "backup", "chat", "alerts"];
+const tabKeys = ["team", "payroll", "roster", "invite", "leave", "attendance", "summary", "billing", "backup", "chat", "assistant", "alerts"];
 
 export default function AdminPage() {
   const { t } = useTranslation();
@@ -84,6 +85,7 @@ export default function AdminPage() {
     { key: "leave", label: t("nav.leave"), icon: Palmtree, badge: unreadLeaveNotifications.length },
     { key: "attendance", label: t("nav.attendance"), icon: Clock },
     { key: "chat", label: t("nav.chat"), icon: MessageCircle },
+    { key: "assistant", label: t("nav.assistant"), icon: Sparkles },
     { key: "alerts", label: t("nav.alerts"), icon: Bell, badge: unreadCount },
   ];
 
@@ -127,6 +129,7 @@ export default function AdminPage() {
           {active === "backup" && <BackupOverviewSection />}
           {active === "billing" && <BillingSection />}
           {active === "chat" && <ChatSection />}
+          {active === "assistant" && <AssistantSection />}
           {active === "alerts" && (
             <NotificationsSection
               notifications={notifications}

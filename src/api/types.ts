@@ -16,6 +16,34 @@ export interface User {
   companyTrialEndsAt: string | null;
 }
 
+export interface AssistantChatTurn {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface AssistantProposedShift {
+  userId: number;
+  userName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  breakMinutes?: number;
+}
+
+export interface AssistantConfirmShift {
+  userId: number;
+  startsAt: string;
+  endsAt: string;
+  breakMinutes?: number;
+}
+
+export interface AssistantConfirmResult {
+  userId: number;
+  startsAt: string;
+  status: "created" | "error";
+  message?: string;
+}
+
 export interface ChatMessageReplyTo {
   id: number;
   userName: string;
