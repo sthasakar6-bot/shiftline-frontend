@@ -1,8 +1,10 @@
 :root {
-  /* A warm, editorial palette -- a saturated terracotta primary instead of
-     the expected SaaS blue, plus a small family of named hues used to give
-     each nav section its own identity color (see --nav-* below) rather
-     than tinting everything with one accent. */
+  /* Two-color brand system: a warm coral primary + a deep teal secondary,
+     used consistently everywhere (nav, buttons, badges) instead of the
+     old per-section rainbow (each nav item used to carry its own hue --
+     8 different colors competing on screen at once). Every --nav-* below
+     now just points at one of these two, kept as named variables so
+     call sites don't need to change, only what they resolve to. */
   --text: #334155;
   --text-h: #0f172a;
   --bg: #f8fafc;
@@ -15,34 +17,41 @@
      dark-mode --accent (tuned for readability as text/icons against the
      dark page background) isn't dark/saturated enough to provide. */
   --accent-solid: #ea580c;
+  --accent-2: #0d9488;
+  --accent-2-bg: rgba(13, 148, 136, 0.1);
+  --accent-2-solid: #0d9488;
   --danger: #b91c1c;
   --danger-bg: rgba(185, 28, 28, 0.08);
   --success: #15803d;
   --success-bg: rgba(21, 128, 61, 0.1);
 
-  --nav-team: #7c3aed;
-  --nav-team-bg: rgba(124, 58, 237, 0.1);
-  --nav-roster: #ea580c;
-  --nav-roster-bg: rgba(234, 88, 12, 0.09);
-  --nav-invite: #0d9488;
-  --nav-invite-bg: rgba(13, 148, 136, 0.1);
-  --nav-leave: #db2777;
-  --nav-leave-bg: rgba(219, 39, 119, 0.09);
-  --nav-attendance: #2563eb;
-  --nav-attendance-bg: rgba(37, 99, 235, 0.09);
-  --nav-summary: #b45309;
-  --nav-summary-bg: rgba(180, 83, 9, 0.1);
-  --nav-billing: #059669;
-  --nav-billing-bg: rgba(5, 150, 105, 0.1);
-  --nav-alerts: #dc2626;
-  --nav-alerts-bg: rgba(220, 38, 38, 0.09);
-  --nav-home: #0891b2;
-  --nav-home-bg: rgba(8, 145, 178, 0.1);
+  --nav-team: var(--accent-2);
+  --nav-team-bg: var(--accent-2-bg);
+  --nav-roster: var(--accent);
+  --nav-roster-bg: var(--accent-bg);
+  --nav-invite: var(--accent-2);
+  --nav-invite-bg: var(--accent-2-bg);
+  --nav-leave: var(--accent);
+  --nav-leave-bg: var(--accent-bg);
+  --nav-attendance: var(--accent-2);
+  --nav-attendance-bg: var(--accent-2-bg);
+  --nav-summary: var(--accent);
+  --nav-summary-bg: var(--accent-bg);
+  --nav-billing: var(--accent-2);
+  --nav-billing-bg: var(--accent-2-bg);
+  --nav-alerts: var(--danger);
+  --nav-alerts-bg: var(--danger-bg);
+  --nav-home: var(--accent);
+  --nav-home-bg: var(--accent-bg);
 
   font: 16px/1.5 system-ui, "Segoe UI", Roboto, sans-serif;
   color-scheme: light dark;
   color: var(--text);
-  background: var(--bg);
+  /* A soft two-color wash instead of flat white/gray -- both washes are
+     faint (6% alpha) so body text and panels stay fully readable. */
+  background: radial-gradient(circle at 8% -10%, rgba(234, 88, 12, 0.07), transparent 45%),
+    radial-gradient(circle at 100% 10%, rgba(13, 148, 136, 0.07), transparent 45%), var(--bg);
+  background-attachment: fixed;
 }
 
 @media (prefers-color-scheme: dark) {

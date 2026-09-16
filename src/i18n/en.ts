@@ -1,4 +1,11 @@
 export default {
+  plan: {
+    trial: "Trial",
+    trialDaysLeft: "Trial · {{count}} day left",
+    trialDaysLeft_other: "Trial · {{count}} days left",
+    starter: "Starter",
+    unlimited: "Unlimited",
+  },
   common: {
     save: "Save",
     cancel: "Cancel",
@@ -246,6 +253,7 @@ export default {
     checkoutFailed: "Could not start checkout. Please try again.",
     mollieManageHint: "To change your plan or update your card, contact us:",
     stripeManageHint: "Manage your plan and payment method from your Stripe receipt email.",
+    finishSignupPrompt: "Your account is ready — choose a payment method below to activate your plan.",
   },
   team: {
     title: "Manage team",

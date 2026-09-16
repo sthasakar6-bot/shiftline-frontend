@@ -12,6 +12,8 @@ export interface User {
   companyId: number;
   companyName: string;
   companySlug: string;
+  companyPlan: string;
+  companyTrialEndsAt: string | null;
 }
 
 export interface Company {

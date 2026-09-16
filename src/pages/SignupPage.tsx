@@ -68,7 +68,9 @@ export default function SignupPage() {
     setSubmitting(true);
     try {
       const user = await signup({ companyName, firstName, lastName, email, password, logo });
-      navigate(user.role === "manager" ? "/admin" : "/");
+      const intendedPlan = searchParams.get("intendedPlan");
+      const payNow = intendedPlan === "starter" || intendedPlan === "unlimited";
+      navigate(user.role === "manager" ? (payNow ? "/admin?tab=billing&checkout=start" : "/admin") : "/");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("signup.failed"));
     } finally {

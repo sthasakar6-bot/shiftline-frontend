@@ -581,14 +581,7 @@
   right: 0;
   bottom: -1px;
   height: 3px;
-  background: linear-gradient(
-    90deg,
-    var(--nav-roster),
-    var(--nav-leave),
-    var(--nav-team),
-    var(--nav-attendance),
-    var(--nav-invite)
-  );
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
 }
 
 .app-header h1 {
@@ -633,9 +626,30 @@
   border-radius: 8px;
 }
 
+.plan-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-left: 2px;
+}
+
+.plan-badge-trial {
+  color: var(--accent-2-solid);
+  background: var(--accent-2-bg);
+}
+
+.plan-badge-paid {
+  color: #fff;
+  background: var(--accent-solid);
+}
+
 @media (max-width: 420px) {
   .app-logo-business,
-  .app-logo-business-mark {
+  .app-logo-business-mark,
+  .plan-badge {
     display: none;
   }
 }
@@ -822,12 +836,13 @@
 
 .app-sidebar .sidebar-icon,
 .tab-bar .tab-icon {
-  color: var(--tab-color, var(--text));
-  opacity: 0.85;
+  color: var(--text);
+  opacity: 0.6;
 }
 
 .app-sidebar button.active .sidebar-icon,
 .tab-bar button.active .tab-icon {
+  color: var(--tab-color, var(--accent));
   opacity: 1;
 }
 
@@ -2879,6 +2894,16 @@
   font-size: 13px;
   opacity: 0.7;
   margin: -8px 0 12px;
+}
+
+.billing-signup-prompt {
+  opacity: 1;
+  color: var(--accent-solid);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-weight: 600;
 }
 
 .section-divider {
