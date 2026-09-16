@@ -664,10 +664,6 @@
   box-sizing: border-box;
 }
 
-.app-content.wide {
-  max-width: 1900px;
-}
-
 .status-badge {
   text-transform: capitalize;
   padding: 2px 10px;
@@ -1003,11 +999,9 @@
     padding-bottom: 24px;
     /* The 700px mobile-reading-width cap is right for a phone but reads
        as a small floating box with a wall of empty space on either side
-       on an actual desktop monitor -- let content use the room next to
-       the sidebar instead, capped just enough to keep very wide (4K/
-       ultrawide) monitors from stretching a table into an unreadable
-       single line. */
-    max-width: 1600px;
+       on an actual desktop monitor -- every page uses the full width
+       next to the sidebar now, standing preference, not just roster. */
+    max-width: none;
     padding-left: 32px;
     padding-right: 32px;
   }
