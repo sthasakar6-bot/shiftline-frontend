@@ -149,6 +149,7 @@ export const api = {
   getMessages: () => request<ChatMessage[]>("/api/messages"),
   sendMessage: (body: string) =>
     request<ChatMessage>("/api/messages", { method: "POST", body: JSON.stringify({ body }) }),
+  deleteMessage: (id: number) => request<void>(`/api/messages/${id}`, { method: "DELETE" }),
 
   signup: (data: {
     companyName: string;

@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { Trash2 } from "lucide-react";
 import { api, ApiError, API_URL, getToken } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import Avatar from "./Avatar";
 import type { ChatMessage } from "../api/types";
 
 function wsUrl(): string {
@@ -48,9 +50,13 @@ export default function ChatSection() {
       socketRef.current = socket;
       socket.onmessage = (event) => {
         try {
-          const data = JSON.parse(event.data) as { type: string; message: ChatMessage };
+          const data = JSON.parse(event.data) as
+            | { type: "message"; message: ChatMessage }
+            | { type: "message_deleted"; id: number };
           if (data.type === "message") {
             setMessages((prev) => [...prev, data.message]);
+          } else if (data.type === "message_deleted") {
+            setMessages((prev) => prev.filter((m) => m.id !== data.id));
           }
         } catch {
           // ignore malformed frames
@@ -89,6 +95,17 @@ export default function ChatSection() {
     }
   }
 
+  async function handleDelete(id: number) {
+    // No local removal here -- the server's own WS broadcast (which the
+    // deleter's socket also receives) is what actually takes it off screen,
+    // same single-source-of-truth reasoning as sending.
+    try {
+      await api.deleteMessage(id);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t("chat.deleteFailed"));
+    }
+  }
+
   return (
     <section className="panel chat-panel">
       <h2>{t("chat.title")}</h2>
@@ -104,11 +121,24 @@ export default function ChatSection() {
             const isMine = m.userId === user?.id;
             return (
               <div key={m.id} className={`chat-bubble-row ${isMine ? "chat-bubble-row-mine" : ""}`}>
+                {!isMine && (
+                  <Avatar userId={m.userId} name={m.userName} hasAvatar={m.hasAvatar} size={28} />
+                )}
                 <div className="chat-bubble">
                   {!isMine && <div className="chat-bubble-author">{m.userName}</div>}
                   <div className="chat-bubble-body">{m.body}</div>
                   <div className="chat-bubble-time">{formatTime(m.createdAt)}</div>
                 </div>
+                {isMine && (
+                  <button
+                    type="button"
+                    className="chat-delete-btn"
+                    onClick={() => handleDelete(m.id)}
+                    title={t("chat.delete")}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
               </div>
             );
           })
