@@ -278,7 +278,8 @@ export default {
     paywallDescription:
       "Type scheduling requests in plain English -- \"put Anita on shift Monday to Friday, 9am-5pm\" -- and review the proposed shifts before anything is created.",
     paywallPrice: "€4.99/month",
-    subscribe: "Subscribe",
+    subscribe: "Subscribe with Mollie",
+    stripeNotYetAvailable: "The AI assistant add-on isn't available for Stripe accounts yet -- contact us and we'll set it up manually.",
     redirecting: "Redirecting...",
     checkoutFailed: "Could not start checkout. Please try again.",
     empty: "Ask me to schedule someone -- for example \"put Anita on shift Monday to Friday, 9am-5pm\".",

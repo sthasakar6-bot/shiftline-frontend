@@ -150,34 +150,15 @@ export default function AssistantSection() {
         <p className="hint">{t("assistant.paywallDescription")}</p>
         <p className="assistant-paywall-price">{t("assistant.paywallPrice")}</p>
         {error && <div className="error">{error}</div>}
-        <div className="actions">
-          {billingProvider ? (
-            <button
-              type="button"
-              onClick={() => handleSubscribe(billingProvider as "mollie" | "stripe")}
-              disabled={checkingOutWith !== null}
-            >
+        {billingProvider === "stripe" ? (
+          <p className="hint">{t("assistant.stripeNotYetAvailable")}</p>
+        ) : (
+          <div className="actions">
+            <button type="button" onClick={() => handleSubscribe("mollie")} disabled={checkingOutWith !== null}>
               {checkingOutWith ? t("assistant.redirecting") : t("assistant.subscribe")}
             </button>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => handleSubscribe("mollie")}
-                disabled={checkingOutWith !== null}
-              >
-                {checkingOutWith === "mollie" ? t("assistant.redirecting") : t("billing.continueWithMollie")}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSubscribe("stripe")}
-                disabled={checkingOutWith !== null}
-              >
-                {checkingOutWith === "stripe" ? t("assistant.redirecting") : t("billing.continueWithStripe")}
-              </button>
-            </>
-          )}
-        </div>
+          </div>
+        )}
       </section>
     );
   }
