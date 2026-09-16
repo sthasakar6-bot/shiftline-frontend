@@ -34,8 +34,7 @@ function summarizeProposal(shifts: AssistantProposedShift[]): string {
 export default function AssistantSection() {
   const { t } = useTranslation();
   const [entitled, setEntitled] = useState<boolean | null>(null);
-  const [billingProvider, setBillingProvider] = useState<string | null>(null);
-  const [checkingOutWith, setCheckingOutWith] = useState<"mollie" | "stripe" | null>(null);
+  const [checkingOut, setCheckingOut] = useState(false);
   const [turns, setTurns] = useState<DisplayTurn[]>([]);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
@@ -46,7 +45,6 @@ export default function AssistantSection() {
     api
       .getBillingStatus()
       .then((status) => {
-        setBillingProvider(status.billingProvider);
         setEntitled(status.aiAssistantStatus === "active" || status.aiAssistantStatus === "past_due");
       })
       .catch(() => setEntitled(false));
@@ -56,15 +54,15 @@ export default function AssistantSection() {
     listEndRef.current?.scrollIntoView({ block: "end" });
   }, [turns]);
 
-  async function handleSubscribe(provider: "mollie" | "stripe") {
+  async function handleSubscribe() {
     setError(null);
-    setCheckingOutWith(provider);
+    setCheckingOut(true);
     try {
-      const { redirectUrl } = await api.createAddonCheckout(provider);
+      const { redirectUrl } = await api.createAddonCheckout();
       window.location.href = redirectUrl;
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("assistant.checkoutFailed"));
-      setCheckingOutWith(null);
+      setCheckingOut(false);
     }
   }
 
@@ -150,15 +148,11 @@ export default function AssistantSection() {
         <p className="hint">{t("assistant.paywallDescription")}</p>
         <p className="assistant-paywall-price">{t("assistant.paywallPrice")}</p>
         {error && <div className="error">{error}</div>}
-        {billingProvider === "stripe" ? (
-          <p className="hint">{t("assistant.stripeNotYetAvailable")}</p>
-        ) : (
-          <div className="actions">
-            <button type="button" onClick={() => handleSubscribe("mollie")} disabled={checkingOutWith !== null}>
-              {checkingOutWith ? t("assistant.redirecting") : t("assistant.subscribe")}
-            </button>
-          </div>
-        )}
+        <div className="actions">
+          <button type="button" onClick={handleSubscribe} disabled={checkingOut}>
+            {checkingOut ? t("assistant.redirecting") : t("assistant.subscribe")}
+          </button>
+        </div>
       </section>
     );
   }

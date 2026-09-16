@@ -252,12 +252,10 @@ export default {
     unlimited: "Unlimited",
     monthly: "Monthly",
     yearly: "Yearly",
-    continueWithMollie: "Continue with Mollie",
-    continueWithStripe: "Continue with Stripe",
+    continueWithMollie: "Subscribe",
     redirecting: "Redirecting...",
     checkoutFailed: "Could not start checkout. Please try again.",
     mollieManageHint: "To change your plan or update your card, contact us:",
-    stripeManageHint: "Manage your plan and payment method from your Stripe receipt email.",
     finishSignupPrompt: "Your account is ready — choose a payment method below to activate your plan.",
   },
   chat: {
@@ -278,8 +276,7 @@ export default {
     paywallDescription:
       "Type scheduling requests in plain English -- \"put Anita on shift Monday to Friday, 9am-5pm\" -- and review the proposed shifts before anything is created.",
     paywallPrice: "€4.99/month",
-    subscribe: "Subscribe with Mollie",
-    stripeNotYetAvailable: "The AI assistant add-on isn't available for Stripe accounts yet -- contact us and we'll set it up manually.",
+    subscribe: "Subscribe",
     redirecting: "Redirecting...",
     checkoutFailed: "Could not start checkout. Please try again.",
     empty: "Ask me to schedule someone -- for example \"put Anita on shift Monday to Friday, 9am-5pm\".",

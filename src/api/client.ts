@@ -140,20 +140,13 @@ export const api = {
       subscriptionStatus: string | null;
       aiAssistantStatus: string | null;
     }>("/api/billing/status"),
-  createBillingCheckout: (data: {
-    plan: "starter" | "unlimited";
-    interval: "monthly" | "yearly";
-    provider: "mollie" | "stripe";
-  }) =>
+  createBillingCheckout: (data: { plan: "starter" | "unlimited"; interval: "monthly" | "yearly" }) =>
     request<{ redirectUrl: string }>("/api/billing/checkout", {
       method: "POST",
       body: JSON.stringify(data),
     }),
-  createAddonCheckout: (provider: "mollie" | "stripe") =>
-    request<{ redirectUrl: string }>("/api/billing/addon/checkout", {
-      method: "POST",
-      body: JSON.stringify({ provider }),
-    }),
+  createAddonCheckout: () =>
+    request<{ redirectUrl: string }>("/api/billing/addon/checkout", { method: "POST" }),
 
   sendAssistantMessage: (history: AssistantChatTurn[], message: string) =>
     request<{ reply: string; proposedShifts: AssistantProposedShift[] }>("/api/assistant/chat", {

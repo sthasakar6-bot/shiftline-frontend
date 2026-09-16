@@ -29,7 +29,7 @@ export default function BillingSection() {
   const [plan, setPlan] = useState<PlanKey>("starter");
   const [interval, setInterval] = useState<Interval>("monthly");
   const [error, setError] = useState<string | null>(null);
-  const [checkingOutWith, setCheckingOutWith] = useState<"mollie" | "stripe" | null>(null);
+  const [checkingOut, setCheckingOut] = useState(false);
 
   useEffect(() => {
     if (searchParams.has("checkout")) {
@@ -65,15 +65,15 @@ export default function BillingSection() {
     localStorage.removeItem(INTENDED_PLAN_KEY);
   }, []);
 
-  async function handleCheckout(provider: "mollie" | "stripe") {
+  async function handleCheckout() {
     setError(null);
-    setCheckingOutWith(provider);
+    setCheckingOut(true);
     try {
-      const { redirectUrl } = await api.createBillingCheckout({ plan, interval, provider });
+      const { redirectUrl } = await api.createBillingCheckout({ plan, interval });
       window.location.href = redirectUrl;
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("billing.checkoutFailed"));
-      setCheckingOutWith(null);
+      setCheckingOut(false);
     }
   }
 
@@ -87,7 +87,6 @@ export default function BillingSection() {
   }
 
   const isPaid = status?.plan === "starter" || status?.plan === "unlimited";
-  const isMollieOnly = status?.billingProvider === "mollie";
 
   return (
     <section className="panel">
@@ -126,34 +125,17 @@ export default function BillingSection() {
       </div>
 
       <div className="actions">
-        <button
-          type="button"
-          onClick={() => handleCheckout("mollie")}
-          disabled={checkingOutWith !== null}
-        >
-          {checkingOutWith === "mollie" ? t("billing.redirecting") : t("billing.continueWithMollie")}
-        </button>
-        <button
-          type="button"
-          onClick={() => handleCheckout("stripe")}
-          disabled={checkingOutWith !== null}
-        >
-          {checkingOutWith === "stripe" ? t("billing.redirecting") : t("billing.continueWithStripe")}
+        <button type="button" onClick={handleCheckout} disabled={checkingOut}>
+          {checkingOut ? t("billing.redirecting") : t("billing.continueWithMollie")}
         </button>
       </div>
 
       {isPaid && (
         <p className="hint">
-          {isMollieOnly ? (
-            <>
-              {t("billing.mollieManageHint")}{" "}
-              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">
-                {t("auth.contactUs")}
-              </a>
-            </>
-          ) : (
-            t("billing.stripeManageHint")
-          )}
+          {t("billing.mollieManageHint")}{" "}
+          <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+            {t("auth.contactUs")}
+          </a>
         </p>
       )}
     </section>
