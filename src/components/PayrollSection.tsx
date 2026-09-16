@@ -9,9 +9,20 @@ import Avatar from "./Avatar";
 
 type Person = { id: number; name: string; hasAvatar: boolean; phone: string | null };
 
+const ENDING_SOON_DAYS = 30;
+
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString(getDateLocale(), { year: "numeric", month: "short", day: "numeric" });
+}
+
+// Flags an end date that's already passed or is coming up within the
+// warning window -- a manager should notice a contract is about to lapse
+// without having to open every employee's detail panel to check.
+function isEndingSoon(endDate: string | null): boolean {
+  if (!endDate) return false;
+  const daysUntil = (new Date(endDate).getTime() - Date.now()) / 86400000;
+  return daysUntil < ENDING_SOON_DAYS;
 }
 
 export default function PayrollSection() {
@@ -62,7 +73,9 @@ export default function PayrollSection() {
               <tr>
                 <th className="attendance-grid-person-col" />
                 <th>{t("team.payrollPhone")}</th>
-                <th>{t("team.payrollContract")}</th>
+                <th>{t("team.role")}</th>
+                <th>{t("summary.from")}</th>
+                <th>{t("summary.to")}</th>
                 <th>{t("team.payrollPayslips")}</th>
               </tr>
             </thead>
@@ -92,18 +105,19 @@ export default function PayrollSection() {
                         "—"
                       )}
                     </td>
-                    <td>
-                      {current ? (
-                        <span className="payroll-cell-contract">
-                          <strong>{current.role}</strong>
-                          <span className="payroll-cell-dates">
-                            {formatDate(current.startDate)} – {formatDate(current.endDate)}
-                          </span>
-                        </span>
-                      ) : (
+                    {current ? (
+                      <>
+                        <td>{current.role}</td>
+                        <td>{formatDate(current.startDate)}</td>
+                        <td className={isEndingSoon(current.endDate) ? "payroll-date-ending-soon" : undefined}>
+                          {formatDate(current.endDate)}
+                        </td>
+                      </>
+                    ) : (
+                      <td colSpan={3}>
                         <span className="empty-state">{t("team.noContracts")}</span>
-                      )}
-                    </td>
+                      </td>
+                    )}
                     <td>
                       {payslips.length > 0 ? (
                         <span className="payroll-cell-payslips">

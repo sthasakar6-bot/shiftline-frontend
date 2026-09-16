@@ -3613,6 +3613,11 @@ td.attendance-grid-person-col {
   font-variant-numeric: tabular-nums;
 }
 
+.payroll-date-ending-soon {
+  color: var(--danger) !important;
+  font-weight: 700;
+}
+
 /* For modals with content long enough to scroll (the date picker's
    calendar, mainly): scope the scrolling to this inner wrapper and keep
    .modal-actions outside it. Without this, a tap on the Done button that
