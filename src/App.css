@@ -1493,8 +1493,59 @@
   white-space: nowrap;
 }
 
-.pdf-menu-wrap {
+.pdf-menu-wrap,
+.row-menu {
   position: relative;
+}
+
+.row-menu-trigger {
+  border: none;
+  background: transparent;
+  padding: 6px;
+  color: var(--text);
+  opacity: 0.6;
+  border-radius: 999px;
+}
+
+.row-menu-trigger:hover {
+  opacity: 1;
+  background: var(--bg);
+  border-color: transparent;
+}
+
+.row-menu-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+}
+
+.row-menu-list button {
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.row-menu-list button:hover {
+  background: var(--accent-bg);
+  border-color: transparent;
+}
+
+.row-menu-danger {
+  color: var(--danger) !important;
 }
 
 .pdf-menu {

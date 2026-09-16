@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Users, UserPlus, CalendarDays, Palmtree, Clock, BarChart3, Bell, CreditCard, MessageCircle } from "lucide-react";
+import { Users, UserPlus, CalendarDays, Palmtree, Clock, BarChart3, Bell, CreditCard, MessageCircle, Wallet } from "lucide-react";
 import UserBox from "../components/UserBox";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import TabBar, { type Tab } from "../components/TabBar";
 import Sidebar from "../components/Sidebar";
 import ManagerSection from "../components/ManagerSection";
+import PayrollSection from "../components/PayrollSection";
 import AddEmployeeSection from "../components/AddEmployeeSection";
 import PasswordResetsSection from "../components/PasswordResetsSection";
 import RosterSection from "../components/RosterSection";
@@ -21,7 +22,7 @@ import { api } from "../api/client";
 import type { Notification } from "../api/types";
 import { updateAppBadge } from "../lib/appBadge";
 
-const tabKeys = ["team", "roster", "invite", "leave", "attendance", "summary", "billing", "chat", "alerts"];
+const tabKeys = ["team", "payroll", "roster", "invite", "leave", "attendance", "summary", "billing", "chat", "alerts"];
 
 export default function AdminPage() {
   const { t } = useTranslation();
@@ -73,6 +74,7 @@ export default function AdminPage() {
 
   const tabs: Tab[] = [
     { key: "team", label: t("nav.team"), icon: Users },
+    { key: "payroll", label: t("nav.payroll"), icon: Wallet },
     { key: "roster", label: t("nav.roster"), icon: CalendarDays },
     { key: "invite", label: t("nav.invite"), icon: UserPlus },
     { key: "leave", label: t("nav.leave"), icon: Palmtree, badge: unreadLeaveNotifications.length },
@@ -109,6 +111,7 @@ export default function AdminPage() {
 
         <main className={active === "roster" ? "app-content wide" : "app-content"}>
           {active === "team" && <ManagerSection />}
+          {active === "payroll" && <PayrollSection />}
           {active === "roster" && <RosterSection />}
           {active === "invite" && (
             <>
