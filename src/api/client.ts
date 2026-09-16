@@ -222,12 +222,19 @@ export const api = {
   getContractPdf: (contractId: number) => requestBlob(`/api/contracts/${contractId}/pdf`),
 
   listContractsForReport: (userId: number) => request<Contract[]>(`/api/users/${userId}/contracts`),
-  createContractForReport: (userId: number, data: { role: string }) =>
+  createContractForReport: (
+    userId: number,
+    data: { role: string; startDate?: string | null; endDate?: string | null },
+  ) =>
     request<Contract>(`/api/users/${userId}/contracts`, {
       method: "POST",
       body: JSON.stringify(data),
     }),
-  updateContractForReport: (userId: number, contractId: number, data: { role: string }) =>
+  updateContractForReport: (
+    userId: number,
+    contractId: number,
+    data: { role?: string; startDate?: string | null; endDate?: string | null },
+  ) =>
     request<Contract>(`/api/users/${userId}/contracts/${contractId}`, {
       method: "PATCH",
       body: JSON.stringify(data),

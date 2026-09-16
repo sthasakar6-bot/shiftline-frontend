@@ -3581,6 +3581,38 @@ td.attendance-grid-person-col {
   flex-direction: column;
 }
 
+.payroll-detail-modal {
+  max-width: 640px;
+}
+
+.payroll-contract-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start !important;
+}
+
+.payroll-cell-phone,
+.payroll-cell-payslips {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.payroll-cell-contract {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.payroll-cell-dates {
+  font-size: 11px;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
 /* For modals with content long enough to scroll (the date picker's
    calendar, mainly): scope the scrolling to this inner wrapper and keep
    .modal-actions outside it. Without this, a tap on the Done button that

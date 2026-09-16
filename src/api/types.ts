@@ -48,6 +48,8 @@ export interface UserSummary extends User {
 export interface Contract {
   id: number;
   role: string;
+  startDate: string | null;
+  endDate: string | null;
   pdfFilename: string | null;
   userId: number;
   createdAt: string;
