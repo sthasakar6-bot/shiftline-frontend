@@ -47,15 +47,17 @@ function TeamRowMenu({
       </button>
       {open && (
         <div className="row-menu-list">
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(false);
-              onToggleTeam();
-            }}
-          >
-            {isOwnReport ? t("team.removeFromTeam") : t("team.addToTeam")}
-          </button>
+          {employee.role === "employee" && (
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onToggleTeam();
+              }}
+            >
+              {isOwnReport ? t("team.removeFromTeam") : t("team.addToTeam")}
+            </button>
+          )}
           <button
             type="button"
             className="row-menu-danger"
@@ -175,6 +177,9 @@ export default function ManagerSection() {
               >
                 <Avatar userId={e.id} name={e.name} hasAvatar={e.hasAvatar} size={32} />
                 {e.name}
+                {e.role === "manager" && (
+                  <span className="plan-badge plan-badge-paid">{t("team.coManager")}</span>
+                )}
                 {e.online && <span className="presence-dot inline" title={t("team.online")} />}
               </button>
               <TeamRowMenu
