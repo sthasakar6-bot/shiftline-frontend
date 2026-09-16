@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Users, UserPlus, CalendarDays, Palmtree, Clock, BarChart3, Bell, CreditCard, MessageCircle, Wallet } from "lucide-react";
+import { Users, CalendarDays, Palmtree, Clock, Bell, MessageCircle, Wallet } from "lucide-react";
 import UserBox from "../components/UserBox";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import TabBar, { type Tab } from "../components/TabBar";
