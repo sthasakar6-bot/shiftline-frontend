@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Trash2 } from "lucide-react";
+import { Trash2, Smile } from "lucide-react";
 import { api, ApiError, API_URL, getToken } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import Avatar from "./Avatar";
@@ -11,6 +11,15 @@ function wsUrl(): string {
   const base = API_URL.replace(/^http/, "ws");
   return `${base}/ws/chat?token=${encodeURIComponent(token)}`;
 }
+
+// A small curated set rather than a full emoji library/dependency -- this
+// is a work-scheduling team chat, not a general messenger, so a handful of
+// common reactions covers the realistic use case without adding bundle
+// weight for a searchable thousands-of-emoji picker.
+const EMOJI_OPTIONS = [
+  "👍", "🙏", "😀", "😂", "❤️", "🎉", "👏", "🔥",
+  "✅", "👌", "😅", "😢", "😮", "🤔", "💪", "☕",
+];
 
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -24,8 +33,36 @@ export default function ChatSection() {
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
   const listEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<WebSocket | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!emojiOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target as Node)) {
+        setEmojiOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [emojiOpen]);
+
+  function insertEmoji(emoji: string) {
+    const el = inputRef.current;
+    const start = el?.selectionStart ?? draft.length;
+    const end = el?.selectionEnd ?? draft.length;
+    const next = draft.slice(0, start) + emoji + draft.slice(end);
+    setDraft(next);
+    setEmojiOpen(false);
+    requestAnimationFrame(() => {
+      el?.focus();
+      const cursor = start + emoji.length;
+      el?.setSelectionRange(cursor, cursor);
+    });
+  }
 
   useEffect(() => {
     api
@@ -147,7 +184,27 @@ export default function ChatSection() {
       </div>
 
       <form className="chat-composer" onSubmit={handleSend}>
+        <div className="chat-emoji-wrap" ref={emojiPickerRef}>
+          <button
+            type="button"
+            className="chat-emoji-btn"
+            onClick={() => setEmojiOpen((v) => !v)}
+            title={t("chat.emoji")}
+          >
+            <Smile size={18} />
+          </button>
+          {emojiOpen && (
+            <div className="chat-emoji-picker">
+              {EMOJI_OPTIONS.map((emoji) => (
+                <button type="button" key={emoji} onClick={() => insertEmoji(emoji)}>
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <input
+          ref={inputRef}
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
