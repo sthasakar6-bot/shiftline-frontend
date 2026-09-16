@@ -46,6 +46,41 @@ export default function OpenShiftModal({
   const [assignUserId, setAssignUserId] = useState("");
   const [assigning, setAssigning] = useState(false);
 
+  // Same time-only-picker pattern as the roster shift modal -- the day is
+  // fixed to whatever day this open shift already starts on, and an end
+  // time earlier than the start time means "next day" instead of an
+  // unreachable state.
+  function datePart(dtLocal: string): string {
+    return dtLocal.slice(0, 10);
+  }
+  function timePart(dtLocal: string): string {
+    return dtLocal.slice(11, 16);
+  }
+  function addDays(dateStr: string, days: number): string {
+    const d = new Date(`${dateStr}T00:00:00`);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+  function handleStartTimeChange(hhmm: string) {
+    const baseDate = datePart(start);
+    setStart(`${baseDate}T${hhmm}`);
+    const endHHMM = timePart(end);
+    setEnd(`${endHHMM <= hhmm ? addDays(baseDate, 1) : baseDate}T${endHHMM}`);
+  }
+  function handleEndTimeChange(hhmm: string) {
+    const baseDate = datePart(start);
+    const startHHMM = timePart(start);
+    setEnd(`${hhmm <= startHHMM ? addDays(baseDate, 1) : baseDate}T${hhmm}`);
+  }
+  const endsNextDay = datePart(end) !== datePart(start);
+  const durationLabel = (() => {
+    const totalMin = Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000);
+    if (totalMin <= 0) return null;
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  })();
+
   async function handleSave(e: FormEvent) {
     e.preventDefault();
     setError(null);
@@ -164,14 +199,23 @@ export default function OpenShiftModal({
               ))}
             </select>
           </label>
-          <label className="field">
-            <span className="field-label">{t("adminRoster.shiftStarts")}</span>
-            <input type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} required />
-          </label>
-          <label className="field">
-            <span className="field-label">{t("adminRoster.shiftEnds")}</span>
-            <input type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} required />
-          </label>
+          <div className="shift-time-row">
+            <label className="field shift-time-field">
+              <span className="field-label">{t("adminRoster.shiftStarts")}</span>
+              <input type="time" value={timePart(start)} onChange={(e) => handleStartTimeChange(e.target.value)} required />
+            </label>
+            <span className="shift-time-arrow">→</span>
+            <label className="field shift-time-field">
+              <span className="field-label">
+                {t("adminRoster.shiftEnds")}
+                {endsNextDay && <span className="shift-next-day-tag">{t("adminRoster.nextDay")}</span>}
+              </span>
+              <input type="time" value={timePart(end)} onChange={(e) => handleEndTimeChange(e.target.value)} required />
+            </label>
+          </div>
+          {durationLabel && (
+            <p className="shift-duration-readout">{t("adminRoster.shiftDuration", { duration: durationLabel })}</p>
+          )}
           <label className="field">
             <span className="field-label">{t("adminRoster.breakLabel")}</span>
             <select value={breakMinutes} onChange={(e) => setBreakMinutes(e.target.value)}>

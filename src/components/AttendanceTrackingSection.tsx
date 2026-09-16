@@ -88,6 +88,52 @@ export default function AttendanceTrackingSection() {
     setModalError(null);
   }
 
+  // Same reasoning as the roster shift modal: the calendar day is fixed to
+  // whatever clock-in day this record is already on (shown separately
+  // above the form), and only the time-of-day is directly editable. Clock
+  // out stays optional -- empty means "still clocked in", not "overnight".
+  function datePart(dtLocal: string): string {
+    return dtLocal.slice(0, 10);
+  }
+  function timePart(dtLocal: string): string {
+    return dtLocal.slice(11, 16);
+  }
+  function addDays(dateStr: string, days: number): string {
+    const d = new Date(`${dateStr}T00:00:00`);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function handleClockInTimeChange(hhmm: string) {
+    const baseDate = clockInVal ? datePart(clockInVal) : datePart(clockOutVal);
+    setClockInVal(`${baseDate}T${hhmm}`);
+    if (!clockOutVal) return;
+    const outHHMM = timePart(clockOutVal);
+    setClockOutVal(`${outHHMM <= hhmm ? addDays(baseDate, 1) : baseDate}T${outHHMM}`);
+  }
+
+  function handleClockOutTimeChange(hhmm: string) {
+    if (!hhmm) {
+      setClockOutVal("");
+      return;
+    }
+    const baseDate = datePart(clockInVal);
+    const inHHMM = timePart(clockInVal);
+    setClockOutVal(`${hhmm <= inHHMM ? addDays(baseDate, 1) : baseDate}T${hhmm}`);
+  }
+
+  const attendanceEndsNextDay =
+    clockInVal && clockOutVal && datePart(clockOutVal) !== datePart(clockInVal);
+
+  const attendanceDurationLabel = (() => {
+    if (!clockInVal || !clockOutVal) return null;
+    const totalMin = Math.round((new Date(clockOutVal).getTime() - new Date(clockInVal).getTime()) / 60000);
+    if (totalMin <= 0) return null;
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  })();
+
   async function handleModalSave(e: FormEvent) {
     e.preventDefault();
     if (!modal || !selected) return;
@@ -238,24 +284,46 @@ export default function AttendanceTrackingSection() {
                 ? t("attendanceTracking.addTitle")
                 : t("attendanceTracking.editTitle")}
             </h3>
+            {clockInVal && (
+              <p className="hint">
+                {new Date(clockInVal).toLocaleDateString(getDateLocale(), {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+            )}
             <form onSubmit={handleModalSave}>
-              <label className="field">
-                <span className="field-label">{t("attendanceTracking.clockInLabel")}</span>
-                <input
-                  type="datetime-local"
-                  value={clockInVal}
-                  onChange={(e) => setClockInVal(e.target.value)}
-                  required
-                />
-              </label>
-              <label className="field">
-                <span className="field-label">{t("attendanceTracking.clockOutLabel")}</span>
-                <input
-                  type="datetime-local"
-                  value={clockOutVal}
-                  onChange={(e) => setClockOutVal(e.target.value)}
-                />
-              </label>
+              <div className="shift-time-row">
+                <label className="field shift-time-field">
+                  <span className="field-label">{t("attendanceTracking.clockInLabel")}</span>
+                  <input
+                    type="time"
+                    value={timePart(clockInVal)}
+                    onChange={(e) => handleClockInTimeChange(e.target.value)}
+                    required
+                  />
+                </label>
+                <span className="shift-time-arrow">→</span>
+                <label className="field shift-time-field">
+                  <span className="field-label">
+                    {t("attendanceTracking.clockOutLabel")}
+                    {attendanceEndsNextDay && (
+                      <span className="shift-next-day-tag">{t("adminRoster.nextDay")}</span>
+                    )}
+                  </span>
+                  <input
+                    type="time"
+                    value={timePart(clockOutVal)}
+                    onChange={(e) => handleClockOutTimeChange(e.target.value)}
+                  />
+                </label>
+              </div>
+              {attendanceDurationLabel && (
+                <p className="shift-duration-readout">
+                  {t("adminRoster.shiftDuration", { duration: attendanceDurationLabel })}
+                </p>
+              )}
               {modalError && <div className="error">{modalError}</div>}
               <div className="modal-actions">
                 <button type="button" onClick={() => setModal(null)}>
