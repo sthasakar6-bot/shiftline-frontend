@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Trash2, Smile, Reply, X } from "lucide-react";
 import { api, ApiError, API_URL, getToken } from "../api/client";
@@ -37,7 +37,7 @@ export default function ChatSection() {
   const [replyTarget, setReplyTarget] = useState<ChatMessage | null>(null);
   const listEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<WebSocket | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const messageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const [highlightId, setHighlightId] = useState<number | null>(null);
@@ -127,6 +127,16 @@ export default function ChatSection() {
     listEndRef.current?.scrollIntoView({ block: "end" });
   }, [messages]);
 
+  // Grows the composer with the message instead of scrolling the typed
+  // text off sideways inside a single-line box -- also shrinks it back
+  // down once a message is sent and draft clears.
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [draft]);
+
   async function handleSend(e: FormEvent) {
     e.preventDefault();
     const body = draft.trim();
@@ -141,6 +151,15 @@ export default function ChatSection() {
       setError(err instanceof ApiError ? err.message : t("chat.sendFailed"));
     } finally {
       setSending(false);
+    }
+  }
+
+  // Enter sends, matching every other chat app -- Shift+Enter still inserts
+  // a real newline (the textarea's own default behavior, left alone).
+  function handleComposerKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      e.currentTarget.form?.requestSubmit();
     }
   }
 
@@ -234,11 +253,12 @@ export default function ChatSection() {
       )}
 
       <form className="chat-composer" onSubmit={handleSend}>
-        <input
+        <textarea
           ref={inputRef}
-          type="text"
+          rows={1}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={handleComposerKeyDown}
           placeholder={t("chat.placeholder")}
           maxLength={2000}
         />

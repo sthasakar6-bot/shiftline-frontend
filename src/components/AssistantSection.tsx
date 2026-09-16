@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Sparkles, Check, X } from "lucide-react";
 import { api, ApiError } from "../api/client";
@@ -57,6 +57,7 @@ export default function AssistantSection() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const listEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     api
@@ -83,6 +84,22 @@ export default function AssistantSection() {
   useEffect(() => {
     listEndRef.current?.scrollIntoView({ block: "end" });
   }, [turns]);
+
+  // Grows the composer with the message instead of scrolling the typed
+  // text off sideways inside a single-line box.
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [draft]);
+
+  function handleComposerKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      e.currentTarget.form?.requestSubmit();
+    }
+  }
 
   async function handleSubscribe() {
     setError(null);
@@ -238,10 +255,12 @@ export default function AssistantSection() {
       </div>
 
       <form className="chat-composer" onSubmit={handleSend}>
-        <input
-          type="text"
+        <textarea
+          ref={inputRef}
+          rows={1}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={handleComposerKeyDown}
           placeholder={t("assistant.placeholder")}
           maxLength={2000}
         />

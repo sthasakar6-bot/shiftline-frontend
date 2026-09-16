@@ -3521,10 +3521,16 @@ td.attendance-grid-person-col {
   display: flex;
   gap: 8px;
   flex: none;
+  align-items: flex-end;
 }
 
-.chat-composer input {
+.chat-composer textarea {
   flex: 1;
+  resize: none;
+  max-height: 140px;
+  overflow-y: auto;
+  line-height: 1.4;
+  font-family: inherit;
 }
 
 .chat-emoji-wrap {
