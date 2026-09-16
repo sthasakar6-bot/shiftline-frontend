@@ -267,7 +267,7 @@ export default function ChatSection() {
             onClick={() => setEmojiOpen((v) => !v)}
             title={t("chat.emoji")}
           >
-            <Smile size={18} />
+            <Smile size={24} />
           </button>
           {emojiOpen && (
             <div className="chat-emoji-picker chat-emoji-picker-right">

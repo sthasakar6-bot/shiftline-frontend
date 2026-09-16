@@ -3741,13 +3741,21 @@ td.attendance-grid-person-col {
 }
 
 .chat-emoji-btn {
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   background: var(--panel-bg);
   color: var(--text);
-  padding: 8px 10px;
-  border-radius: 6px;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.chat-emoji-btn:hover {
+  border-color: var(--accent);
 }
 
 .chat-emoji-picker {
