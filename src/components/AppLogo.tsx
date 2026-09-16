@@ -30,6 +30,14 @@ function PlanBadge() {
       </span>
     );
   }
+  // Pre-billing-era companies backfilled with an unrestricted grandfather
+  // plan -- not "trial" and not a real Starter/Unlimited tier, but still a
+  // real paying account, so it gets a badge too instead of silently
+  // showing nothing (which is what happened for Super Sushi/Zuiderzoet
+  // before either was ever moved onto a real plan).
+  if (user.companyPlan === "legacy") {
+    return <span className="plan-badge plan-badge-paid">{t("plan.legacy")}</span>;
+  }
   return null;
 }
 

@@ -5,6 +5,7 @@ export default {
     trialDaysLeft_other: "Trial · {{count}} days left",
     starter: "Starter",
     unlimited: "Unlimited",
+    legacy: "Member",
   },
   common: {
     save: "Save",
@@ -263,6 +264,8 @@ export default {
     empty: "No messages yet. Say hello!",
     placeholder: "Type a message...",
     send: "Send",
+    delete: "Delete message",
+    deleteFailed: "Could not delete message. Please try again.",
   },
   team: {
     title: "Manage team",
@@ -482,7 +485,6 @@ export default {
   },
   adminRoster: {
     title: "Roster",
-    gridHint: "Tap + on a cell to add a shift, or tap an existing shift to edit or remove it.",
     shiftStarts: "Shift starts",
     shiftEnds: "Shift ends",
     breakLabel: "Break",
@@ -504,6 +506,13 @@ export default {
     pdfGeneratedBy: "Generated {{date}} by {{name}}",
     pdfEmployeeColumn: "Employee",
     pdfEmptyCell: "—",
+    pdfWeeklyTitle: "Weekly Roster",
+    pdfThisWeek: "This week",
+    pdfThisMonth: "This month",
+    pdfChooseWeek: "Choose week...",
+    pdfWeekNumberPlaceholder: "Week #",
+    pdfGo: "Go",
+    weekNumber: "Week {{n}}",
     quickAddTitle: "{{name}}'s shift",
     manage: "Manage",
     fullscreenEnter: "Full screen",
