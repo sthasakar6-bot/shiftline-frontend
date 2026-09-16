@@ -5,19 +5,7 @@ import { api, ApiError } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
 import LanguageSwitcher from "../components/LanguageSwitcher";
-
-type PlanKey = "starter" | "unlimited";
-type Interval = "monthly" | "yearly";
-
-// Same numbers as shiftline-marketing's Pricing.tsx -- kept in sync by hand
-// since these two apps don't share a package.
-const MONTHLY_PRICE: Record<PlanKey, number> = { starter: 9.99, unlimited: 19.99 };
-const YEARLY_PRICE: Record<PlanKey, number> = { starter: 95.9, unlimited: 191.9 };
-const PLAN_LABEL: Record<PlanKey, string> = { starter: "Starter", unlimited: "Unlimited" };
-
-function formatPrice(n: number): string {
-  return `€${n.toFixed(2)}`;
-}
+import { type PlanKey, type Interval, MONTHLY_PRICE, YEARLY_PRICE, PLAN_LABEL, formatPrice } from "../lib/planPricing";
 
 export default function PurchasePage() {
   const { t } = useTranslation();

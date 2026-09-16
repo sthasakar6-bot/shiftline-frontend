@@ -3346,14 +3346,154 @@ td.attendance-grid-person-col {
   margin: -8px 0 12px;
 }
 
-.billing-signup-prompt {
-  opacity: 1;
-  color: var(--accent-solid);
-  background: var(--accent-bg);
-  border: 1px solid var(--accent);
-  border-radius: 8px;
-  padding: 10px 12px;
+.billing-toggle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  width: fit-content;
+  margin: 4px 0 20px;
+  padding: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.billing-toggle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 14px;
   font-weight: 600;
+  color: var(--text);
+  opacity: 0.7;
+  transition: background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+}
+
+.billing-toggle button:hover {
+  opacity: 1;
+}
+
+.billing-toggle button.billing-toggle-active {
+  background: var(--accent);
+  color: #fff !important;
+  opacity: 1 !important;
+}
+
+.billing-discount {
+  background: rgba(21, 128, 61, 0.15);
+  color: #15803d;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.billing-toggle-active .billing-discount {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.billing-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 900px;
+}
+
+@media (max-width: 860px) {
+  .billing-cards {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+  }
+}
+
+.billing-card {
+  height: 100%;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.billing-card-highlight {
+  border-color: var(--accent);
+  box-shadow: 0 20px 44px -20px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.billing-card-current {
+  border-color: var(--success);
+}
+
+.billing-card-badge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+.billing-card-badge-current {
+  background: var(--success);
+}
+
+.billing-card-name {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.billing-card-tagline {
+  font-size: 13px;
+  opacity: 0.7;
+  min-height: 34px;
+  margin-bottom: 16px;
+}
+
+.billing-card-price {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.billing-card-amount {
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.billing-card-note {
+  font-size: 12px;
+  opacity: 0.6;
+  max-width: 140px;
+}
+
+.billing-card-extra {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 16px;
+  min-height: 30px;
+}
+
+.billing-card button {
+  width: 100%;
+  margin-top: auto;
+}
+
+.billing-card button:disabled {
+  opacity: 0.6;
 }
 
 .chat-panel {

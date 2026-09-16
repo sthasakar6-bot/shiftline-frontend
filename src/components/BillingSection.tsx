@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, ApiError } from "../api/client";
 import { WHATSAPP_URL } from "../config";
-
-type PlanKey = "starter" | "unlimited";
-type Interval = "monthly" | "yearly";
+import { type PlanKey, type Interval, priceFor, PLAN_LABEL, formatPrice } from "../lib/planPricing";
 
 interface BillingStatus {
   plan: string;
@@ -14,14 +12,17 @@ interface BillingStatus {
   subscriptionStatus: string | null;
 }
 
+function daysLeft(trialEndsAt: string): number {
+  return Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000));
+}
+
 export default function BillingSection() {
   const { t } = useTranslation();
   const [status, setStatus] = useState<BillingStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const [plan, setPlan] = useState<PlanKey>("starter");
   const [interval, setInterval] = useState<Interval>("monthly");
   const [error, setError] = useState<string | null>(null);
-  const [checkingOut, setCheckingOut] = useState(false);
+  const [checkingOutPlan, setCheckingOutPlan] = useState<PlanKey | null>(null);
 
   useEffect(() => {
     api
@@ -31,15 +32,15 @@ export default function BillingSection() {
       .finally(() => setLoading(false));
   }, [t]);
 
-  async function handleCheckout() {
+  async function handleCheckout(plan: PlanKey) {
     setError(null);
-    setCheckingOut(true);
+    setCheckingOutPlan(plan);
     try {
       const { redirectUrl } = await api.createBillingCheckout({ plan, interval });
       window.location.href = redirectUrl;
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("billing.checkoutFailed"));
-      setCheckingOut(false);
+      setCheckingOutPlan(null);
     }
   }
 
@@ -53,18 +54,52 @@ export default function BillingSection() {
   }
 
   const isPaid = status?.plan === "starter" || status?.plan === "unlimited";
+  const isOnTrial = status?.plan === "trial";
+
+  function renderPlanCard(plan: PlanKey, highlight: boolean) {
+    const isCurrent = status?.plan === plan;
+    const price = priceFor(plan, interval);
+    return (
+      <div
+        key={plan}
+        className={`billing-card ${highlight ? "billing-card-highlight" : ""} ${isCurrent ? "billing-card-current" : ""}`}
+      >
+        {isCurrent ? (
+          <span className="billing-card-badge billing-card-badge-current">{t("billing.currentPlanBadge")}</span>
+        ) : (
+          highlight && <span className="billing-card-badge">{t("billing.bestValue")}</span>
+        )}
+        <h3 className="billing-card-name">{PLAN_LABEL[plan]}</h3>
+        <p className="billing-card-tagline">
+          {plan === "starter" ? t("billing.starterTagline") : t("billing.unlimitedTagline")}
+        </p>
+        <div className="billing-card-price">
+          <span className="billing-card-amount">{formatPrice(price)}</span>
+          <span className="billing-card-note">
+            {interval === "monthly" ? t("billing.perMonth") : t("billing.perYear")}
+          </span>
+        </div>
+        <p className="billing-card-extra">
+          {plan === "starter" ? t("billing.starterExtra") : t("billing.unlimitedExtra")}
+        </p>
+        <button
+          type="button"
+          onClick={() => handleCheckout(plan)}
+          disabled={isCurrent || checkingOutPlan !== null}
+        >
+          {isCurrent
+            ? t("billing.currentPlanBadge")
+            : checkingOutPlan === plan
+              ? t("billing.redirecting")
+              : t("billing.getPlan", { plan: PLAN_LABEL[plan] })}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <section className="panel">
       <h2>{t("billing.title")}</h2>
-
-      {status && (
-        <p className="hint">
-          {isPaid
-            ? t("billing.currentPlan", { plan: status.plan })
-            : t("billing.onTrial")}
-        </p>
-      )}
 
       {status?.subscriptionStatus === "past_due" && (
         <div className="error">{t("billing.pastDueWarning")}</div>
@@ -74,22 +109,42 @@ export default function BillingSection() {
       )}
       {error && <div className="error">{error}</div>}
 
-      <h3>{t("billing.changePlan")}</h3>
-      <div className="inline-form">
-        <select value={plan} onChange={(e) => setPlan(e.target.value as PlanKey)}>
-          <option value="starter">{t("billing.starter")}</option>
-          <option value="unlimited">{t("billing.unlimited")}</option>
-        </select>
-        <select value={interval} onChange={(e) => setInterval(e.target.value as Interval)}>
-          <option value="monthly">{t("billing.monthly")}</option>
-          <option value="yearly">{t("billing.yearly")}</option>
-        </select>
+      <div className="billing-toggle">
+        <button
+          type="button"
+          className={interval === "monthly" ? "billing-toggle-active" : ""}
+          onClick={() => setInterval("monthly")}
+        >
+          {t("billing.monthly")}
+        </button>
+        <button
+          type="button"
+          className={interval === "yearly" ? "billing-toggle-active" : ""}
+          onClick={() => setInterval("yearly")}
+        >
+          {t("billing.yearly")} <span className="billing-discount">-20%</span>
+        </button>
       </div>
 
-      <div className="actions">
-        <button type="button" onClick={handleCheckout} disabled={checkingOut}>
-          {checkingOut ? t("billing.redirecting") : t("billing.continueWithMollie")}
-        </button>
+      <div className="billing-cards">
+        <div className="billing-card">
+          {isOnTrial && <span className="billing-card-badge billing-card-badge-current">{t("billing.currentPlanBadge")}</span>}
+          <h3 className="billing-card-name">{t("billing.trialName")}</h3>
+          <p className="billing-card-tagline">{t("billing.trialTagline")}</p>
+          <div className="billing-card-price">
+            <span className="billing-card-amount">
+              {isOnTrial && status?.trialEndsAt
+                ? t("billing.trialDaysLeft", { count: daysLeft(status.trialEndsAt) })
+                : t("billing.trialLength")}
+            </span>
+          </div>
+          <p className="billing-card-extra">
+            {isPaid ? t("billing.trialAlreadyUpgraded") : t("billing.trialExtra")}
+          </p>
+        </div>
+
+        {renderPlanCard("starter", false)}
+        {renderPlanCard("unlimited", true)}
       </div>
 
       {isPaid && (
