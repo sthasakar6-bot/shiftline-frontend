@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BarChart3 } from "lucide-react";
 import { api } from "../api/client";
 import type { LeaveRequest, Shift, UserSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { formatTime } from "../lib/formatDate";
 import { getDateLocale } from "../i18n";
+import Avatar from "./Avatar";
 
 function startOfMonth(): string {
   const d = new Date();
@@ -33,7 +33,9 @@ export default function EmployeeSummarySection() {
   const [pdfBusy, setPdfBusy] = useState(false);
 
   const youLabel = `(${t("common.you")})`;
-  const people = user ? [{ id: user.id, name: `${user.name} ${youLabel}` }, ...reports] : reports;
+  const people = user
+    ? [{ id: user.id, name: `${user.name} ${youLabel}`, hasAvatar: user.hasAvatar }, ...reports]
+    : reports;
 
   useEffect(() => {
     api.listReports().then(setReports).catch(() => {});
@@ -139,26 +141,23 @@ export default function EmployeeSummarySection() {
 
   return (
     <section className="panel">
-      <div className="panel-title">
-        <span className="panel-title-icon">
-          <BarChart3 size={17} />
-        </span>
-        <h2>{t("summary.title")}</h2>
+      <h2>{t("summary.title")}</h2>
+
+      <div className="attendance-person-picker">
+        {people.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            className={`attendance-person-chip${String(p.id) === selected ? " active" : ""}`}
+            onClick={() => setSelected(String(p.id))}
+          >
+            <Avatar userId={p.id} name={p.name} hasAvatar={p.hasAvatar} size={28} />
+            <span>{p.name}</span>
+          </button>
+        ))}
       </div>
-      <p className="hint">{t("summary.hint")}</p>
 
       <div className="inline-form">
-        <label className="field">
-          <span className="field-label">{t("summary.employee")}</span>
-          <select value={selected} onChange={(e) => setSelected(e.target.value)}>
-            <option value="">{t("team.selectEmployee")}</option>
-            {people.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </label>
         <label className="field">
           <span className="field-label">{t("summary.from")}</span>
           <input type="date" value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} />
