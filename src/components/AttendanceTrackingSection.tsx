@@ -1,12 +1,13 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { MapPin, Pencil, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, Plus } from "lucide-react";
 import { api, ApiError } from "../api/client";
 import type { Attendance, Shift, UserSummary } from "../api/types";
-import { formatTime, formatDuration } from "../lib/formatDate";
+import { formatTime } from "../lib/formatDate";
 import { mapsUrl } from "../lib/geolocation";
 import { useAuth } from "../auth/AuthContext";
 import { getDateLocale } from "../i18n";
+import { dateKey, startOfWeek } from "../lib/rosterDates";
 import Avatar from "./Avatar";
 
 // datetime-local gives a plain string with no timezone -- interpreting it via
@@ -22,15 +23,18 @@ function toLocalInput(iso: string): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-type ModalState = { mode: "add"; shift: Shift } | { mode: "edit"; attendance: Attendance };
+type ModalState =
+  | { mode: "add"; userId: number; userName: string; shift: Shift }
+  | { mode: "edit"; userId: number; userName: string; attendance: Attendance };
 
 export default function AttendanceTrackingSection() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [reports, setReports] = useState<UserSummary[]>([]);
-  const [selected, setSelected] = useState("");
-  const [records, setRecords] = useState<Attendance[]>([]);
-  const [shifts, setShifts] = useState<Shift[]>([]);
+  const [recordsByUser, setRecordsByUser] = useState<Map<number, Attendance[]>>(new Map());
+  const [shiftsByUser, setShiftsByUser] = useState<Map<number, Shift[]>>(new Map());
+  const [loading, setLoading] = useState(true);
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [modal, setModal] = useState<ModalState | null>(null);
   const [clockInVal, setClockInVal] = useState("");
   const [clockOutVal, setClockOutVal] = useState("");
@@ -47,42 +51,71 @@ export default function AttendanceTrackingSection() {
   }, []);
 
   function reload() {
-    if (!selected) return;
-    api.listAttendanceForReport(Number(selected)).then(setRecords).catch(() => {});
-    api.listShiftsForReport(Number(selected)).then(setShifts).catch(() => {});
+    if (people.length === 0) return;
+    setLoading(true);
+    Promise.all(
+      people.map((p) =>
+        Promise.all([api.listAttendanceForReport(p.id), api.listShiftsForReport(p.id)]).then(
+          ([records, shifts]) => [p.id, records, shifts] as const,
+        ),
+      ),
+    )
+      .then((results) => {
+        setRecordsByUser(new Map(results.map(([id, records]) => [id, records])));
+        setShiftsByUser(new Map(results.map(([id, , shifts]) => [id, shifts])));
+      })
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }
 
-  useEffect(() => {
-    if (selected) {
-      reload();
-    } else {
-      setRecords([]);
-      setShifts([]);
+  useEffect(reload, [reports.length, user?.id]);
+
+  const weekEnd = useMemo(() => {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + 7);
+    return d;
+  }, [weekStart]);
+
+  const weekDays = useMemo(() => {
+    const days: Date[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStart);
+      d.setDate(d.getDate() + i);
+      days.push(d);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected]);
+    return days;
+  }, [weekStart]);
 
-  const selectedPerson = people.find((p) => p.id === Number(selected));
-  const sortedRecords = [...records].sort((a, b) => {
-    const aTime = a.clockIn ? new Date(a.clockIn).getTime() : 0;
-    const bTime = b.clockIn ? new Date(b.clockIn).getTime() : 0;
-    return bTime - aTime;
-  });
-  const missingShifts = shifts
-    .filter(
-      (s) => new Date(s.startsAt).getTime() < Date.now() && !records.some((r) => r.shiftId === s.id),
-    )
-    .sort((a, b) => new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime());
+  const weekLabel = `${weekStart.toLocaleDateString(getDateLocale(), { month: "short", day: "numeric" })} – ${new Date(weekEnd.getTime() - 86400000).toLocaleDateString(getDateLocale(), { month: "short", day: "numeric", year: "numeric" })}`;
 
-  function openAdd(shift: Shift) {
-    setModal({ mode: "add", shift });
+  function recordsFor(userId: number, day: Date): Attendance[] {
+    const key = dateKey(day);
+    return (recordsByUser.get(userId) ?? []).filter(
+      (r) => r.clockIn && dateKey(new Date(r.clockIn)) === key,
+    );
+  }
+
+  function missingShiftFor(userId: number, day: Date): Shift | null {
+    const key = dateKey(day);
+    const records = recordsByUser.get(userId) ?? [];
+    const shift = (shiftsByUser.get(userId) ?? []).find(
+      (s) =>
+        dateKey(new Date(s.startsAt)) === key &&
+        new Date(s.startsAt).getTime() < Date.now() &&
+        !records.some((r) => r.shiftId === s.id),
+    );
+    return shift ?? null;
+  }
+
+  function openAdd(userId: number, userName: string, shift: Shift) {
+    setModal({ mode: "add", userId, userName, shift });
     setClockInVal(toLocalInput(shift.startsAt));
     setClockOutVal("");
     setModalError(null);
   }
 
-  function openEdit(record: Attendance) {
-    setModal({ mode: "edit", attendance: record });
+  function openEdit(userId: number, userName: string, record: Attendance) {
+    setModal({ mode: "edit", userId, userName, attendance: record });
     setClockInVal(record.clockIn ? toLocalInput(record.clockIn) : "");
     setClockOutVal(record.clockOut ? toLocalInput(record.clockOut) : "");
     setModalError(null);
@@ -136,18 +169,18 @@ export default function AttendanceTrackingSection() {
 
   async function handleModalSave(e: FormEvent) {
     e.preventDefault();
-    if (!modal || !selected) return;
+    if (!modal) return;
     setSaving(true);
     setModalError(null);
     try {
       if (modal.mode === "add") {
-        await api.createManualAttendance(Number(selected), {
+        await api.createManualAttendance(modal.userId, {
           shiftId: modal.shift.id,
           clockIn: toIso(clockInVal),
           clockOut: clockOutVal ? toIso(clockOutVal) : undefined,
         });
       } else {
-        await api.editManualAttendance(Number(selected), modal.attendance.id, {
+        await api.editManualAttendance(modal.userId, modal.attendance.id, {
           clockIn: toIso(clockInVal),
           clockOut: clockOutVal ? toIso(clockOutVal) : undefined,
         });
@@ -164,116 +197,126 @@ export default function AttendanceTrackingSection() {
   return (
     <section className="panel">
       <h2>{t("attendanceTracking.title")}</h2>
-      <div className="attendance-person-picker">
-        {people.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            className={`attendance-person-chip${String(p.id) === selected ? " active" : ""}`}
-            onClick={() => setSelected(String(p.id))}
-          >
-            <Avatar userId={p.id} name={p.name} hasAvatar={p.hasAvatar} size={28} />
-            <span>{p.name}</span>
-          </button>
-        ))}
+
+      <div className="roster-week-nav">
+        <button
+          type="button"
+          className="roster-nav-btn"
+          onClick={() =>
+            setWeekStart((w) => {
+              const d = new Date(w);
+              d.setDate(d.getDate() - 7);
+              return d;
+            })
+          }
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <button type="button" className="roster-week-label" onClick={() => setWeekStart(startOfWeek(new Date()))}>
+          {weekLabel}
+        </button>
+        <button
+          type="button"
+          className="roster-nav-btn"
+          onClick={() =>
+            setWeekStart((w) => {
+              const d = new Date(w);
+              d.setDate(d.getDate() + 7);
+              return d;
+            })
+          }
+        >
+          <ChevronRight size={18} />
+        </button>
       </div>
 
-      {selected && selectedPerson && (
-        <div className="attendance-track-header">
-          <span className="attendance-track-header-count">
-            {t("attendanceTracking.record", { count: sortedRecords.length })}
-          </span>
+      {loading ? (
+        <p className="hint">{t("common.loading")}</p>
+      ) : (
+        <div className="attendance-grid-scroll">
+          <table className="attendance-grid">
+            <thead>
+              <tr>
+                <th className="attendance-grid-person-col" />
+                {weekDays.map((d) => (
+                  <th key={dateKey(d)}>
+                    {d.toLocaleDateString(getDateLocale(), { weekday: "short", day: "numeric" })}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {people.map((p) => (
+                <tr key={p.id}>
+                  <td className="attendance-grid-person-col">
+                    <Avatar userId={p.id} name={p.name} hasAvatar={p.hasAvatar} size={28} />
+                    <span>{p.name}</span>
+                  </td>
+                  {weekDays.map((d) => {
+                    const dayRecords = recordsFor(p.id, d);
+                    const missing = dayRecords.length === 0 ? missingShiftFor(p.id, d) : null;
+                    return (
+                      <td key={dateKey(d)} className="attendance-grid-cell">
+                        {dayRecords.map((r) => (
+                          <button
+                            type="button"
+                            key={r.id}
+                            className="attendance-cell-entry"
+                            onClick={() => openEdit(p.id, p.name, r)}
+                          >
+                            <span className="attendance-cell-time">
+                              {r.clockIn ? formatTime(r.clockIn) : "-"}
+                              {" – "}
+                              {r.clockOut ? (
+                                formatTime(r.clockOut)
+                              ) : (
+                                <span className="status-badge pending">{t("attendanceTracking.active")}</span>
+                              )}
+                            </span>
+                            {(r.clockInLat != null || r.clockOutLat != null) && (
+                              <span className="attendance-cell-links">
+                                {r.clockInLat != null && r.clockInLng != null && (
+                                  <a
+                                    href={mapsUrl(r.clockInLat, r.clockInLng)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <MapPin size={10} /> {t("attendanceTracking.in")}
+                                  </a>
+                                )}
+                                {r.clockOutLat != null && r.clockOutLng != null && (
+                                  <a
+                                    href={mapsUrl(r.clockOutLat, r.clockOutLng)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <MapPin size={10} /> {t("attendanceTracking.out")}
+                                  </a>
+                                )}
+                              </span>
+                            )}
+                          </button>
+                        ))}
+                        {missing && (
+                          <button
+                            type="button"
+                            className="attendance-cell-add"
+                            onClick={() => openAdd(p.id, p.name, missing)}
+                            title={t("attendanceTracking.add")}
+                          >
+                            <Plus size={13} />
+                          </button>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
-
-      {selected && missingShifts.length > 0 && (
-        <div>
-          <div className="panel-subtitle">
-            <h3>{t("attendanceTracking.missingTitle")}</h3>
-          </div>
-          <ul className="attendance-track-rows">
-            {missingShifts.map((s) => (
-              <li key={s.id} className="attendance-track-row">
-                <div className="attendance-track-main">
-                  <span className="attendance-track-date">
-                    {new Date(s.startsAt).toLocaleDateString(getDateLocale(), {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </span>
-                  <span className="attendance-track-range">
-                    {formatTime(s.startsAt)} – {formatTime(s.endsAt)}
-                  </span>
-                </div>
-                <button type="button" className="icon-btn" onClick={() => openAdd(s)}>
-                  <Plus size={14} /> {t("attendanceTracking.add")}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {selected && (
-        <ul className="attendance-track-rows">
-          {sortedRecords.map((r) => (
-            <li key={r.id} className="attendance-track-row">
-              <div className="attendance-track-main">
-                <span className="attendance-track-date">
-                  {r.clockIn
-                    ? new Date(r.clockIn).toLocaleDateString(getDateLocale(), {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : t("attendance.unknownDate")}
-                </span>
-                <span className="attendance-track-range">
-                  {r.clockIn ? formatTime(r.clockIn) : "-"} –{" "}
-                  {r.clockOut ? (
-                    formatTime(r.clockOut)
-                  ) : (
-                    <span className="status-badge pending">{t("attendanceTracking.active")}</span>
-                  )}
-                  {r.clockIn && r.clockOut && (
-                    <> · {formatDuration(new Date(r.clockOut).getTime() - new Date(r.clockIn).getTime())}</>
-                  )}
-                </span>
-              </div>
-              {(r.clockInLat != null || r.clockOutLat != null) && (
-                <div className="attendance-track-links">
-                  {r.clockInLat != null && r.clockInLng != null && (
-                    <a
-                      className="attendance-track-map"
-                      href={mapsUrl(r.clockInLat, r.clockInLng)}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <MapPin size={11} /> {t("attendanceTracking.in")}
-                    </a>
-                  )}
-                  {r.clockOutLat != null && r.clockOutLng != null && (
-                    <a
-                      className="attendance-track-map"
-                      href={mapsUrl(r.clockOutLat, r.clockOutLng)}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <MapPin size={11} /> {t("attendanceTracking.out")}
-                    </a>
-                  )}
-                </div>
-              )}
-              <button type="button" className="icon-btn" onClick={() => openEdit(r)}>
-                <Pencil size={14} /> {t("common.edit")}
-              </button>
-            </li>
-          ))}
-          {sortedRecords.length === 0 && (
-            <li className="leave-empty">{t("attendanceTracking.noRecords")}</li>
-          )}
-        </ul>
       )}
 
       {modal && (
@@ -281,8 +324,8 @@ export default function AttendanceTrackingSection() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>
               {modal.mode === "add"
-                ? t("attendanceTracking.addTitle")
-                : t("attendanceTracking.editTitle")}
+                ? t("attendanceTracking.addTitleFor", { name: modal.userName })
+                : t("attendanceTracking.editTitleFor", { name: modal.userName })}
             </h3>
             {clockInVal && (
               <p className="hint">

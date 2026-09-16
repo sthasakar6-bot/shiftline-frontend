@@ -2355,6 +2355,114 @@
   font-style: italic;
 }
 
+.attendance-grid-scroll {
+  overflow-x: auto;
+  margin: 4px -2px 0;
+}
+
+.attendance-grid {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 720px;
+}
+
+.attendance-grid th {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  opacity: 0.7;
+  text-transform: uppercase;
+  padding: 6px 8px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.attendance-grid-person-col {
+  text-align: left !important;
+  min-width: 160px;
+  position: sticky;
+  left: 0;
+  background: var(--panel-bg);
+  z-index: 1;
+}
+
+td.attendance-grid-person-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+  white-space: nowrap;
+}
+
+.attendance-grid-cell {
+  padding: 4px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  min-width: 96px;
+}
+
+.attendance-cell-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  border: none;
+  background: var(--accent-2-bg);
+  border-radius: 6px;
+  padding: 5px 6px;
+  margin-bottom: 3px;
+  text-align: left;
+}
+
+.attendance-cell-entry:hover {
+  background: var(--accent-bg);
+  border-color: transparent;
+}
+
+.attendance-cell-time {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+
+.attendance-cell-links {
+  display: flex;
+  gap: 4px;
+}
+
+.attendance-cell-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.attendance-cell-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: 1px dashed var(--border);
+  background: transparent;
+  border-radius: 6px;
+  padding: 5px;
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+.attendance-cell-add:hover {
+  opacity: 1;
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+
 .attendance-person-picker {
   display: flex;
   flex-wrap: wrap;

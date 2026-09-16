@@ -72,15 +72,17 @@ export default function AdminPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, notifications]);
 
-  const tabs: Tab[] = [
+  // Add Employee, Employee Summary, and Billing are reachable from the
+  // hamburger side drawer (UserBox) now, so they're left out of the
+  // sidebar/tab bar to avoid listing the same destination twice -- their
+  // tab keys stay valid for deep links (?tab=invite etc.), just not shown
+  // as their own nav buttons here.
+  const sidebarTabs: Tab[] = [
     { key: "team", label: t("nav.team"), icon: Users },
     { key: "payroll", label: t("nav.payroll"), icon: Wallet },
     { key: "roster", label: t("nav.roster"), icon: CalendarDays },
-    { key: "invite", label: t("nav.invite"), icon: UserPlus },
     { key: "leave", label: t("nav.leave"), icon: Palmtree, badge: unreadLeaveNotifications.length },
     { key: "attendance", label: t("nav.attendance"), icon: Clock },
-    { key: "summary", label: t("nav.summary"), icon: BarChart3 },
-    { key: "billing", label: t("nav.billing"), icon: CreditCard },
     { key: "chat", label: t("nav.chat"), icon: MessageCircle },
     { key: "alerts", label: t("nav.alerts"), icon: Bell, badge: unreadCount },
   ];
@@ -107,7 +109,7 @@ export default function AdminPage() {
       </header>
 
       <div className="app-body">
-        <Sidebar tabs={tabs} active={active} onChange={setActive} />
+        <Sidebar tabs={sidebarTabs} active={active} onChange={setActive} />
 
         <main className={active === "roster" ? "app-content wide" : "app-content"}>
           {active === "team" && <ManagerSection />}
@@ -139,7 +141,7 @@ export default function AdminPage() {
         </main>
       </div>
 
-      <TabBar tabs={tabs.filter((t) => t.key !== "alerts")} active={active} onChange={setActive} />
+      <TabBar tabs={sidebarTabs.filter((t) => t.key !== "alerts")} active={active} onChange={setActive} />
     </div>
   );
 }

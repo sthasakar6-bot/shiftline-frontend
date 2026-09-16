@@ -436,6 +436,8 @@ export default {
     add: "Add",
     addTitle: "Add attendance",
     editTitle: "Edit attendance",
+    addTitleFor: "Add attendance — {{name}}",
+    editTitleFor: "Edit attendance — {{name}}",
     clockInLabel: "Clock in",
     clockOutLabel: "Clock out (optional)",
     saveFailed: "Failed to save attendance",
