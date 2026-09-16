@@ -346,7 +346,8 @@ export default function RosterSection() {
   function weekLabelFor(start: Date): string {
     const end = new Date(start);
     end.setDate(end.getDate() + 6);
-    return `${start.toLocaleDateString(getDateLocale(), { month: "short", day: "numeric" })} – ${end.toLocaleDateString(getDateLocale(), { month: "short", day: "numeric", year: "numeric" })}`;
+    const range = `${start.toLocaleDateString(getDateLocale(), { month: "short", day: "numeric" })} – ${end.toLocaleDateString(getDateLocale(), { month: "short", day: "numeric", year: "numeric" })}`;
+    return `${t("adminRoster.weekNumber", { n: getWeekNumber(start) })} · ${range}`;
   }
 
   // Builds one PDF table section for an arbitrary week -- not just the
