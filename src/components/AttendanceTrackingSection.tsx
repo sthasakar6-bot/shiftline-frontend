@@ -7,7 +7,7 @@ import { formatTime } from "../lib/formatDate";
 import { mapsUrl } from "../lib/geolocation";
 import { useAuth } from "../auth/AuthContext";
 import { getDateLocale } from "../i18n";
-import { dateKey, startOfWeek } from "../lib/rosterDates";
+import { dateKey, startOfWeek, getWeekNumber } from "../lib/rosterDates";
 import Avatar from "./Avatar";
 
 // datetime-local gives a plain string with no timezone -- interpreting it via
@@ -87,6 +87,7 @@ export default function AttendanceTrackingSection() {
   }, [weekStart]);
 
   const weekLabel = `${weekStart.toLocaleDateString(getDateLocale(), { month: "short", day: "numeric" })} – ${new Date(weekEnd.getTime() - 86400000).toLocaleDateString(getDateLocale(), { month: "short", day: "numeric", year: "numeric" })}`;
+  const weekNumber = useMemo(() => getWeekNumber(weekStart), [weekStart]);
 
   function recordsFor(userId: number, day: Date): Attendance[] {
     const key = dateKey(day);
@@ -199,6 +200,7 @@ export default function AttendanceTrackingSection() {
       <h2>{t("attendanceTracking.title")}</h2>
 
       <div className="roster-week-nav">
+        <span className="roster-week-number">{t("adminRoster.weekNumber", { n: weekNumber })}</span>
         <button
           type="button"
           className="roster-nav-btn"
