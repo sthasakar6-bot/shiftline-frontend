@@ -462,6 +462,8 @@ export default {
     title: "Roster",
     shiftStarts: "Shift starts",
     shiftEnds: "Shift ends",
+    nextDay: "Next day",
+    shiftDuration: "{{duration}} shift",
     breakLabel: "Break",
     breakNone: "No break",
     break15: "15 minutes",

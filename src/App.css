@@ -1263,6 +1263,54 @@
   opacity: 0.75;
 }
 
+.shift-time-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.shift-time-field {
+  min-width: 0;
+}
+
+.shift-time-field input[type="time"] {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-h);
+  padding: 10px 8px;
+  text-align: center;
+}
+
+.shift-time-arrow {
+  padding-bottom: 10px;
+  color: var(--accent);
+  font-weight: 700;
+  flex: none;
+}
+
+.shift-next-day-tag {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent-2-solid);
+  background: var(--accent-2-bg);
+  border-radius: 999px;
+  padding: 1px 7px;
+  vertical-align: middle;
+}
+
+.shift-duration-readout {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-solid);
+  background: var(--accent-bg);
+  border-radius: 8px;
+  padding: 5px;
+  margin: 0 0 14px;
+}
+
 .field input,
 .field select {
   width: 100%;

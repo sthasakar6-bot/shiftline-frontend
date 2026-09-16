@@ -187,6 +187,51 @@ export default function RosterSection() {
     setMError(null);
   }
 
+  // The modal's two datetime-local fields (mStart/mEnd) still carry a full
+  // date, but the picker only lets the manager touch the time-of-day --
+  // the date is fixed to the day they clicked (shown separately above the
+  // form) for every *ordinary* shift. An overnight shift is the one case
+  // that still needs a date to move: rolling the end time past midnight
+  // relative to the start time bumps its date forward a day automatically,
+  // rather than exposing a second date picker for a case that's rare.
+  function datePart(dtLocal: string): string {
+    return dtLocal.slice(0, 10);
+  }
+  function timePart(dtLocal: string): string {
+    return dtLocal.slice(11, 16);
+  }
+  function addDays(dateStr: string, days: number): string {
+    const d = new Date(`${dateStr}T00:00:00`);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function handleStartTimeChange(hhmm: string) {
+    const baseDate = datePart(mStart);
+    setMStart(`${baseDate}T${hhmm}`);
+    const endHHMM = timePart(mEnd);
+    const endDate = endHHMM <= hhmm ? addDays(baseDate, 1) : baseDate;
+    setMEnd(`${endDate}T${endHHMM}`);
+  }
+
+  function handleEndTimeChange(hhmm: string) {
+    const baseDate = datePart(mStart);
+    const startHHMM = timePart(mStart);
+    const endDate = hhmm <= startHHMM ? addDays(baseDate, 1) : baseDate;
+    setMEnd(`${endDate}T${hhmm}`);
+  }
+
+  const shiftEndsNextDay = mStart && mEnd && datePart(mEnd) !== datePart(mStart);
+
+  const shiftDurationLabel = useMemo(() => {
+    if (!mStart || !mEnd) return null;
+    const totalMin = Math.round((new Date(mEnd).getTime() - new Date(mStart).getTime()) / 60000);
+    if (totalMin <= 0) return null;
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  }, [mStart, mEnd]);
+
   async function handleModalSave(e: FormEvent) {
     e.preventDefault();
     if (!modal) return;
@@ -747,24 +792,37 @@ export default function RosterSection() {
               )}
             </p>
             <form onSubmit={handleModalSave}>
-              <label className="field">
-                <span className="field-label">{t("adminRoster.shiftStarts")}</span>
-                <input
-                  type="datetime-local"
-                  value={mStart}
-                  onChange={(e) => setMStart(e.target.value)}
-                  required
-                />
-              </label>
-              <label className="field">
-                <span className="field-label">{t("adminRoster.shiftEnds")}</span>
-                <input
-                  type="datetime-local"
-                  value={mEnd}
-                  onChange={(e) => setMEnd(e.target.value)}
-                  required
-                />
-              </label>
+              <div className="shift-time-row">
+                <label className="field shift-time-field">
+                  <span className="field-label">{t("adminRoster.shiftStarts")}</span>
+                  <input
+                    type="time"
+                    value={timePart(mStart)}
+                    onChange={(e) => handleStartTimeChange(e.target.value)}
+                    required
+                  />
+                </label>
+                <span className="shift-time-arrow">→</span>
+                <label className="field shift-time-field">
+                  <span className="field-label">
+                    {t("adminRoster.shiftEnds")}
+                    {shiftEndsNextDay && (
+                      <span className="shift-next-day-tag">{t("adminRoster.nextDay")}</span>
+                    )}
+                  </span>
+                  <input
+                    type="time"
+                    value={timePart(mEnd)}
+                    onChange={(e) => handleEndTimeChange(e.target.value)}
+                    required
+                  />
+                </label>
+              </div>
+              {shiftDurationLabel && (
+                <p className="shift-duration-readout">
+                  {t("adminRoster.shiftDuration", { duration: shiftDurationLabel })}
+                </p>
+              )}
               <label className="field">
                 <span className="field-label">{t("adminRoster.breakLabel")}</span>
                 <select value={mBreak} onChange={(e) => setMBreak(e.target.value)}>
