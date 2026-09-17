@@ -4999,8 +4999,14 @@ html[data-theme="light"] .auth-illustration-art-light {
     mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
   }
 
+  /* The whole screen is fixed on mobile -- illustration pinned at top,
+     footer pinned at bottom -- and only the content in between (the
+     form, or the company list) scrolls if it doesn't fit. Nothing
+     shifts up and down as a page the way it did before. */
   .auth-page {
-    padding: 300px 20px 32px;
+    height: 100dvh;
+    overflow: hidden;
+    padding: 300px 20px 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -5011,43 +5017,42 @@ html[data-theme="light"] .auth-illustration-art-light {
     font-size: 22px;
   }
 
+  .auth-welcome {
+    flex: 0 0 auto;
+  }
+
   .auth-form,
   .auth-form.wide {
     width: 100%;
     max-width: none;
-  }
-
-  /* The company-select page specifically: the whole screen is fixed
-     (illustration pinned at top, footer pinned at bottom) and only the
-     list itself scrolls in between -- nothing shifts up and down as a
-     page the way a normal auth form can. */
-  .auth-page:has(.company-select-open) {
-    height: 100dvh;
-    overflow: hidden;
-    padding-bottom: 0;
-  }
-
-  .auth-page:has(.company-select-open) .company-select-open {
     flex: 1;
     min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 76px;
+  }
+
+  .company-select-open {
     width: 100%;
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     padding-bottom: 56px;
   }
 
-  .auth-page:has(.company-select-open) .company-select-open h1,
-  .auth-page:has(.company-select-open) .company-search {
+  .company-select-open h1,
+  .company-search {
     flex: 0 0 auto;
   }
 
-  .auth-page:has(.company-select-open) .company-select-list {
+  .company-select-list {
     flex: 1;
     min-height: 0;
     max-height: none;
   }
 
-  .auth-page:has(.company-select-open) .auth-footer {
+  .auth-footer {
     position: fixed;
     left: 0;
     right: 0;
