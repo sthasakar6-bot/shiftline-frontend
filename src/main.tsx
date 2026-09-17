@@ -5,9 +5,11 @@ import './i18n'
 import App from './App.tsx'
 import { setupAutoUpdate } from './lib/autoUpdate'
 import { setupInstallPromptCapture } from './lib/installPrompt'
+import { watchSystemTheme } from './lib/theme'
 
 setupAutoUpdate()
 setupInstallPromptCapture()
+watchSystemTheme()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

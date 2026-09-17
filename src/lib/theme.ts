@@ -38,3 +38,15 @@ export function setTheme(theme: ThemeChoice): void {
 export function initTheme(): void {
   applyTheme(getEffectiveTheme());
 }
+
+// Keeps the page in sync with the phone/OS setting live: if the person
+// hasn't explicitly picked light or dark in the app, switching the
+// system theme (even without reloading) updates the app immediately.
+// A manual choice from the toggle still wins over this.
+export function watchSystemTheme(): void {
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  media.addEventListener("change", (e) => {
+    if (getStoredTheme()) return; // an explicit choice takes precedence
+    applyTheme(e.matches ? "dark" : "light");
+  });
+}
