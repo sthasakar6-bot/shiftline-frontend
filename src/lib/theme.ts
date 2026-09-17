@@ -21,6 +21,10 @@ export function getEffectiveTheme(): ThemeChoice {
 
 export function applyTheme(theme: ThemeChoice): void {
   document.documentElement.setAttribute("data-theme", theme);
+  // Keeps the browser/OS status bar tinted to match the page instead of
+  // showing its own mismatched system-colored strip above our content.
+  const meta = document.getElementById("theme-color-meta");
+  if (meta) meta.setAttribute("content", theme === "dark" ? "#0f172a" : "#f8fafc");
 }
 
 export function setTheme(theme: ThemeChoice): void {

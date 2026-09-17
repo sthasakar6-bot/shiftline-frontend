@@ -18,7 +18,7 @@ export default defineConfig({
         name: 'Shiftline',
         short_name: 'Shiftline',
         description: 'Employee, contract, and shift management',
-        theme_color: '#1e3a5f',
+        theme_color: '#f8fafc',
         background_color: '#f8fafc',
         display: 'standalone',
         start_url: '/',

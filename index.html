@@ -13,8 +13,16 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
+    <!-- Lets the page paint behind the status bar / notch (with
+         viewport-fit=cover above) instead of the OS reserving a plain
+         system-colored strip above our own content -- that mismatched
+         strip is what makes the page look like "a webpage" rather than
+         a full-screen app. -->
+    <meta name="theme-color" id="theme-color-meta" content="#f8fafc" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -36,6 +44,8 @@
                 ? "dark"
                 : "light";
           document.documentElement.setAttribute("data-theme", theme);
+          var meta = document.getElementById("theme-color-meta");
+          if (meta) meta.setAttribute("content", theme === "dark" ? "#0f172a" : "#f8fafc");
         } catch (e) {}
       })();
     </script>
