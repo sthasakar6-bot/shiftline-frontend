@@ -657,23 +657,6 @@
   color: var(--text-h);
 }
 
-.app-logo-business {
-  font-family: "Dancing Script", cursive;
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--accent);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px;
-}
-
-.app-logo-business-mark {
-  height: 34px;
-  width: auto;
-  border-radius: 8px;
-}
-
 .plan-badge {
   font-size: 11px;
   font-weight: 700;
@@ -695,8 +678,6 @@
 }
 
 @media (max-width: 420px) {
-  .app-logo-business,
-  .app-logo-business-mark,
   .plan-badge {
     display: none;
   }
@@ -1236,6 +1217,14 @@
 .side-drawer-role {
   font-size: 12px;
   opacity: 0.65;
+}
+
+.side-drawer-company {
+  font-size: 12px;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .side-drawer-close {

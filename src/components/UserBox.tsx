@@ -88,6 +88,7 @@ export default function UserBox() {
               <div className="side-drawer-header-text">
                 <span className="side-drawer-name">{user.name}</span>
                 <span className="side-drawer-role">{t(`userBox.role.${user.role}`)}</span>
+                {user.companyName && <span className="side-drawer-company">{user.companyName}</span>}
               </div>
               <button className="side-drawer-close" onClick={() => setOpen(false)} aria-label={t("common.close")}>
                 <X size={18} />
