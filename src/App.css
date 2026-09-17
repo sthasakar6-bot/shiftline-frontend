@@ -452,8 +452,6 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 50vh;
-  overflow-y: auto;
 }
 
 .company-select-row {
@@ -4534,6 +4532,9 @@ td.attendance-grid-person-col {
 }
 
 .auth-lang-switcher {
+  position: fixed !important;
+  top: max(16px, env(safe-area-inset-top));
+  right: 16px;
   z-index: 3;
 }
 
@@ -4648,8 +4649,10 @@ td.attendance-grid-person-col {
 
 .auth-illustration-brand .auth-brand-name {
   color: #fff;
-  font-size: 18px;
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  font-size: 19px;
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .auth-illustration-tagline {
@@ -4658,8 +4661,10 @@ td.attendance-grid-person-col {
   left: 28px;
   right: 28px;
   color: #fff;
-  font-size: clamp(22px, 3vw, 30px);
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  font-size: clamp(24px, 3.2vw, 32px);
   font-weight: 800;
+  letter-spacing: -0.01em;
   line-height: 1.15;
   margin: 0;
   text-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
