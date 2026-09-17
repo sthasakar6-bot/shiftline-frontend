@@ -411,12 +411,12 @@
   width: 100%;
   max-width: 480px;
   text-align: center;
-  color: #e2e6f5;
+  color: var(--auth-text);
 }
 
 .company-select-open h1 {
   margin-bottom: 20px;
-  color: #fff;
+  color: var(--auth-brand-text);
 }
 
 .company-search {
@@ -424,11 +424,11 @@
   align-items: center;
   gap: 10px;
   padding: 0 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--auth-input-border);
   border-radius: 999px;
   margin-bottom: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #e2e6f5;
+  background: var(--auth-input-bg);
+  color: var(--auth-text);
 }
 
 .company-search input {
@@ -460,17 +460,17 @@
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--auth-form-border);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  color: #fff;
+  background: var(--auth-form-bg);
+  color: var(--auth-brand-text);
   text-align: left;
 }
 
 .company-select-row:hover,
 .company-select-row:focus-visible {
-  border-color: #7c8cff;
-  background: rgba(124, 140, 255, 0.15);
+  border-color: var(--auth-focus-border);
+  background: var(--auth-focus-ring);
 }
 
 .company-select-logo {
@@ -4515,6 +4515,21 @@ td.attendance-grid-person-col {
    is the design, not a color-scheme choice. */
 
 .auth-page {
+  --auth-illustration-bg: radial-gradient(circle at 30% 25%, #fff3d6, #ffd685 45%, #ffb454 78%, #ff9d4d 100%);
+  --auth-page-bg: #fffaf0;
+  --auth-text: #4a3418;
+  --auth-form-bg: rgba(255, 255, 255, 0.55);
+  --auth-form-border: rgba(180, 120, 40, 0.18);
+  --auth-input-bg: rgba(255, 255, 255, 0.7);
+  --auth-input-border: rgba(180, 120, 40, 0.25);
+  --auth-input-text: #4a3418;
+  --auth-placeholder: rgba(74, 52, 24, 0.45);
+  --auth-btn-gradient: linear-gradient(135deg, #ffb454, #ff7a3d);
+  --auth-focus-ring: rgba(255, 154, 61, 0.3);
+  --auth-focus-border: #ff9a3d;
+  --auth-link: #b3541e;
+  --auth-brand-text: #4a3418;
+
   position: relative;
   min-height: 100dvh;
   width: 100%;
@@ -4522,8 +4537,27 @@ td.attendance-grid-person-col {
   gap: 0;
   align-items: stretch;
   justify-content: flex-start;
-  background: #0b1020;
+  background: var(--auth-page-bg);
   overflow-x: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+  .auth-page {
+    --auth-illustration-bg: radial-gradient(circle at 30% 20%, #2a2f6b, #0b1020 65%);
+    --auth-page-bg: #0b1020;
+    --auth-text: #e2e6f5;
+    --auth-form-bg: rgba(255, 255, 255, 0.04);
+    --auth-form-border: rgba(255, 255, 255, 0.08);
+    --auth-input-bg: rgba(255, 255, 255, 0.06);
+    --auth-input-border: rgba(255, 255, 255, 0.12);
+    --auth-input-text: #fff;
+    --auth-placeholder: rgba(226, 230, 245, 0.45);
+    --auth-btn-gradient: linear-gradient(135deg, #6c4fc9, #3b6fd6);
+    --auth-focus-ring: rgba(124, 140, 255, 0.25);
+    --auth-focus-border: #7c8cff;
+    --auth-link: #a6b4ff;
+    --auth-brand-text: #fff;
+  }
 }
 
 .auth-page > * {
@@ -4543,11 +4577,29 @@ td.attendance-grid-person-col {
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  background: radial-gradient(circle at 30% 20%, #2a2f6b, #0b1020 65%);
+  background: var(--auth-illustration-bg);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   padding: 28px;
+}
+
+.auth-illustration-art-dark {
+  display: none;
+}
+
+.auth-illustration-art-light {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  .auth-illustration-art-dark {
+    display: block;
+  }
+
+  .auth-illustration-art-light {
+    display: none;
+  }
 }
 
 .auth-illustration-art {
@@ -4632,6 +4684,58 @@ td.attendance-grid-person-col {
   }
 }
 
+.auth-sun {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  top: 14%;
+  left: 14%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #fffef2, #ffe27a 55%, #ffb454 80%);
+  box-shadow: 0 0 90px 30px rgba(255, 200, 90, 0.55);
+  animation: auth-sun-pulse 6s ease-in-out infinite;
+}
+
+@keyframes auth-sun-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+.auth-cloud {
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  filter: blur(2px);
+}
+
+.auth-cloud-a {
+  width: 160px;
+  height: 46px;
+  top: 55%;
+  left: 8%;
+  animation: auth-cloud-drift 22s ease-in-out infinite;
+}
+
+.auth-cloud-b {
+  width: 110px;
+  height: 34px;
+  top: 68%;
+  left: 42%;
+  animation: auth-cloud-drift 26s ease-in-out infinite reverse;
+}
+
+@keyframes auth-cloud-drift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(18px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-sun,
+  .auth-cloud {
+    animation: none;
+  }
+}
+
 .auth-illustration-brand {
   position: absolute;
   top: 24px;
@@ -4648,7 +4752,7 @@ td.attendance-grid-person-col {
 }
 
 .auth-illustration-brand .auth-brand-name {
-  color: #fff;
+  color: var(--auth-brand-text);
   font-family: "Bricolage Grotesque", system-ui, sans-serif;
   font-size: 19px;
   font-weight: 700;
@@ -4660,14 +4764,14 @@ td.attendance-grid-person-col {
   bottom: 28px;
   left: 28px;
   right: 28px;
-  color: #fff;
+  color: var(--auth-brand-text);
   font-family: "Bricolage Grotesque", system-ui, sans-serif;
   font-size: clamp(24px, 3.2vw, 32px);
   font-weight: 800;
   letter-spacing: -0.01em;
   line-height: 1.15;
   margin: 0;
-  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
 }
 
 /* Everything after the illustration (welcome text, the form, footer)
@@ -4680,7 +4784,7 @@ td.attendance-grid-person-col {
 .auth-form p,
 .auth-form .hint,
 .auth-footer {
-  color: #e2e6f5;
+  color: var(--auth-text);
 }
 
 .auth-welcome {
@@ -4691,62 +4795,62 @@ td.attendance-grid-person-col {
 }
 
 .auth-form {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--auth-form-bg);
+  border: 1px solid var(--auth-form-border);
   box-shadow: none;
   backdrop-filter: blur(6px);
 }
 
 .auth-form h1 {
-  color: #fff;
+  color: var(--auth-brand-text);
 }
 
 .auth-form input,
 .auth-form select {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #fff;
+  background: var(--auth-input-bg);
+  border: 1px solid var(--auth-input-border);
+  color: var(--auth-input-text);
   border-radius: 999px;
   padding: 12px 16px;
 }
 
 .auth-form input::placeholder {
-  color: rgba(226, 230, 245, 0.45);
+  color: var(--auth-placeholder);
 }
 
 .auth-form input:focus {
-  border-color: #7c8cff;
-  box-shadow: 0 0 0 3px rgba(124, 140, 255, 0.25);
+  border-color: var(--auth-focus-border);
+  box-shadow: 0 0 0 3px var(--auth-focus-ring);
 }
 
 .auth-form button[type="submit"] {
   border-radius: 999px;
-  background: linear-gradient(135deg, #6c4fc9, #3b6fd6);
+  background: var(--auth-btn-gradient);
 }
 
 .auth-form a {
-  color: #a6b4ff;
+  color: var(--auth-link);
 }
 
 .auth-company-banner {
   border-radius: 999px;
-  color: #e2e6f5;
-  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--auth-text);
+  border-color: var(--auth-form-border);
 }
 
 .mode-toggle {
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--auth-input-border);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auth-input-bg);
 }
 
 .mode-toggle button {
   border-radius: 999px;
-  color: #e2e6f5;
+  color: var(--auth-text);
 }
 
 .mode-toggle button.active {
-  background: linear-gradient(135deg, #6c4fc9, #3b6fd6);
+  background: var(--auth-btn-gradient);
   color: #fff;
 }
 
