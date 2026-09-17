@@ -4602,6 +4602,11 @@ td.attendance-grid-person-col {
   flex-direction: column;
   justify-content: flex-end;
   padding: 28px;
+  /* Fades into the page background at its trailing edge instead of
+     cutting off in a hard line, so the two halves read as one blended
+     scene rather than a split screen. */
+  -webkit-mask-image: linear-gradient(to right, black 60%, transparent 100%);
+  mask-image: linear-gradient(to right, black 60%, transparent 100%);
 }
 
 .auth-illustration-art-dark {
@@ -4904,6 +4909,8 @@ td.attendance-grid-person-col {
     position: absolute;
     height: 280px;
     padding: 20px;
+    -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
   }
 
   .auth-page {
