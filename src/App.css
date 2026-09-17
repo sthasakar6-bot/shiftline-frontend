@@ -448,10 +448,30 @@
 .company-select-list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 6px 6px 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /* Scrolls once the list runs long, but stays visually "open" -- no
+     border/background wrapper around it, just a thin themed scrollbar
+     instead of the browser's default chrome. */
+  max-height: min(56vh, 480px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--auth-focus-border) transparent;
+}
+
+.company-select-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.company-select-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.company-select-list::-webkit-scrollbar-thumb {
+  background: var(--auth-focus-border);
+  border-radius: 999px;
 }
 
 .company-select-row {
