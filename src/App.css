@@ -176,6 +176,14 @@
   right: 16px;
 }
 
+.auth-hero {
+  display: contents;
+}
+
+.auth-wave {
+  display: none;
+}
+
 .auth-brand {
   display: flex;
   align-items: center;
@@ -4467,4 +4475,125 @@ td.attendance-grid-person-col {
 .backup-row-relative {
   font-size: 12px;
   opacity: 0.65;
+}
+
+/* ---------- mobile auth redesign ----------
+   On phones the auth pages (login, signup, complete-account/invite,
+   forgot/reset password, purchase) get a full-bleed layout: a curved
+   gradient header with the brand mark and a wave divider, then the
+   form as a plain white sheet with pill-shaped fields -- no card
+   chrome, no page margins, edge to edge. Desktop keeps the existing
+   centered card (auth-hero is display:contents there, so none of this
+   applies until the breakpoint). */
+@media (max-width: 640px) {
+  .auth-page {
+    padding: 0;
+    gap: 0;
+    justify-content: flex-start;
+    background: var(--panel-bg);
+    min-height: 100dvh;
+  }
+
+  .auth-lang-switcher {
+    top: max(14px, env(safe-area-inset-top));
+    right: 14px;
+    z-index: 2;
+  }
+
+  .auth-hero {
+    display: block;
+    position: relative;
+    width: 100%;
+    padding: max(48px, env(safe-area-inset-top) + 32px) 24px 46px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    overflow: hidden;
+  }
+
+  .auth-hero .auth-brand {
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .auth-hero .auth-brand-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+  }
+
+  .auth-hero .auth-brand-name {
+    color: #fff;
+    font-size: 26px;
+    font-weight: 700;
+  }
+
+  .auth-wave {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 34px;
+    color: var(--bg);
+  }
+
+  .auth-welcome {
+    margin: 22px 0 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-h);
+  }
+
+  .auth-form,
+  .auth-form.wide {
+    width: 100%;
+    max-width: none;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 20px 24px 40px;
+  }
+
+  .auth-form h1 {
+    font-size: 22px;
+  }
+
+  .auth-form input,
+  .auth-form select {
+    background: var(--bg);
+    border: none;
+    border-radius: 999px;
+    padding: 14px 18px;
+  }
+
+  .auth-form input:focus {
+    box-shadow: 0 0 0 3px var(--accent-bg);
+  }
+
+  .auth-form label {
+    gap: 8px;
+  }
+
+  .auth-form button[type="submit"] {
+    border-radius: 999px;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  }
+
+  .auth-company-banner {
+    border-radius: 999px;
+  }
+
+  .mode-toggle {
+    border-radius: 999px;
+  }
+
+  .mode-toggle button {
+    border-radius: 999px;
+  }
+
+  .auth-footer {
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
 }
