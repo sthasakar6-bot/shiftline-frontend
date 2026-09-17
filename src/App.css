@@ -407,56 +407,84 @@
   color: #fff;
 }
 
-.company-select-page {
-  background: var(--panel-bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 36px 32px;
-  width: 460px;
-  max-width: 100%;
+.company-select-open {
+  width: 100%;
+  max-width: 480px;
   text-align: center;
-  box-shadow:
-    0 24px 48px -24px rgba(15, 23, 42, 0.3),
-    0 2px 8px rgba(15, 23, 42, 0.06);
+  color: #e2e6f5;
 }
 
-.company-select-grid {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 20px;
+.company-select-open h1 {
+  margin-bottom: 20px;
+  color: #fff;
 }
 
-.company-select-card {
+.company-search {
   display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 10px;
-  width: 150px;
-  padding: 24px 12px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--bg);
-  color: var(--text-h);
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e6f5;
 }
 
-.company-select-card:hover,
-.company-select-card:focus-visible {
-  border-color: var(--accent);
-  background: var(--accent-bg);
+.company-search input {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 12px 0;
+  font-size: 15px;
+  color: inherit;
+}
+
+.company-search input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.company-select-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.company-select-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  text-align: left;
+}
+
+.company-select-row:hover,
+.company-select-row:focus-visible {
+  border-color: #7c8cff;
+  background: rgba(124, 140, 255, 0.15);
 }
 
 .company-select-logo {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  flex-shrink: 0;
 }
 
 .company-select-name {
   font-size: 15px;
   font-weight: 700;
-  text-align: center;
 }
 
 .team-grid {
@@ -4477,123 +4505,293 @@ td.attendance-grid-person-col {
   opacity: 0.65;
 }
 
-/* ---------- mobile auth redesign ----------
-   On phones the auth pages (login, signup, complete-account/invite,
-   forgot/reset password, purchase) get a full-bleed layout: a curved
-   gradient header with the brand mark and a wave divider, then the
-   form as a plain white sheet with pill-shaped fields -- no card
-   chrome, no page margins, edge to edge. Desktop keeps the existing
-   centered card (auth-hero is display:contents there, so none of this
-   applies until the breakpoint). */
-@media (max-width: 640px) {
+/* ---------- auth pages: split-screen illustrated redesign ----------
+   Both desktop and mobile now share one full-screen dark layout: a
+   decorative illustrated panel (AuthBrand) plus the form content,
+   instead of the previous light centered-card design. The panel is
+   taken out of flow (position: fixed) so every auth page's existing
+   DOM order (AuthBrand, optional welcome text, the form, AuthFooter)
+   keeps working unchanged -- the rest of the page is simply offset to
+   sit beside/below it. This intentionally overrides the light/dark
+   system-preference theme for these pages only: the illustrated look
+   is the design, not a color-scheme choice. */
+
+.auth-page {
+  position: relative;
+  min-height: 100dvh;
+  width: 100%;
+  padding: 0;
+  gap: 0;
+  align-items: stretch;
+  justify-content: flex-start;
+  background: #0b1020;
+  overflow-x: hidden;
+}
+
+.auth-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-lang-switcher {
+  z-index: 3;
+}
+
+.auth-illustration {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: radial-gradient(circle at 30% 20%, #2a2f6b, #0b1020 65%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 28px;
+}
+
+.auth-illustration-art {
+  position: absolute;
+  inset: 0;
+}
+
+.auth-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(1px);
+}
+
+.auth-orb-a {
+  width: 260px;
+  height: 260px;
+  top: 8%;
+  left: 8%;
+  background: radial-gradient(circle at 35% 30%, #8bd8ff, #3b6fd6 55%, transparent 75%);
+  opacity: 0.9;
+  animation: auth-orb-drift-a 16s ease-in-out infinite;
+}
+
+.auth-orb-b {
+  width: 150px;
+  height: 150px;
+  top: 34%;
+  left: 46%;
+  background: radial-gradient(circle at 40% 35%, #c9b6ff, #6c4fc9 60%, transparent 78%);
+  opacity: 0.75;
+  animation: auth-orb-drift-b 20s ease-in-out infinite;
+}
+
+.auth-orb-c {
+  width: 90px;
+  height: 90px;
+  top: 12%;
+  left: 62%;
+  background: radial-gradient(circle at 40% 35%, #ffd7a8, #d68b3f 60%, transparent 78%);
+  opacity: 0.6;
+  animation: auth-orb-drift-a 24s ease-in-out infinite reverse;
+}
+
+@keyframes auth-orb-drift-a {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(14px, 18px); }
+}
+
+@keyframes auth-orb-drift-b {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-16px, 12px); }
+}
+
+.auth-spark {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.8);
+  opacity: 0.8;
+}
+
+.auth-spark-a {
+  top: 20%;
+  left: 78%;
+}
+
+.auth-spark-b {
+  top: 62%;
+  left: 20%;
+}
+
+.auth-spark-c {
+  top: 72%;
+  left: 68%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-orb {
+    animation: none;
+  }
+}
+
+.auth-illustration-brand {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-illustration-brand .auth-brand-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
+.auth-illustration-brand .auth-brand-name {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.auth-illustration-tagline {
+  position: absolute;
+  bottom: 28px;
+  left: 28px;
+  right: 28px;
+  color: #fff;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* Everything after the illustration (welcome text, the form, footer)
+   is pushed clear of the fixed panel and given the dark theme's text
+   colors. */
+.auth-welcome,
+.auth-form,
+.auth-form h1,
+.auth-form label,
+.auth-form p,
+.auth-form .hint,
+.auth-footer {
+  color: #e2e6f5;
+}
+
+.auth-welcome {
+  margin: 0 0 -8px;
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.auth-form {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+  backdrop-filter: blur(6px);
+}
+
+.auth-form h1 {
+  color: #fff;
+}
+
+.auth-form input,
+.auth-form select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 999px;
+  padding: 12px 16px;
+}
+
+.auth-form input::placeholder {
+  color: rgba(226, 230, 245, 0.45);
+}
+
+.auth-form input:focus {
+  border-color: #7c8cff;
+  box-shadow: 0 0 0 3px rgba(124, 140, 255, 0.25);
+}
+
+.auth-form button[type="submit"] {
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6c4fc9, #3b6fd6);
+}
+
+.auth-form a {
+  color: #a6b4ff;
+}
+
+.auth-company-banner {
+  border-radius: 999px;
+  color: #e2e6f5;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.mode-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mode-toggle button {
+  border-radius: 999px;
+  color: #e2e6f5;
+}
+
+.mode-toggle button.active {
+  background: linear-gradient(135deg, #6c4fc9, #3b6fd6);
+  color: #fff;
+}
+
+.auth-footer {
+  opacity: 0.55;
+}
+
+/* ---- Desktop: illustration takes the left ~45%, content sits in the
+   remaining right column, vertically centered. ---- */
+@media (min-width: 860px) {
+  .auth-illustration {
+    width: 46%;
+    padding: 40px;
+    justify-content: space-between;
+  }
+
   .auth-page {
-    padding: 0;
-    gap: 0;
-    justify-content: flex-start;
-    background: var(--panel-bg);
-    min-height: 100dvh;
-  }
-
-  .auth-lang-switcher {
-    top: max(14px, env(safe-area-inset-top));
-    right: 14px;
-    z-index: 2;
-  }
-
-  .auth-hero {
-    display: block;
-    position: relative;
-    width: 100%;
-    padding: max(48px, env(safe-area-inset-top) + 32px) 24px 46px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    overflow: hidden;
-  }
-
-  .auth-hero .auth-brand {
+    padding: 40px 40px 40px calc(46% + 40px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 16px;
   }
+}
 
-  .auth-hero .auth-brand-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-  }
-
-  .auth-hero .auth-brand-name {
-    color: #fff;
-    font-size: 26px;
-    font-weight: 700;
-  }
-
-  .auth-wave {
-    display: block;
+/* ---- Mobile: illustration becomes a shorter top band, content flows
+   below it edge to edge. ---- */
+@media (max-width: 859px) {
+  .auth-illustration {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -1px;
-    width: 100%;
-    height: 34px;
-    color: var(--bg);
+    height: 280px;
+    padding: 20px;
   }
 
-  .auth-welcome {
-    margin: 22px 0 0;
+  .auth-page {
+    padding: 300px 20px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .auth-illustration-tagline {
     font-size: 22px;
-    font-weight: 700;
-    color: var(--text-h);
   }
 
   .auth-form,
   .auth-form.wide {
     width: 100%;
     max-width: none;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    border-radius: 0;
-    padding: 20px 24px 40px;
-  }
-
-  .auth-form h1 {
-    font-size: 22px;
-  }
-
-  .auth-form input,
-  .auth-form select {
-    background: var(--bg);
-    border: none;
-    border-radius: 999px;
-    padding: 14px 18px;
-  }
-
-  .auth-form input:focus {
-    box-shadow: 0 0 0 3px var(--accent-bg);
-  }
-
-  .auth-form label {
-    gap: 8px;
-  }
-
-  .auth-form button[type="submit"] {
-    border-radius: 999px;
-    padding: 15px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  }
-
-  .auth-company-banner {
-    border-radius: 999px;
-  }
-
-  .mode-toggle {
-    border-radius: 999px;
-  }
-
-  .mode-toggle button {
-    border-radius: 999px;
-  }
-
-  .auth-footer {
-    padding-bottom: max(20px, env(safe-area-inset-bottom));
   }
 }

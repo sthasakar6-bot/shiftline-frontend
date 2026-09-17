@@ -56,6 +56,7 @@ export default {
   },
   auth: {
     selectCompanyTitle: "Select your company",
+    searchCompany: "Search for your company",
     loadingCompanies: "Loading companies...",
     noCompanies: "No companies found.",
     loadCompaniesFailed: "Failed to load companies",

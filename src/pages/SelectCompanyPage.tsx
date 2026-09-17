@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Search } from "lucide-react";
 import { api, ApiError, setSelectedCompany } from "../api/client";
 import type { Company } from "../api/types";
+import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
@@ -30,6 +32,7 @@ export default function SelectCompanyPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
   const [welcoming, setWelcoming] = useState<Company | null>(null);
   const [leaving, setLeaving] = useState(false);
 
@@ -41,6 +44,12 @@ export default function SelectCompanyPage() {
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return companies;
+    return companies.filter((c) => c.name.toLowerCase().includes(q));
+  }, [companies, query]);
 
   function proceed(company: Company) {
     setSelectedCompany({ id: company.id, name: company.name });
@@ -89,31 +98,40 @@ export default function SelectCompanyPage() {
       <div className="auth-lang-switcher">
         <LanguageSwitcher />
       </div>
-      <div className="company-select-page">
+      <AuthBrand />
+      <div className="company-select-open">
         <h1>{t("auth.selectCompanyTitle")}</h1>
+
+        <div className="company-search">
+          <Search size={16} />
+          <input
+            type="search"
+            placeholder={t("auth.searchCompany") as string}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+
         {error && <div className="error">{error}</div>}
         {loading ? (
           <p className="hint">{t("auth.loadingCompanies")}</p>
-        ) : companies.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <p className="hint">{t("auth.noCompanies")}</p>
         ) : (
-          <div className="company-select-grid">
-            {companies.map((c) => (
-              <button
-                type="button"
-                key={c.id}
-                className="company-select-card"
-                onClick={() => choose(c)}
-              >
-                <img
-                  className="company-select-logo"
-                  src={COMPANY_LOGO[c.slug] ?? "/icon-192.png"}
-                  alt=""
-                />
-                <span className="company-select-name">{c.name}</span>
-              </button>
+          <ul className="company-select-list">
+            {filtered.map((c) => (
+              <li key={c.id}>
+                <button type="button" className="company-select-row" onClick={() => choose(c)}>
+                  <img
+                    className="company-select-logo"
+                    src={COMPANY_LOGO[c.slug] ?? "/icon-192.png"}
+                    alt=""
+                  />
+                  <span className="company-select-name">{c.name}</span>
+                </button>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </div>
       <AuthFooter />
