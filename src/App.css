@@ -5016,4 +5016,44 @@ html[data-theme="light"] .auth-illustration-art-light {
     width: 100%;
     max-width: none;
   }
+
+  /* The company-select page specifically: the whole screen is fixed
+     (illustration pinned at top, footer pinned at bottom) and only the
+     list itself scrolls in between -- nothing shifts up and down as a
+     page the way a normal auth form can. */
+  .auth-page:has(.company-select-open) {
+    height: 100dvh;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  .auth-page:has(.company-select-open) .company-select-open {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 56px;
+  }
+
+  .auth-page:has(.company-select-open) .company-select-open h1,
+  .auth-page:has(.company-select-open) .company-search {
+    flex: 0 0 auto;
+  }
+
+  .auth-page:has(.company-select-open) .company-select-list {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .auth-page:has(.company-select-open) .auth-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 12px 0 max(12px, env(safe-area-inset-bottom));
+    background: var(--auth-page-bg);
+    z-index: 2;
+  }
 }
