@@ -90,6 +90,78 @@
   }
 }
 
+/* An explicit choice from the theme toggle (data-theme, set on <html>)
+   overrides the system preference above -- these duplicate the same
+   values so ":root[data-theme]" (specificity 0,2,0) always wins over
+   both the plain ":root" default and the media-queried ":root". */
+:root[data-theme="dark"] {
+  --text: #cbd5e1;
+  --text-h: #f1f5f9;
+  --bg: #0f172a;
+  --panel-bg: #1e293b;
+  --border: #334155;
+  --accent: #fb923c;
+  --accent-bg: rgba(251, 146, 60, 0.16);
+  --accent-solid: #c2410c;
+  --danger: #f87171;
+  --danger-bg: rgba(248, 113, 113, 0.14);
+  --success: #4ade80;
+  --success-bg: rgba(74, 222, 128, 0.14);
+
+  --nav-team: #a78bfa;
+  --nav-team-bg: rgba(167, 139, 250, 0.16);
+  --nav-roster: #fb923c;
+  --nav-roster-bg: rgba(251, 146, 60, 0.16);
+  --nav-invite: #2dd4bf;
+  --nav-invite-bg: rgba(45, 212, 191, 0.16);
+  --nav-leave: #f472b6;
+  --nav-leave-bg: rgba(244, 114, 182, 0.16);
+  --nav-attendance: #60a5fa;
+  --nav-attendance-bg: rgba(96, 165, 250, 0.16);
+  --nav-summary: #facc15;
+  --nav-summary-bg: rgba(250, 204, 21, 0.16);
+  --nav-billing: #34d399;
+  --nav-billing-bg: rgba(52, 211, 153, 0.16);
+  --nav-alerts: #f87171;
+  --nav-alerts-bg: rgba(248, 113, 113, 0.16);
+  --nav-home: #22d3ee;
+  --nav-home-bg: rgba(34, 211, 238, 0.16);
+}
+
+:root[data-theme="light"] {
+  --text: #334155;
+  --text-h: #0f172a;
+  --bg: #f8fafc;
+  --panel-bg: #fff;
+  --border: #e2e8f0;
+  --accent: #ea580c;
+  --accent-bg: rgba(234, 88, 12, 0.09);
+  --accent-solid: #ea580c;
+  --danger: #b91c1c;
+  --danger-bg: rgba(185, 28, 28, 0.08);
+  --success: #15803d;
+  --success-bg: rgba(21, 128, 61, 0.1);
+
+  --nav-team: var(--accent-2);
+  --nav-team-bg: var(--accent-2-bg);
+  --nav-roster: var(--accent);
+  --nav-roster-bg: var(--accent-bg);
+  --nav-invite: var(--accent-2);
+  --nav-invite-bg: var(--accent-2-bg);
+  --nav-leave: var(--accent);
+  --nav-leave-bg: var(--accent-bg);
+  --nav-attendance: var(--accent-2);
+  --nav-attendance-bg: var(--accent-2-bg);
+  --nav-summary: var(--accent);
+  --nav-summary-bg: var(--accent-bg);
+  --nav-billing: var(--accent-2);
+  --nav-billing-bg: var(--accent-2-bg);
+  --nav-alerts: var(--danger);
+  --nav-alerts-bg: var(--danger-bg);
+  --nav-home: var(--accent);
+  --nav-home-bg: var(--accent-bg);
+}
+
 * {
   box-sizing: border-box;
 }

@@ -22,6 +22,23 @@
       rel="stylesheet"
     />
     <title>Shiftline</title>
+    <script>
+      // Applied before any stylesheet paints so a stored theme choice
+      // (or the system preference, if none was chosen yet) never flashes
+      // the "wrong" theme for a frame. Kept in sync with src/lib/theme.ts.
+      (function () {
+        try {
+          var stored = localStorage.getItem("shiftline-theme");
+          var theme =
+            stored === "light" || stored === "dark"
+              ? stored
+              : window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

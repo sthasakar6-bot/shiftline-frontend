@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Check } from "lucide-react";
 import { setLanguage, SUPPORTED_LANGUAGES, type SupportedLanguage } from "../i18n";
 import FlagIcon from "./FlagIcon";
+import ThemeToggle from "./ThemeToggle";
 
 const NAME_KEYS: Record<SupportedLanguage, string> = {
   en: "language.english",
@@ -27,33 +28,36 @@ export default function LanguageSwitcher() {
   }, []);
 
   return (
-    <div className="lang-switcher" ref={ref}>
-      <button
-        type="button"
-        className="lang-switcher-trigger"
-        onClick={() => setOpen(!open)}
-        title={t("language.label")}
-      >
-        <FlagIcon lang={current} size={19} />
-      </button>
-      {open && (
-        <div className="lang-switcher-menu">
-          {SUPPORTED_LANGUAGES.map((lang) => (
-            <button
-              key={lang}
-              className={lang === current ? "active" : ""}
-              onClick={() => {
-                setLanguage(lang);
-                setOpen(false);
-              }}
-            >
-              <FlagIcon lang={lang} size={19} />
-              {t(NAME_KEYS[lang])}
-              {lang === current && <Check size={15} className="lang-check" />}
-            </button>
-          ))}
-        </div>
-      )}
+    <div className="lang-switcher-group">
+      <ThemeToggle />
+      <div className="lang-switcher" ref={ref}>
+        <button
+          type="button"
+          className="lang-switcher-trigger"
+          onClick={() => setOpen(!open)}
+          title={t("language.label")}
+        >
+          <FlagIcon lang={current} size={19} />
+        </button>
+        {open && (
+          <div className="lang-switcher-menu">
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <button
+                key={lang}
+                className={lang === current ? "active" : ""}
+                onClick={() => {
+                  setLanguage(lang);
+                  setOpen(false);
+                }}
+              >
+                <FlagIcon lang={lang} size={19} />
+                {t(NAME_KEYS[lang])}
+                {lang === current && <Check size={15} className="lang-check" />}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

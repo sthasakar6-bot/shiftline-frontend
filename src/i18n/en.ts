@@ -1,4 +1,8 @@
 export default {
+  theme: {
+    switchToLight: "Switch to light mode",
+    switchToDark: "Switch to dark mode",
+  },
   plan: {
     trial: "Trial",
     trialDaysLeft: "Trial · {{count}} day left",

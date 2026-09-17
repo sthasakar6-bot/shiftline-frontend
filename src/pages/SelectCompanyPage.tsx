@@ -13,6 +13,7 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 const COMPANY_LOGO: Record<string, string> = {
   "super-sushi": "/logo-super-sushi-mark.png",
   zuiderzoet: "/logo-zuiderzoet.png",
+  "sunrise-bakery": "/logo-sunrise-bakery.png",
 };
 
 const HOLD_MS = 1400;
