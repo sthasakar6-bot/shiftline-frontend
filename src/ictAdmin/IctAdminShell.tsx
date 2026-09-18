@@ -13,15 +13,18 @@ import {
   Wrench,
   SlidersHorizontal,
   BrainCircuit,
+  Building2,
   LogOut,
 } from "lucide-react";
 import { clearIctAdminToken } from "./client";
 import IctAdminMonitoring from "./pages/IctAdminMonitoring";
 import IctAdminTickets from "./pages/IctAdminTickets";
+import IctAdminCompanies from "./pages/IctAdminCompanies";
 import IctAdminComingSoon from "./pages/IctAdminComingSoon";
 
 const NAV = [
   { key: "monitoring", label: "System Monitoring", icon: Activity, ready: true },
+  { key: "companies", label: "Manage Companies", icon: Building2, ready: true },
   { key: "security", label: "Security Center", icon: Shield, ready: false },
   { key: "api", label: "API Management", icon: Plug, ready: false },
   { key: "database", label: "Database Tools", icon: Database, ready: false },
@@ -70,6 +73,7 @@ export default function IctAdminShell() {
 
       <main className="ict-content">
         {current.key === "monitoring" && <IctAdminMonitoring />}
+        {current.key === "companies" && <IctAdminCompanies />}
         {current.key === "tickets" && <IctAdminTickets />}
         {current.ready === false && <IctAdminComingSoon label={current.label} />}
       </main>

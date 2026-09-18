@@ -58,6 +58,30 @@ export interface IctAdminTicket {
   updatedAt: string;
 }
 
+export interface IctAdminCompany {
+  id: number;
+  name: string;
+  slug: string;
+  plan: string;
+  createdAt: string;
+  userCount: number;
+}
+
+async function requestForm<T>(path: string, formData: FormData, method: string): Promise<T> {
+  const token = getIctAdminToken();
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${API_URL}${path}`, { method, headers, body: formData });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    if (res.status === 401) clearIctAdminToken();
+    throw new IctAdminApiError(res.status, body.message || "Request failed");
+  }
+  if (res.status === 204) return undefined as T;
+  return res.json();
+}
+
 export const ictAdminApi = {
   login: (email: string, password: string) =>
     request<{ token: string }>("/api/ict-admin/login", {
@@ -76,4 +100,23 @@ export const ictAdminApi = {
       method: "PATCH",
       body: JSON.stringify({ status }),
     }),
+  listCompanies: () => request<IctAdminCompany[]>("/api/ict-admin/companies"),
+  createCompany: (data: {
+    companyName: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    logo: File;
+  }) => {
+    const form = new FormData();
+    form.append("companyName", data.companyName);
+    form.append("firstName", data.firstName);
+    form.append("lastName", data.lastName);
+    form.append("email", data.email);
+    form.append("password", data.password);
+    form.append("logo", data.logo);
+    return requestForm("/api/ict-admin/companies", form, "POST");
+  },
+  deleteCompany: (id: number) => request<void>(`/api/ict-admin/companies/${id}`, { method: "DELETE" }),
 };
