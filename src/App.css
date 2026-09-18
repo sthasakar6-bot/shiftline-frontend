@@ -4991,22 +4991,30 @@ html[data-theme="light"] .auth-illustration-art-light {
 /* ---- Mobile: illustration becomes a shorter top band, content flows
    below it edge to edge. ---- */
 @media (max-width: 859px) {
+  /* Illustration and footer are viewport-fixed overlays; the page itself
+     is a normal, plainly-scrolling document in between them (no
+     overflow:hidden/flex-scroll shell). That's deliberate: nesting an
+     overflow:hidden outer container with an inner overflow-y:auto region
+     and a 100dvh height is exactly the combination that breaks touch
+     scrolling on iOS Safari once the on-screen keyboard opens/closes
+     (email/password focus, company-name field, etc.) -- the inner
+     region's height gets stuck stale and upward swipes stop registering.
+     A single ordinary document scroll has none of that failure mode. */
   .auth-illustration {
-    position: absolute;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     height: 280px;
     padding: 20px;
+    z-index: 0;
     -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
   }
 
-  /* The whole screen is fixed on mobile -- illustration pinned at top,
-     footer pinned at bottom -- and only the content in between (the
-     form, or the company list) scrolls if it doesn't fit. Nothing
-     shifts up and down as a page the way it did before. */
   .auth-page {
-    height: 100dvh;
-    overflow: hidden;
-    padding: 300px 20px 0;
+    min-height: 100dvh;
+    padding: 300px 20px 76px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -5017,39 +5025,16 @@ html[data-theme="light"] .auth-illustration-art-light {
     font-size: 22px;
   }
 
-  .auth-welcome {
-    flex: 0 0 auto;
-  }
-
   .auth-form,
-  .auth-form.wide {
-    width: 100%;
-    max-width: none;
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 76px;
-  }
-
+  .auth-form.wide,
   .company-select-open {
     width: 100%;
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 56px;
-  }
-
-  .company-select-open h1,
-  .company-search {
-    flex: 0 0 auto;
+    max-width: none;
   }
 
   .company-select-list {
-    flex: 1;
-    min-height: 0;
     max-height: none;
+    overflow: visible;
   }
 
   .auth-footer {
