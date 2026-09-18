@@ -17,6 +17,9 @@ import PullToRefresh from "./components/PullToRefresh";
 import SplashScreen from "./components/SplashScreen";
 import ButtonRipple from "./components/ButtonRipple";
 import OfflineBanner from "./components/OfflineBanner";
+import IctAdminLoginPage from "./ictAdmin/IctAdminLoginPage";
+import IctAdminShell from "./ictAdmin/IctAdminShell";
+import IctAdminProtectedRoute from "./ictAdmin/IctAdminProtectedRoute";
 import "./App.css";
 
 function App() {
@@ -28,6 +31,15 @@ function App() {
       <AuthProvider>
         <PullToRefresh>
           <Routes>
+            <Route path="/ict-admin/login" element={<IctAdminLoginPage />} />
+            <Route
+              path="/ict-admin"
+              element={
+                <IctAdminProtectedRoute>
+                  <IctAdminShell />
+                </IctAdminProtectedRoute>
+              }
+            />
             <Route path="/select-company" element={<SelectCompanyPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />

@@ -5047,3 +5047,359 @@ html[data-theme="light"] .auth-illustration-art-light {
     z-index: 2;
   }
 }
+
+/* ---------- ICT admin ---------- */
+
+.ict-login-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0b1020;
+  padding: 24px;
+}
+
+.ict-login-form {
+  width: 100%;
+  max-width: 360px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: #e2e6f5;
+}
+
+.ict-login-form h1 {
+  color: #fff;
+  font-size: 20px;
+  margin: 0;
+}
+
+.ict-login-sub {
+  font-size: 13px;
+  opacity: 0.6;
+  margin: -8px 0 4px;
+}
+
+.ict-login-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ict-login-form input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.ict-login-form button {
+  margin-top: 6px;
+  padding: 11px;
+  border-radius: 8px;
+  border: none;
+  background: #3b6fd6;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.ict-login-form button:disabled {
+  opacity: 0.6;
+}
+
+.ict-login-error {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.ict-shell {
+  display: flex;
+  min-height: 100dvh;
+  background: #0f1420;
+  color: #e2e6f5;
+}
+
+.ict-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: #0b1020;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 10px;
+}
+
+.ict-sidebar-brand {
+  font-weight: 800;
+  font-size: 15px;
+  color: #fff;
+  padding: 8px 10px 16px;
+}
+
+.ict-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.ict-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  background: none;
+  border: none;
+  color: #b8c0d9;
+  font-size: 13px;
+  text-align: left;
+}
+
+.ict-nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ict-nav-item.active {
+  background: rgba(59, 111, 214, 0.2);
+  color: #fff;
+}
+
+.ict-nav-item.soon {
+  opacity: 0.55;
+}
+
+.ict-nav-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ict-logout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e2e6f5;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.ict-content {
+  flex: 1;
+  padding: 32px 40px;
+  overflow-y: auto;
+}
+
+.ict-page-title {
+  color: #fff;
+  font-size: 22px;
+  margin: 0 0 6px;
+}
+
+.ict-page-sub {
+  font-size: 13px;
+  opacity: 0.6;
+  margin: 0 0 24px;
+}
+
+.ict-panel {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+}
+
+.ict-error {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.ict-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.ict-stat-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ict-stat-card.ok {
+  border-color: rgba(74, 222, 128, 0.4);
+}
+
+.ict-stat-card.fail {
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
+.ict-stat-label {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.ict-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.ict-ticket-form {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+  max-width: 520px;
+}
+
+.ict-ticket-form input,
+.ict-ticket-form textarea,
+.ict-ticket-form select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 9px 11px;
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.ict-ticket-form textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.ict-ticket-form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.ict-ticket-form-row button {
+  flex: 1;
+  border: none;
+  border-radius: 8px;
+  background: #3b6fd6;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.ict-ticket-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 720px;
+}
+
+.ict-ticket-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.ict-ticket-info p {
+  font-size: 13px;
+  opacity: 0.7;
+  margin: 4px 0 0;
+}
+
+.ict-ticket-priority {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ict-ticket-priority.high,
+.ict-ticket-priority.urgent {
+  background: rgba(248, 113, 113, 0.2);
+  color: #f87171;
+}
+
+.ict-ticket-row select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 6px 8px;
+  color: #fff;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 720px) {
+  .ict-shell {
+    flex-direction: column;
+  }
+
+  .ict-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .ict-sidebar-brand {
+    display: none;
+  }
+
+  .ict-nav {
+    flex-direction: row;
+  }
+
+  .ict-nav-item span:not(.ict-nav-badge) {
+    display: none;
+  }
+
+  .ict-logout span {
+    display: none;
+  }
+
+  .ict-content {
+    padding: 20px;
+  }
+}
