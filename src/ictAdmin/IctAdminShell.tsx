@@ -15,6 +15,7 @@ import {
   BrainCircuit,
   Building2,
   LogOut,
+  MoreVertical,
 } from "lucide-react";
 import { clearIctAdminToken } from "./client";
 import IctAdminMonitoring from "./pages/IctAdminMonitoring";
@@ -41,6 +42,7 @@ const NAV = [
 export default function IctAdminShell() {
   const navigate = useNavigate();
   const [active, setActive] = useState("monitoring");
+  const [menuOpen, setMenuOpen] = useState(false);
   const current = NAV.find((n) => n.key === active)!;
 
   function logout() {
@@ -48,8 +50,48 @@ export default function IctAdminShell() {
     navigate("/ict-admin/login");
   }
 
+  function choose(key: string) {
+    setActive(key);
+    setMenuOpen(false);
+  }
+
   return (
     <div className="ict-shell">
+      <div className="ict-mobile-topbar">
+        <button className="ict-mobile-menu-btn" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+          <MoreVertical size={20} />
+        </button>
+        <span className="ict-mobile-title">{current.label}</span>
+        <button className="ict-mobile-logout-btn" onClick={logout} aria-label="Log out">
+          <LogOut size={18} />
+        </button>
+      </div>
+
+      {menuOpen && (
+        <div className="ict-mobile-menu-overlay" onClick={() => setMenuOpen(false)}>
+          <div className="ict-mobile-menu-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="ict-sidebar-brand">ICT Admin</div>
+            <nav className="ict-nav">
+              {NAV.map((item) => (
+                <button
+                  key={item.key}
+                  className={`ict-nav-item ${active === item.key ? "active" : ""} ${!item.ready ? "soon" : ""}`}
+                  onClick={() => choose(item.key)}
+                >
+                  <item.icon size={17} />
+                  <span>{item.label}</span>
+                  {!item.ready && <span className="ict-nav-badge">Soon</span>}
+                </button>
+              ))}
+            </nav>
+            <button className="ict-logout" onClick={logout}>
+              <LogOut size={16} />
+              Log out
+            </button>
+          </div>
+        </div>
+      )}
+
       <aside className="ict-sidebar">
         <div className="ict-sidebar-brand">ICT Admin</div>
         <nav className="ict-nav">
