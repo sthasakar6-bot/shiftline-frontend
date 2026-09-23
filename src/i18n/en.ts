@@ -283,8 +283,8 @@ export default {
     existingAccountHint: "Already have an account? Just enter your email above -- we'll apply this to your existing company.",
   },
   completeSignup: {
-    title: "You're all set -- just a few details",
-    paidNote: "Your payment went through. Finish setting up your company to get started.",
+    title: "Almost there -- just a few details",
+    paidNote: "Finish setting up your company below. We'll confirm your payment automatically once it's complete.",
     submit: "Create my account",
     confirmingPayment: "We're still confirming your payment. Please wait a moment and try again.",
   },
