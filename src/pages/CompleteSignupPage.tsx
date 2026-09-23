@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Camera } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
-import { ApiError } from "../api/client";
+import { api, ApiError } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -14,6 +14,8 @@ export default function CompleteSignupPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const email = searchParams.get("email") ?? "";
+  const plan = searchParams.get("plan") === "unlimited" ? "unlimited" : "starter";
+  const interval = searchParams.get("interval") === "yearly" ? "yearly" : "monthly";
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [companyName, setCompanyName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -24,6 +26,8 @@ export default function CompleteSignupPage() {
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [paymentNotConfirmed, setPaymentNotConfirmed] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     if (!email) {
@@ -54,20 +58,37 @@ export default function CompleteSignupPage() {
       return;
     }
     setSubmitting(true);
+    setPaymentNotConfirmed(false);
     try {
       const user = await completeSignup({ email, companyName, firstName, lastName, password, logo });
       navigate(user.role === "manager" ? "/admin" : "/");
     } catch (err) {
       // A real race, not just defensive: the webhook that confirms payment
       // can land a few seconds after Mollie's own redirect back here, so
-      // the very first submit attempt genuinely can be too early.
+      // the very first submit attempt genuinely can be too early. But it's
+      // also the same error for someone who never paid at all (e.g. backed
+      // out of Mollie's checkout) -- retrying alone can never help that
+      // case, so goToPayment below gives them a real way forward.
       if (err instanceof ApiError && err.code === "PAYMENT_NOT_CONFIRMED") {
         setError(t("completeSignup.confirmingPayment"));
+        setPaymentNotConfirmed(true);
       } else {
         setError(err instanceof ApiError ? err.message : t("signup.failed"));
       }
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function goToPayment() {
+    setRedirecting(true);
+    setError(null);
+    try {
+      const { redirectUrl } = await api.startPurchase({ email, plan, interval });
+      window.location.href = redirectUrl;
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t("purchase.failed"));
+      setRedirecting(false);
     }
   }
 
@@ -85,6 +106,11 @@ export default function CompleteSignupPage() {
         <h1>{t("completeSignup.title")}</h1>
         <p className="hint">{t("completeSignup.paidNote")}</p>
         {error && <div className="error">{error}</div>}
+        {paymentNotConfirmed && (
+          <button type="button" onClick={goToPayment} disabled={redirecting}>
+            {redirecting ? t("purchase.redirecting") : t("completeSignup.goToPayment")}
+          </button>
+        )}
 
         <label>
           {t("signup.companyName")}

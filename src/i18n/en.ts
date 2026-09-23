@@ -287,6 +287,7 @@ export default {
     paidNote: "Finish setting up your company below. We'll confirm your payment automatically once it's complete.",
     submit: "Create my account",
     confirmingPayment: "We're still confirming your payment. Please wait a moment and try again.",
+    goToPayment: "Complete payment",
   },
   chat: {
     title: "Team chat",
