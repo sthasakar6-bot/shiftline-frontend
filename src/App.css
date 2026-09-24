@@ -4252,6 +4252,37 @@ td.attendance-grid-person-col {
   margin-bottom: 10px;
 }
 
+.profile-privacy-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-privacy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.profile-privacy-row + .profile-privacy-row {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.profile-privacy-row button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.profile-privacy-label {
+  font-weight: 600;
+  margin: 0 0 2px;
+}
+
 .profile-stats-panel {
   display: flex;
   flex-direction: column;

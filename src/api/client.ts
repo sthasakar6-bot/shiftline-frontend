@@ -298,6 +298,9 @@ export const api = {
     return request<void>("/api/users/me/avatar", { method: "POST", body: formData });
   },
   getAvatarBlob: (id: number) => requestBlob(`/api/users/${id}/avatar`),
+  exportMyData: () => request<Record<string, unknown>>("/api/me/export"),
+  deleteMyAccount: () =>
+    request<{ deletedCompany: boolean }>("/api/me", { method: "DELETE" }),
 
   listContracts: () => request<Contract[]>("/api/contracts"),
   getContractPdf: (contractId: number) => requestBlob(`/api/contracts/${contractId}/pdf`),

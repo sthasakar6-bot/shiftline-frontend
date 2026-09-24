@@ -1,7 +1,7 @@
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Camera, CalendarCheck, Clock, Palmtree, Thermometer } from "lucide-react";
+import { ArrowLeft, Camera, CalendarCheck, Clock, Palmtree, Thermometer, Download, Trash2 } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { api, ApiError } from "../api/client";
 import Avatar from "../components/Avatar";
@@ -19,13 +19,18 @@ function countLeaveDays(l: LeaveRequest): number {
 
 export default function ProfilePage() {
   const { t } = useTranslation();
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, logout } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
+  const [exporting, setExporting] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [privacyError, setPrivacyError] = useState<string | null>(null);
 
   useEffect(() => {
     api.listAttendance().then(setAttendance).catch(() => {});
@@ -45,6 +50,38 @@ export default function ProfilePage() {
     } finally {
       setUploading(false);
       e.target.value = "";
+    }
+  }
+
+  async function handleExportData() {
+    setExporting(true);
+    setPrivacyError(null);
+    try {
+      const data = await api.exportMyData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "shiftline-my-data.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setPrivacyError(err instanceof ApiError ? err.message : t("profile.exportFailed"));
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeleting(true);
+    setPrivacyError(null);
+    try {
+      await api.deleteMyAccount();
+      logout();
+      navigate("/select-company", { replace: true });
+    } catch (err) {
+      setPrivacyError(err instanceof ApiError ? err.message : t("profile.deleteFailed"));
+      setDeleting(false);
     }
   }
 
@@ -160,7 +197,71 @@ export default function ProfilePage() {
 
         <ContractsSection />
         <PayslipsSection />
+
+        <section className="panel profile-privacy-panel">
+          <h2 className="profile-section-kicker">{t("profile.privacyTitle")}</h2>
+          {privacyError && <div className="error">{privacyError}</div>}
+
+          <div className="profile-privacy-row">
+            <div>
+              <p className="profile-privacy-label">{t("profile.exportDataTitle")}</p>
+              <p className="hint">{t("profile.exportDataHint")}</p>
+            </div>
+            <button onClick={handleExportData} disabled={exporting}>
+              <Download size={15} />
+              {exporting ? t("profile.exporting") : t("profile.exportData")}
+            </button>
+          </div>
+
+          <div className="profile-privacy-row">
+            <div>
+              <p className="profile-privacy-label">{t("profile.deleteAccountTitle")}</p>
+              <p className="hint">
+                {user.role === "manager"
+                  ? t("profile.deleteAccountHintManager")
+                  : t("profile.deleteAccountHint")}
+              </p>
+            </div>
+            <button className="danger" onClick={() => setShowDeleteConfirm(true)}>
+              <Trash2 size={15} />
+              {t("profile.deleteAccount")}
+            </button>
+          </div>
+        </section>
       </main>
+
+      {showDeleteConfirm && (
+        <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2>{t("profile.deleteAccountTitle")}</h2>
+            <p>
+              {user.role === "manager"
+                ? t("profile.deleteAccountHintManager")
+                : t("profile.deleteAccountHint")}
+            </p>
+            <p>{t("profile.deleteConfirmPrompt")}</p>
+            <input
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="DELETE"
+              autoFocus
+            />
+            <div className="modal-actions">
+              <button type="button" onClick={() => setShowDeleteConfirm(false)}>
+                {t("common.cancel")}
+              </button>
+              <button
+                type="button"
+                className="danger"
+                disabled={deleteConfirmText !== "DELETE" || deleting}
+                onClick={handleDeleteAccount}
+              >
+                {deleting ? t("profile.deleting") : t("profile.deleteAccountConfirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
