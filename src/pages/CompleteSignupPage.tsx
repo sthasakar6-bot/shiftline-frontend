@@ -28,12 +28,62 @@ export default function CompleteSignupPage() {
   const [submitting, setSubmitting] = useState(false);
   const [paymentNotConfirmed, setPaymentNotConfirmed] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(true);
 
   useEffect(() => {
     if (!email) {
       navigate("/purchase", { replace: true });
     }
   }, [email, navigate]);
+
+  // Mollie's checkout page always sends both a completed payment AND an
+  // abandoned one ("Previous page" clicked with no payment made) back to
+  // this same URL -- it only exposes a single redirect target, so there's
+  // no way to distinguish the two cases from Mollie's side. Instead, check
+  // real payment status ourselves the moment this page loads: a genuine
+  // payer might land here a couple of seconds before the webhook confirms
+  // it, so poll briefly before concluding it's unpaid and sending them back
+  // to /purchase -- the page where they'd actually enter an email to pay.
+  useEffect(() => {
+    if (!email) return;
+    let cancelled = false;
+    let attempts = 0;
+    const maxAttempts = 5;
+
+    async function poll() {
+      attempts += 1;
+      try {
+        const status = await api.purchasePendingStatus(email);
+        if (cancelled) return;
+        if (status.paid) {
+          setCheckingStatus(false);
+          return;
+        }
+        // No pending checkout for this email at all -- never started a
+        // purchase, so there's nothing to wait for.
+        if (!status.exists) {
+          navigate(`/purchase?plan=${plan}&interval=${interval}`, { replace: true });
+          return;
+        }
+      } catch {
+        // If the status check itself fails, fall through to showing the
+        // form -- the existing submit-time PAYMENT_NOT_CONFIRMED handling
+        // still covers it.
+      }
+      if (attempts >= maxAttempts) {
+        if (!cancelled) {
+          navigate(`/purchase?plan=${plan}&interval=${interval}`, { replace: true });
+        }
+        return;
+      }
+      setTimeout(poll, 1500);
+    }
+
+    poll();
+    return () => {
+      cancelled = true;
+    };
+  }, [email, plan, interval, navigate]);
 
   useEffect(() => {
     if (!logo) return;
@@ -94,6 +144,22 @@ export default function CompleteSignupPage() {
 
   if (!email) {
     return null;
+  }
+
+  if (checkingStatus) {
+    return (
+      <div className="auth-page">
+        <div className="auth-lang-switcher">
+          <LanguageSwitcher />
+        </div>
+        <AuthBrand />
+        <div className="auth-form wide">
+          <h1>{t("completeSignup.title")}</h1>
+          <p className="hint">{t("completeSignup.confirmingPayment")}</p>
+        </div>
+        <AuthFooter />
+      </div>
+    );
   }
 
   return (

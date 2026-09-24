@@ -190,6 +190,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify(data),
     }),
+  purchasePendingStatus: (email: string) =>
+    request<{ paid: boolean; exists: boolean }>(
+      `/api/signup/pending-status?email=${encodeURIComponent(email)}`,
+    ),
   completeSignup: (data: {
     email: string;
     companyName: string;
