@@ -5,7 +5,7 @@ import { api, ApiError } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
 import LanguageSwitcher from "../components/LanguageSwitcher";
-import { type PlanKey, type Interval, MONTHLY_PRICE, YEARLY_PRICE, PLAN_LABEL, formatPrice } from "../lib/planPricing";
+import { type PlanKey, type Interval, PLAN_LABEL, formatPrice, priceBreakdownFor } from "../lib/planPricing";
 
 export default function PurchasePage() {
   const { t } = useTranslation();
@@ -16,7 +16,7 @@ export default function PurchasePage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const price = interval === "monthly" ? MONTHLY_PRICE[plan] : YEARLY_PRICE[plan];
+  const price = priceBreakdownFor(plan, interval);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -42,10 +42,13 @@ export default function PurchasePage() {
         <div className="purchase-summary">
           <span className="purchase-plan-name">{PLAN_LABEL[plan]}</span>
           <span className="purchase-plan-price">
-            {formatPrice(price)}
+            {formatPrice(price.gross)}
             <span className="purchase-plan-interval">
               {interval === "monthly" ? t("purchase.perMonth") : t("purchase.perYear")}
             </span>
+          </span>
+          <span className="purchase-plan-vat-breakdown">
+            {formatPrice(price.net)} + {formatPrice(price.vat)} VAT (21%)
           </span>
         </div>
         <p className="hint">{t("purchase.emailHint")}</p>

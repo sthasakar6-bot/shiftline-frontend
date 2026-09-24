@@ -14,3 +14,22 @@ export function priceFor(plan: PlanKey, interval: Interval): number {
 export function formatPrice(n: number): string {
   return `€${n.toFixed(2)}`;
 }
+
+// Flat 21% Dutch VAT, matching the backend's actual charge (see
+// computeVat in billing/providers/mollie.ts) -- these numbers are net
+// (VAT-exclusive); this is purely for display before the real,
+// server-computed amount is charged.
+export const VAT_RATE = 0.21;
+
+export interface PriceBreakdown {
+  net: number;
+  vat: number;
+  gross: number;
+}
+
+export function priceBreakdownFor(plan: PlanKey, interval: Interval): PriceBreakdown {
+  const net = priceFor(plan, interval);
+  const vat = Math.round(net * VAT_RATE * 100) / 100;
+  const gross = Math.round((net + vat) * 100) / 100;
+  return { net, vat, gross };
+}
