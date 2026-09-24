@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Camera } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../api/client";
+import { MARKETING_URL } from "../config";
 import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -199,7 +200,16 @@ export default function SignupPage() {
             checked={termsAccepted}
             onChange={(e) => setTermsAccepted(e.target.checked)}
           />
-          {t("signup.termsAgree")}
+          <span>
+            I agree to the{" "}
+            <a href={`${MARKETING_URL}/terms`} target="_blank" rel="noreferrer">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href={`${MARKETING_URL}/privacy`} target="_blank" rel="noreferrer">
+              Privacy Policy
+            </a>
+          </span>
         </label>
 
         <button type="submit" disabled={submitting || !logo}>
