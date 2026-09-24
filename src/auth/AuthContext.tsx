@@ -8,6 +8,7 @@ import {
   setToken,
 } from "../api/client";
 import type { User } from "../api/types";
+import type { SignupCompanyDetailsPayload } from "../api/client";
 
 interface AuthContextValue {
   user: User | null;
@@ -20,7 +21,7 @@ interface AuthContextValue {
     email: string;
     password: string;
     logo: File;
-  }) => Promise<User>;
+  } & SignupCompanyDetailsPayload) => Promise<User>;
   completeSignup: (data: {
     email: string;
     companyName: string;
@@ -28,7 +29,7 @@ interface AuthContextValue {
     lastName: string;
     password: string;
     logo: File;
-  }) => Promise<User>;
+  } & SignupCompanyDetailsPayload) => Promise<User>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -69,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string;
     password: string;
     logo: File;
-  }) {
+  } & SignupCompanyDetailsPayload) {
     const res = await api.signup(data);
     setToken(res.token);
     setUser(res.user);
@@ -86,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     lastName: string;
     password: string;
     logo: File;
-  }) {
+  } & SignupCompanyDetailsPayload) {
     const res = await api.completeSignup(data);
     setToken(res.token);
     setUser(res.user);

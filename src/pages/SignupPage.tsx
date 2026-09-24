@@ -7,6 +7,11 @@ import { ApiError } from "../api/client";
 import AuthBrand from "../components/AuthBrand";
 import AuthFooter from "../components/AuthFooter";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import CompanyDetailsFields, {
+  EMPTY_COMPANY_DETAILS,
+  resolveBillingAddress,
+  type CompanyDetailsState,
+} from "../components/CompanyDetailsFields";
 
 export default function SignupPage() {
   const { t } = useTranslation();
@@ -17,10 +22,14 @@ export default function SignupPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [role, setRole] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [logo, setLogo] = useState<File | null>(null);
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+  const [companyDetails, setCompanyDetails] = useState<CompanyDetailsState>(EMPTY_COMPANY_DETAILS);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -46,9 +55,36 @@ export default function SignupPage() {
       setError(t("signup.passwordMismatch"));
       return;
     }
+    if (!termsAccepted) {
+      setError(t("signup.termsRequired"));
+      return;
+    }
     setSubmitting(true);
     try {
-      const user = await signup({ companyName, firstName, lastName, email, password, logo });
+      const user = await signup({
+        companyName,
+        firstName,
+        lastName,
+        email,
+        password,
+        logo,
+        kvkNumber: companyDetails.kvkNumber,
+        vatNumber: companyDetails.vatNumber,
+        businessType: companyDetails.businessType,
+        industry: companyDetails.industry,
+        estimatedEmployeeCount: Number(companyDetails.estimatedEmployeeCount),
+        companyEmail: companyDetails.companyEmail,
+        companyPhone: companyDetails.companyPhone,
+        phone,
+        addressStreet: companyDetails.addressStreet,
+        addressNumber: companyDetails.addressNumber,
+        addressPostcode: companyDetails.addressPostcode,
+        addressCity: companyDetails.addressCity,
+        countryOfRegistration: companyDetails.countryOfRegistration,
+        billingAddress: resolveBillingAddress(companyDetails),
+        contactPersonRole: role,
+        termsAccepted,
+      });
       navigate(user.role === "manager" ? "/admin" : "/");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("signup.failed"));
@@ -104,6 +140,9 @@ export default function SignupPage() {
         </div>
         <p className="hint">{logo ? t("signup.logoUploaded") : t("signup.logoRequired")}</p>
 
+        <CompanyDetailsFields values={companyDetails} onChange={setCompanyDetails} />
+
+        <h2 className="auth-section-title">{t("signup.yourDetailsTitle")}</h2>
         <div className="auth-form-row">
           <label className="field">
             <span className="field-label">{t("auth.firstName")}</span>
@@ -118,6 +157,21 @@ export default function SignupPage() {
           {t("auth.email")}
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
+        <div className="auth-form-row">
+          <label className="field">
+            <span className="field-label">{t("signup.phone")}</span>
+            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+          </label>
+          <label className="field">
+            <span className="field-label">{t("signup.role")}</span>
+            <input
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              placeholder={t("signup.rolePlaceholder")}
+              required
+            />
+          </label>
+        </div>
         <label>
           {t("signup.password")}
           <input
@@ -137,6 +191,15 @@ export default function SignupPage() {
             required
             minLength={8}
           />
+        </label>
+
+        <label className="auth-checkbox-row">
+          <input
+            type="checkbox"
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+          />
+          {t("signup.termsAgree")}
         </label>
 
         <button type="submit" disabled={submitting || !logo}>

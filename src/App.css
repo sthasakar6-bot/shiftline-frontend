@@ -319,6 +319,34 @@
   margin-bottom: 2px;
 }
 
+.auth-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-h);
+  margin: 10px 0 -2px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.auth-form h2.auth-section-title:first-of-type {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.auth-checkbox-row {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+  font-weight: 500 !important;
+}
+
+.auth-checkbox-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
 .auth-form .hint {
   margin-top: -10px;
   font-size: 13px;
@@ -5270,6 +5298,53 @@ html[data-theme="light"] .auth-illustration-art-light {
   font-size: 20px;
   font-weight: 700;
   color: #fff;
+}
+
+.ict-detail-section {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.ict-detail-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 12px;
+}
+
+.ict-field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.ict-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ict-field-label {
+  font-size: 12px;
+  opacity: 0.65;
+  color: #fff;
+}
+
+.ict-field input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 9px 10px;
+  color: #fff;
+  font-size: 13.5px;
+}
+
+.ict-field input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .ict-ticket-form {

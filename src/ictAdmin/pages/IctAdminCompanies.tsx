@@ -1,8 +1,10 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { ictAdminApi, type IctAdminCompany } from "../client";
+import IctAdminCompanyDetail from "./IctAdminCompanyDetail";
 
 export default function IctAdminCompanies() {
   const [companies, setCompanies] = useState<IctAdminCompany[]>([]);
+  const [viewingCompanyId, setViewingCompanyId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -65,6 +67,12 @@ export default function IctAdminCompanies() {
     } finally {
       setDeleting(false);
     }
+  }
+
+  if (viewingCompanyId !== null) {
+    return (
+      <IctAdminCompanyDetail companyId={viewingCompanyId} onClose={() => setViewingCompanyId(null)} />
+    );
   }
 
   return (
@@ -152,9 +160,14 @@ export default function IctAdminCompanies() {
               <td>{c.userCount}</td>
               <td>{new Date(c.createdAt).toLocaleDateString()}</td>
               <td>
-                <button className="ict-danger-btn" onClick={() => setConfirmTarget(c)}>
-                  Remove
-                </button>
+                <div className="ict-ticket-form-row">
+                  <button className="ict-secondary-btn" onClick={() => setViewingCompanyId(c.id)}>
+                    View
+                  </button>
+                  <button className="ict-danger-btn" onClick={() => setConfirmTarget(c)}>
+                    Remove
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

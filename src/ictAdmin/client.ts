@@ -67,6 +67,79 @@ export interface IctAdminCompany {
   userCount: number;
 }
 
+export const COMPANY_PROFILE_FIELDS = [
+  "kvkNumber",
+  "vatNumber",
+  "legalAddress",
+  "businessType",
+  "countryOfRegistration",
+  "contactPersonName",
+  "contactPersonRole",
+  "billingEmail",
+  "billingAddress",
+  "customPricingNotes",
+  "industry",
+  "payrollCycle",
+  "schedulingFormat",
+  "shiftRulesNotes",
+  "supportEmail",
+  "phoneNumber",
+  "preferredLanguage",
+  "emergencyContact",
+  "preferredCommunicationChannel",
+  "companyEmail",
+  "companyPhone",
+  "addressStreet",
+  "addressNumber",
+  "addressPostcode",
+  "addressCity",
+] as const;
+
+export type CompanyProfileField = (typeof COMPANY_PROFILE_FIELDS)[number];
+
+export type CompanyProfileFields = Partial<Record<CompanyProfileField, string | null>> & {
+  estimatedEmployeeCount?: number | null;
+};
+
+export interface IctAdminCompanyFull extends CompanyProfileFields {
+  id: number;
+  name: string;
+  slug: string;
+  plan: string;
+  trialEndsAt: string | null;
+  billingProvider: string | null;
+  billingCustomerId: string | null;
+  billingSubscriptionId: string | null;
+  billingInterval: string | null;
+  subscriptionStatus: string | null;
+  createdAt: string;
+}
+
+export interface IctAdminBillingPayment {
+  id: string;
+  amount: { currency: string; value: string };
+  status: string;
+  method: string | null;
+  description: string;
+  createdAt: string;
+  paidAt: string | null;
+}
+
+export interface IctAdminCompanyProfile {
+  company: IctAdminCompanyFull;
+  stats: {
+    employeeCount: number;
+    activeEmployeeCount: number;
+    rolesBreakdown: { role: string; count: number }[];
+    workLocations: string[];
+  };
+  billing: {
+    payments: IctAdminBillingPayment[];
+    nextPaymentDate: string | null;
+    subscriptionStatus: string | null;
+  } | null;
+}
+
 async function requestForm<T>(path: string, formData: FormData, method: string): Promise<T> {
   const token = getIctAdminToken();
   const headers: Record<string, string> = {};
@@ -119,4 +192,11 @@ export const ictAdminApi = {
     return requestForm("/api/ict-admin/companies", form, "POST");
   },
   deleteCompany: (id: number) => request<void>(`/api/ict-admin/companies/${id}`, { method: "DELETE" }),
+  getCompanyProfile: (id: number) =>
+    request<IctAdminCompanyProfile>(`/api/ict-admin/companies/${id}`),
+  updateCompanyProfile: (id: number, fields: CompanyProfileFields) =>
+    request<IctAdminCompanyProfile>(`/api/ict-admin/companies/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(fields),
+    }),
 };

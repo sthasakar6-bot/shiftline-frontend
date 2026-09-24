@@ -122,6 +122,44 @@ async function requestBlob(path: string): Promise<Blob> {
   return res.blob();
 }
 
+export interface SignupCompanyDetailsPayload {
+  kvkNumber: string;
+  vatNumber: string;
+  businessType: string;
+  industry: string;
+  estimatedEmployeeCount: number;
+  companyEmail: string;
+  companyPhone: string;
+  phone: string;
+  addressStreet: string;
+  addressNumber: string;
+  addressPostcode: string;
+  addressCity: string;
+  countryOfRegistration: string;
+  billingAddress: string;
+  contactPersonRole: string;
+  termsAccepted: boolean;
+}
+
+function appendCompanyDetails(formData: FormData, data: SignupCompanyDetailsPayload) {
+  formData.append("kvkNumber", data.kvkNumber);
+  formData.append("vatNumber", data.vatNumber);
+  formData.append("businessType", data.businessType);
+  formData.append("industry", data.industry);
+  formData.append("estimatedEmployeeCount", String(data.estimatedEmployeeCount));
+  formData.append("companyEmail", data.companyEmail);
+  formData.append("companyPhone", data.companyPhone);
+  formData.append("phone", data.phone);
+  formData.append("addressStreet", data.addressStreet);
+  formData.append("addressNumber", data.addressNumber);
+  formData.append("addressPostcode", data.addressPostcode);
+  formData.append("addressCity", data.addressCity);
+  formData.append("countryOfRegistration", data.countryOfRegistration);
+  formData.append("billingAddress", data.billingAddress);
+  formData.append("contactPersonRole", data.contactPersonRole);
+  formData.append("termsAccepted", String(data.termsAccepted));
+}
+
 export const api = {
   login: (email: string, password: string, companyId: number) =>
     request<LoginResponse>("/api/auth/login", {
@@ -174,7 +212,7 @@ export const api = {
     email: string;
     password: string;
     logo: File;
-  }) => {
+  } & SignupCompanyDetailsPayload) => {
     const formData = new FormData();
     formData.append("companyName", data.companyName);
     formData.append("firstName", data.firstName);
@@ -182,6 +220,7 @@ export const api = {
     formData.append("email", data.email);
     formData.append("password", data.password);
     formData.append("logo", data.logo);
+    appendCompanyDetails(formData, data);
     return request<LoginResponse>("/api/signup", { method: "POST", body: formData });
   },
 
@@ -201,7 +240,7 @@ export const api = {
     lastName: string;
     password: string;
     logo: File;
-  }) => {
+  } & SignupCompanyDetailsPayload) => {
     const formData = new FormData();
     formData.append("email", data.email);
     formData.append("companyName", data.companyName);
@@ -209,6 +248,7 @@ export const api = {
     formData.append("lastName", data.lastName);
     formData.append("password", data.password);
     formData.append("logo", data.logo);
+    appendCompanyDetails(formData, data);
     return request<LoginResponse>("/api/signup/complete", { method: "POST", body: formData });
   },
 
