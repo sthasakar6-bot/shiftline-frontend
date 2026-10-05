@@ -1,7 +1,7 @@
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Camera, CalendarCheck, Clock, Palmtree, Thermometer, Download, Trash2 } from "lucide-react";
+import { ArrowLeft, Camera, CalendarCheck, Clock, Palmtree, Thermometer, Download, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { api, ApiError } from "../api/client";
 import Avatar from "../components/Avatar";
@@ -31,6 +31,7 @@ export default function ProfilePage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [privacyError, setPrivacyError] = useState<string | null>(null);
+  const [monthOffset, setMonthOffset] = useState(0);
 
   useEffect(() => {
     api.listAttendance().then(setAttendance).catch(() => {});
@@ -85,39 +86,60 @@ export default function ProfilePage() {
     }
   }
 
-  const stats = useMemo(() => {
+  const selectedMonthDate = useMemo(() => {
     const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    const yearStart = new Date(now.getFullYear(), 0, 1);
-    const yearEnd = new Date(now.getFullYear() + 1, 0, 1);
+    return new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+  }, [monthOffset]);
 
-    const thisMonth = attendance.filter((a) => {
+  // Attendance history goes back to whenever the employee's contract
+  // started clocking records -- this just bounds the "previous month" arrow
+  // so they can't page back past the point where there's nothing to show.
+  const earliestAttendanceMonth = useMemo(() => {
+    const dates = attendance.filter((a) => a.clockIn).map((a) => new Date(a.clockIn as string));
+    if (dates.length === 0) return null;
+    const earliest = dates.reduce((min, d) => (d < min ? d : min));
+    return new Date(earliest.getFullYear(), earliest.getMonth(), 1);
+  }, [attendance]);
+
+  const stats = useMemo(() => {
+    const monthStart = selectedMonthDate;
+    const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
+    const yearStart = new Date(monthStart.getFullYear(), 0, 1);
+    const yearEnd = new Date(monthStart.getFullYear() + 1, 0, 1);
+
+    const monthAttendance = attendance.filter((a) => {
       if (!a.clockIn) return false;
       const t = new Date(a.clockIn);
       return t >= monthStart && t < monthEnd;
     });
-    const daysWorked = new Set(thisMonth.map((a) => new Date(a.clockIn as string).toDateString()))
+    const daysWorked = new Set(monthAttendance.map((a) => new Date(a.clockIn as string).toDateString()))
       .size;
-    const workedMs = thisMonth.reduce((sum, a) => {
+    const workedMs = monthAttendance.reduce((sum, a) => {
       if (!a.clockIn || !a.clockOut) return sum;
       return sum + (new Date(a.clockOut).getTime() - new Date(a.clockIn).getTime());
     }, 0);
 
-    const approvedThisYear = leaveRequests.filter((l) => {
+    const approvedThatYear = leaveRequests.filter((l) => {
       if (l.status !== "approved") return false;
       const start = parseIsoDateLocal(l.startDate);
       return start >= yearStart && start < yearEnd;
     });
-    const vacationDays = approvedThisYear
+    const vacationDays = approvedThatYear
       .filter((l) => l.type === "vacation")
       .reduce((sum, l) => sum + countLeaveDays(l), 0);
-    const sickDays = approvedThisYear
+    const sickDays = approvedThatYear
       .filter((l) => l.type === "sick")
       .reduce((sum, l) => sum + countLeaveDays(l), 0);
 
     return { daysWorked, workedMs, vacationDays, sickDays };
-  }, [attendance, leaveRequests]);
+  }, [attendance, leaveRequests, selectedMonthDate]);
+
+  const canGoToNextMonth = monthOffset < 0;
+  const canGoToPreviousMonth = !earliestAttendanceMonth || selectedMonthDate > earliestAttendanceMonth;
+  const monthLabel = selectedMonthDate.toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
 
   if (!user) return null;
 
@@ -163,7 +185,27 @@ export default function ProfilePage() {
 
         <section className="panel profile-stats-panel">
           <div className="profile-stat-group">
-            <span className="profile-section-kicker">{t("profile.thisMonth")}</span>
+            <div className="profile-month-nav">
+              <button
+                type="button"
+                className="profile-month-nav-btn"
+                onClick={() => setMonthOffset((o) => o - 1)}
+                disabled={!canGoToPreviousMonth}
+                aria-label={t("profile.previousMonth")}
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="profile-section-kicker profile-month-label">{monthLabel}</span>
+              <button
+                type="button"
+                className="profile-month-nav-btn"
+                onClick={() => setMonthOffset((o) => o + 1)}
+                disabled={!canGoToNextMonth}
+                aria-label={t("profile.nextMonth")}
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
             <div className="profile-stat-grid">
               <div className="profile-stat-card accent">
                 <CalendarCheck size={20} />

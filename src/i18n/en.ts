@@ -251,6 +251,8 @@ export default {
   profile: {
     title: "Profile",
     thisMonth: "This month",
+    previousMonth: "Previous month",
+    nextMonth: "Next month",
     daysWorked: "Days worked",
     hoursWorked: "Hours worked",
     thisYear: "This year",

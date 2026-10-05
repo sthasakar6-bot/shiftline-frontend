@@ -4467,6 +4467,37 @@ td.attendance-grid-person-col {
   margin-bottom: 10px;
 }
 
+.profile-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.profile-month-label {
+  margin-bottom: 0;
+  min-width: 120px;
+  text-align: center;
+}
+
+.profile-month-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel-bg);
+  color: var(--text);
+}
+
+.profile-month-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .profile-privacy-panel {
   display: flex;
   flex-direction: column;
