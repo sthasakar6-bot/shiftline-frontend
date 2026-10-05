@@ -8,7 +8,7 @@ import { getDateLocale } from "../i18n";
 import Avatar from "./Avatar";
 import FileUploadButton from "./FileUploadButton";
 
-type Person = { id: number; name: string; hasAvatar: boolean; phone: string | null };
+type Person = { id: number; name: string; hasAvatar: boolean; phone: string | null; managerId: number | null };
 
 const ENDING_SOON_DAYS = 30;
 
@@ -37,12 +37,19 @@ export default function PayrollSection() {
 
   function reload() {
     api
-      .listReports()
-      .then(async (reports) => {
-        const all: Person[] = [
-          ...(user ? [{ id: user.id, name: user.name, hasAvatar: user.hasAvatar, phone: null }] : []),
-          ...reports.map((r) => ({ id: r.id, name: r.name, hasAvatar: r.hasAvatar, phone: r.phone })),
-        ];
+      .listPayrollEligible()
+      .then(async (eligible) => {
+        // Company-wide, not just the caller's own direct reports -- every
+        // manager/co-manager can see everyone's contracts/payslips here,
+        // though only their own reports (and themselves) are editable (see
+        // canEdit below, and the same restriction enforced server-side).
+        const all: Person[] = eligible.map((r) => ({
+          id: r.id,
+          name: r.name,
+          hasAvatar: r.hasAvatar,
+          phone: r.phone,
+          managerId: r.managerId,
+        }));
         setPeople(all);
         const results = await Promise.all(
           all.map((p) =>
@@ -60,6 +67,10 @@ export default function PayrollSection() {
   useEffect(reload, [user?.id]);
 
   const detailPerson = people.find((p) => p.id === detailPersonId) ?? null;
+
+  function canEdit(person: Person): boolean {
+    return !!user && (person.id === user.id || person.managerId === user.id);
+  }
 
   return (
     <section className="panel">
@@ -95,6 +106,7 @@ export default function PayrollSection() {
                       >
                         <Avatar userId={p.id} name={p.name} hasAvatar={p.hasAvatar} size={28} />
                         {p.name}
+                        {!canEdit(p) && <span className="read-only-badge">{t("team.readOnly")}</span>}
                       </button>
                     </td>
                     <td>
@@ -139,6 +151,7 @@ export default function PayrollSection() {
       {detailPerson && (
         <PayrollDetailModal
           person={detailPerson}
+          readOnly={!canEdit(detailPerson)}
           contracts={contractsByUser.get(detailPerson.id) ?? []}
           payslips={payslipsByUser.get(detailPerson.id) ?? []}
           onClose={() => setDetailPersonId(null)}
@@ -151,12 +164,14 @@ export default function PayrollSection() {
 
 function PayrollDetailModal({
   person,
+  readOnly,
   contracts,
   payslips,
   onClose,
   onChanged,
 }: {
   person: Person;
+  readOnly: boolean;
   contracts: Contract[];
   payslips: Payslip[];
   onClose: () => void;
@@ -258,7 +273,11 @@ function PayrollDetailModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal payroll-detail-modal" onClick={(e) => e.stopPropagation()}>
-        <h3>{person.name}</h3>
+        <h3>
+          {person.name}
+          {readOnly && <span className="read-only-badge">{t("team.readOnly")}</span>}
+        </h3>
+        {readOnly && <p className="hint">{t("team.readOnlyHint")}</p>}
 
         <h4>{t("team.manageContracts")}</h4>
         <ul className="list">
@@ -268,64 +287,83 @@ function PayrollDetailModal({
                 <strong>{c.role}</strong>
                 {!c.pdfFilename && ` — ${t("team.noPdfUploaded")}`}
               </div>
-              <div className="inline-form">
-                <label className="field">
-                  <span className="field-label">{t("summary.from")}</span>
-                  <input
-                    type="date"
-                    defaultValue={c.startDate ? c.startDate.slice(0, 10) : ""}
-                    onBlur={(e) => handleEditDates(c.id, "startDate", e.target.value)}
-                  />
-                </label>
-                <label className="field">
-                  <span className="field-label">{t("summary.to")}</span>
-                  <input
-                    type="date"
-                    defaultValue={c.endDate ? c.endDate.slice(0, 10) : ""}
-                    onBlur={(e) => handleEditDates(c.id, "endDate", e.target.value)}
-                  />
-                </label>
-              </div>
+              {readOnly ? (
+                <div className="inline-form">
+                  <div className="field">
+                    <span className="field-label">{t("summary.from")}</span>
+                    <span>{formatDate(c.startDate)}</span>
+                  </div>
+                  <div className="field">
+                    <span className="field-label">{t("summary.to")}</span>
+                    <span>{formatDate(c.endDate)}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="inline-form">
+                  <label className="field">
+                    <span className="field-label">{t("summary.from")}</span>
+                    <input
+                      type="date"
+                      defaultValue={c.startDate ? c.startDate.slice(0, 10) : ""}
+                      onBlur={(e) => handleEditDates(c.id, "startDate", e.target.value)}
+                    />
+                  </label>
+                  <label className="field">
+                    <span className="field-label">{t("summary.to")}</span>
+                    <input
+                      type="date"
+                      defaultValue={c.endDate ? c.endDate.slice(0, 10) : ""}
+                      onBlur={(e) => handleEditDates(c.id, "endDate", e.target.value)}
+                    />
+                  </label>
+                </div>
+              )}
               <span className="actions">
                 {c.pdfFilename && <button onClick={() => handleViewPdf(c.id)}>{t("team.viewPdf")}</button>}
-                <FileUploadButton
-                  id={`contract-reupload-${c.id}`}
-                  file={reuploadFiles[c.id] ?? null}
-                  onChange={(file) => setReuploadFiles({ ...reuploadFiles, [c.id]: file })}
-                  accept="application/pdf"
-                  label={t("team.uploadPdf")}
-                />
-                <button onClick={() => handleUploadPdf(c.id)}>
-                  {c.pdfFilename ? t("team.replacePdf") : t("team.uploadPdf")}
-                </button>
-                <button onClick={() => handleDeleteContract(c.id)}>{t("common.delete")}</button>
+                {!readOnly && (
+                  <>
+                    <FileUploadButton
+                      id={`contract-reupload-${c.id}`}
+                      file={reuploadFiles[c.id] ?? null}
+                      onChange={(file) => setReuploadFiles({ ...reuploadFiles, [c.id]: file })}
+                      accept="application/pdf"
+                      label={t("team.uploadPdf")}
+                    />
+                    <button onClick={() => handleUploadPdf(c.id)}>
+                      {c.pdfFilename ? t("team.replacePdf") : t("team.uploadPdf")}
+                    </button>
+                    <button onClick={() => handleDeleteContract(c.id)}>{t("common.delete")}</button>
+                  </>
+                )}
               </span>
             </li>
           ))}
           {contracts.length === 0 && <li className="empty">{t("team.noContracts")}</li>}
         </ul>
 
-        <form className="inline-form" onSubmit={handleCreateContract}>
-          <input placeholder={t("team.role")} value={role} onChange={(e) => setRole(e.target.value)} required />
-          <label className="field">
-            <span className="field-label">{t("summary.from")}</span>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-          </label>
-          <label className="field">
-            <span className="field-label">{t("summary.to")}</span>
-            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-          </label>
-          <FileUploadButton
-            id="new-contract-file"
-            file={pdfFile}
-            onChange={setPdfFile}
-            accept="application/pdf"
-            label={t("team.uploadPdf")}
-          />
-          <button type="submit" disabled={saving}>
-            {t("team.createContract")}
-          </button>
-        </form>
+        {!readOnly && (
+          <form className="inline-form" onSubmit={handleCreateContract}>
+            <input placeholder={t("team.role")} value={role} onChange={(e) => setRole(e.target.value)} required />
+            <label className="field">
+              <span className="field-label">{t("summary.from")}</span>
+              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            </label>
+            <label className="field">
+              <span className="field-label">{t("summary.to")}</span>
+              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            </label>
+            <FileUploadButton
+              id="new-contract-file"
+              file={pdfFile}
+              onChange={setPdfFile}
+              accept="application/pdf"
+              label={t("team.uploadPdf")}
+            />
+            <button type="submit" disabled={saving}>
+              {t("team.createContract")}
+            </button>
+          </form>
+        )}
 
         {message && <div className="success">{message}</div>}
         {error && <div className="error">{error}</div>}

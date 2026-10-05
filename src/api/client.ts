@@ -271,6 +271,7 @@ export const api = {
       body: JSON.stringify(data),
     }),
   listReports: () => request<UserSummary[]>("/api/users/reports"),
+  listPayrollEligible: () => request<UserSummary[]>("/api/users/payroll-eligible"),
   listEmployees: () => request<UserSummary[]>("/api/users/employees"),
   promoteUser: (id: number) => request<UserSummary>(`/api/users/${id}/promote`, { method: "POST" }),
   assignManager: (id: number) =>

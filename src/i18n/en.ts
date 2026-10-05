@@ -383,6 +383,8 @@ export default {
     payslipCount_other: "{{count}} payslips",
     payslipsFromBookkeeper: "Payslips are uploaded by your bookkeeper — you can view them here, but not upload new ones.",
     manageContracts: "Manage contracts",
+    readOnly: "View only",
+    readOnlyHint: "You can view this person's documents, but only their own manager can edit, upload, or delete them.",
     managePayslips: "Payslips",
     selectEmployee: "Select employee",
     noPdfUploaded: "no PDF uploaded",
