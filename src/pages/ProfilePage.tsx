@@ -200,7 +200,7 @@ export default function ProfilePage() {
 
         <section className="panel profile-privacy-panel">
           <h2 className="profile-section-kicker">{t("profile.privacyTitle")}</h2>
-          {privacyError && <div className="error">{privacyError}</div>}
+          {privacyError && !showDeleteConfirm && <div className="error">{privacyError}</div>}
 
           <div className="profile-privacy-row">
             <div>
@@ -212,7 +212,10 @@ export default function ProfilePage() {
               {exporting ? t("profile.exporting") : t("profile.exportData")}
             </button>
           </div>
+        </section>
 
+        <section className="panel danger-zone-panel">
+          <h2 className="danger-zone-title">{t("profile.dangerZoneTitle")}</h2>
           <div className="profile-privacy-row">
             <div>
               <p className="profile-privacy-label">{t("profile.deleteAccountTitle")}</p>
@@ -239,6 +242,7 @@ export default function ProfilePage() {
                 ? t("profile.deleteAccountHintManager")
                 : t("profile.deleteAccountHint")}
             </p>
+            {privacyError && <div className="error">{privacyError}</div>}
             <p>{t("profile.deleteConfirmPrompt")}</p>
             <input
               value={deleteConfirmText}

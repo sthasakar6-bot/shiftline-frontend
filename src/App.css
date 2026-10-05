@@ -4484,6 +4484,23 @@ td.attendance-grid-person-col {
   margin: 0 0 2px;
 }
 
+.danger-zone-panel {
+  border: 1px solid rgba(224, 72, 62, 0.35);
+  background: rgba(224, 72, 62, 0.04);
+}
+
+.danger-zone-title {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #e0483e;
+  opacity: 0.9;
+  margin-bottom: 10px;
+}
+
 .profile-stats-panel {
   display: flex;
   flex-direction: column;
