@@ -17,6 +17,7 @@ import ChatSection from "../components/ChatSection";
 import { api } from "../api/client";
 import type { Notification } from "../api/types";
 import { updateAppBadge } from "../lib/appBadge";
+import { useChatUnread } from "../hooks/useChatUnread";
 
 const tabKeys = ["home", "roster", "attendance", "leave", "team", "chat", "notifications"];
 
@@ -51,10 +52,15 @@ export default function DashboardPage() {
   }, [searchParams]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const { unreadCount: unreadChat, markRead: markChatRead } = useChatUnread();
 
   useEffect(() => {
     updateAppBadge(unreadCount);
   }, [unreadCount]);
+
+  useEffect(() => {
+    if (active === "chat") markChatRead();
+  }, [active, markChatRead]);
 
   const tabs: Tab[] = [
     { key: "home", label: t("nav.home"), icon: Home },
@@ -62,7 +68,7 @@ export default function DashboardPage() {
     { key: "attendance", label: t("nav.attendance"), icon: Watch },
     { key: "leave", label: t("nav.leave"), icon: Palmtree },
     { key: "team", label: t("nav.team"), icon: Users },
-    { key: "chat", label: t("nav.chat"), icon: MessageCircle },
+    { key: "chat", label: t("nav.chat"), icon: MessageCircle, badge: unreadChat },
     { key: "notifications", label: t("nav.alerts"), icon: Bell, badge: unreadCount },
   ];
 

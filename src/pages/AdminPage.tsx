@@ -22,6 +22,7 @@ import AssistantSection from "../components/AssistantSection";
 import { api } from "../api/client";
 import type { Notification } from "../api/types";
 import { updateAppBadge } from "../lib/appBadge";
+import { useChatUnread } from "../hooks/useChatUnread";
 
 const tabKeys = ["team", "payroll", "roster", "invite", "leave", "attendance", "summary", "billing", "backup", "chat", "assistant", "alerts"];
 
@@ -58,10 +59,15 @@ export default function AdminPage() {
   const unreadLeaveNotifications = notifications.filter(
     (n) => !n.read && n.url === "/admin?tab=leave",
   );
+  const { unreadCount: unreadChat, markRead: markChatRead } = useChatUnread();
 
   useEffect(() => {
     updateAppBadge(unreadCount);
   }, [unreadCount]);
+
+  useEffect(() => {
+    if (active === "chat") markChatRead();
+  }, [active, markChatRead]);
 
   // Looking at the Leave tab counts as having seen those requests -- clear
   // their badge the same way opening a notification would.
@@ -84,7 +90,7 @@ export default function AdminPage() {
     { key: "roster", label: t("nav.roster"), icon: CalendarDays },
     { key: "leave", label: t("nav.leave"), icon: Palmtree, badge: unreadLeaveNotifications.length },
     { key: "attendance", label: t("nav.attendance"), icon: Clock },
-    { key: "chat", label: t("nav.chat"), icon: MessageCircle },
+    { key: "chat", label: t("nav.chat"), icon: MessageCircle, badge: unreadChat },
     { key: "assistant", label: t("nav.assistant"), icon: Sparkles },
     { key: "alerts", label: t("nav.alerts"), icon: Bell, badge: unreadCount },
   ];
