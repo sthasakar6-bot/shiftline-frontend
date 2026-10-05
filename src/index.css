@@ -171,60 +171,6 @@ body {
   overscroll-behavior-y: contain;
 }
 
-body.has-wallpaper {
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-}
-
-/* Glass look so panels/header/nav read as floating over the photo instead
-   of sitting on it as separate opaque boxes. */
-body.has-wallpaper .panel,
-body.has-wallpaper .app-header,
-body.has-wallpaper .tab-bar-arched,
-body.has-wallpaper .modal,
-body.has-wallpaper .auth-form {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-body.has-wallpaper .tab-bar-arched .tab-bar-group {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-}
-
-:root[data-theme="dark"] body.has-wallpaper .panel,
-:root[data-theme="dark"] body.has-wallpaper .app-header,
-:root[data-theme="dark"] body.has-wallpaper .tab-bar-arched,
-:root[data-theme="dark"] body.has-wallpaper .modal,
-:root[data-theme="dark"] body.has-wallpaper .auth-form {
-  background: rgba(30, 41, 59, 0.68);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-:root[data-theme="dark"] body.has-wallpaper .tab-bar-arched .tab-bar-group {
-  background: rgba(30, 41, 59, 0.55);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) body.has-wallpaper .panel,
-  :root:not([data-theme="light"]) body.has-wallpaper .app-header,
-  :root:not([data-theme="light"]) body.has-wallpaper .tab-bar-arched,
-  :root:not([data-theme="light"]) body.has-wallpaper .modal,
-  :root:not([data-theme="light"]) body.has-wallpaper .auth-form {
-    background: rgba(30, 41, 59, 0.68);
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-
-  :root:not([data-theme="light"]) body.has-wallpaper .tab-bar-arched .tab-bar-group {
-    background: rgba(30, 41, 59, 0.55);
-  }
-}
-
 h1,
 h2,
 h3 {

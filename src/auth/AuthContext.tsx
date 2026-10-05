@@ -9,18 +9,6 @@ import {
 } from "../api/client";
 import type { User } from "../api/types";
 import type { SignupCompanyDetailsPayload } from "../api/client";
-import { wallpaperGradient } from "../lib/wallpapers";
-
-function applyWallpaper(wallpaperKey: string | null) {
-  const body = document.body;
-  if (!wallpaperKey) {
-    body.style.backgroundImage = "";
-    body.classList.remove("has-wallpaper");
-    return;
-  }
-  body.style.backgroundImage = wallpaperGradient(wallpaperKey);
-  body.classList.add("has-wallpaper");
-}
 
 interface AuthContextValue {
   user: User | null;
@@ -63,10 +51,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .catch(() => clearToken())
       .finally(() => setLoading(false));
   }, []);
-
-  useEffect(() => {
-    applyWallpaper(user?.wallpaperUrl ?? null);
-  }, [user?.wallpaperUrl]);
 
   async function login(email: string, password: string) {
     const company = getSelectedCompany();

@@ -4498,62 +4498,6 @@ td.attendance-grid-person-col {
   margin: 0 0 2px;
 }
 
-.user-box-wallpaper-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 4px 14px 12px;
-}
-
-.wallpaper-swatch {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 10px;
-  border: 2px solid transparent;
-  background-color: var(--bg);
-  background-size: cover;
-  background-position: center;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  padding: 0;
-  transition: transform 0.12s ease, border-color 0.12s ease;
-}
-
-.wallpaper-swatch:hover {
-  transform: scale(1.04);
-}
-
-.wallpaper-swatch.selected {
-  border-color: var(--accent-solid);
-}
-
-.wallpaper-swatch svg {
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
-}
-
-.wallpaper-swatch-none {
-  background-image: none;
-  border: 2px dashed var(--border);
-  color: var(--text);
-}
-
-.wallpaper-swatch-none.selected {
-  border-style: solid;
-  border-color: var(--accent-solid);
-}
-
-.wallpaper-swatch-sm {
-  width: 32px;
-  height: 32px;
-  aspect-ratio: unset;
-  border-radius: 8px;
-  flex: 0 0 auto;
-}
-
 .danger-zone-panel {
   border: 1px solid rgba(224, 72, 62, 0.35);
   background: rgba(224, 72, 62, 0.04);

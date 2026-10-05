@@ -14,29 +14,23 @@ import {
   UserPlus,
   BarChart3,
   Shield,
-  Palette,
-  Check,
 } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
-import { api } from "../api/client";
 import Avatar from "./Avatar";
 import {
   disablePushNotifications,
   enablePushNotifications,
   isPushSupported,
 } from "../lib/push";
-import { WALLPAPER_URLS, wallpaperGradient } from "../lib/wallpapers";
 
 export default function UserBox() {
   const { t } = useTranslation();
-  const { user, logout, refreshUser } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushError, setPushError] = useState<string | null>(null);
-  const [backgroundOpen, setBackgroundOpen] = useState(false);
-  const [wallpaperSaving, setWallpaperSaving] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -68,18 +62,6 @@ export default function UserBox() {
       }
     } catch (err) {
       setPushError(err instanceof Error ? err.message : t("userBox.notificationsUpdateFailed"));
-    }
-  }
-
-  async function handlePickWallpaper(wallpaperUrl: string | null) {
-    setWallpaperSaving(wallpaperUrl ?? "none");
-    try {
-      await api.updateWallpaper(wallpaperUrl);
-      await refreshUser();
-    } catch {
-      // Non-critical preference -- just leave the previous selection in place.
-    } finally {
-      setWallpaperSaving(null);
     }
   }
 
@@ -148,36 +130,6 @@ export default function UserBox() {
                   <div className="side-drawer-divider" />
                 </>
               )}
-              <button onClick={() => setBackgroundOpen((v) => !v)}>
-                <Palette size={16} />
-                {t("userBox.appBackground")}
-              </button>
-              {backgroundOpen && (
-                <div className="user-box-wallpaper-row">
-                  <button
-                    type="button"
-                    className={`wallpaper-swatch wallpaper-swatch-none wallpaper-swatch-sm${!user.wallpaperUrl ? " selected" : ""}`}
-                    onClick={() => handlePickWallpaper(null)}
-                    disabled={wallpaperSaving !== null}
-                    title={t("profile.appearanceDefault")}
-                  >
-                    {!user.wallpaperUrl && <Check size={14} />}
-                  </button>
-                  {WALLPAPER_URLS.map((key) => (
-                    <button
-                      type="button"
-                      key={key}
-                      className={`wallpaper-swatch wallpaper-swatch-sm${user.wallpaperUrl === key ? " selected" : ""}`}
-                      style={{ backgroundImage: wallpaperGradient(key) }}
-                      onClick={() => handlePickWallpaper(key)}
-                      disabled={wallpaperSaving !== null}
-                    >
-                      {user.wallpaperUrl === key && <Check size={14} />}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <div className="side-drawer-divider" />
               {isPushSupported() && (
                 <button onClick={handleTogglePush}>
                   {pushEnabled ? <BellOff size={16} /> : <Bell size={16} />}

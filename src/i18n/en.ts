@@ -259,7 +259,6 @@ export default {
     changePhoto: "Change photo",
     uploadingPhoto: "Uploading photo...",
     uploadPhotoFailed: "Failed to upload photo",
-    appearanceDefault: "Default",
     privacyTitle: "Privacy & data",
     exportDataTitle: "Export your data",
     exportDataHint: "Download a copy of everything Shiftline holds about you, as a JSON file.",
@@ -662,7 +661,6 @@ export default {
   },
   userBox: {
     myProfile: "My Profile",
-    appBackground: "App background",
     switchToAdmin: "Switch to Administration",
     backToDashboard: "Back to Dashboard",
     enableNotifications: "Enable notifications",
