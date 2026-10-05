@@ -10,7 +10,7 @@ import PayslipsSection from "../components/PayslipsSection";
 import type { Attendance, LeaveRequest } from "../api/types";
 import { parseIsoDateLocal } from "../lib/dateOnly";
 import { formatDuration } from "../lib/formatDate";
-import { WALLPAPER_URLS, wallpaperThumbUrl } from "../lib/wallpapers";
+import { WALLPAPER_URLS, wallpaperGradient } from "../lib/wallpapers";
 
 function countLeaveDays(l: LeaveRequest): number {
   const start = parseIsoDateLocal(l.startDate);
@@ -222,16 +222,16 @@ export default function ProfilePage() {
             >
               {!user.wallpaperUrl && <Check size={16} />}
             </button>
-            {WALLPAPER_URLS.map((url) => (
+            {WALLPAPER_URLS.map((key) => (
               <button
                 type="button"
-                key={url}
-                className={`wallpaper-swatch${user.wallpaperUrl === url ? " selected" : ""}`}
-                style={{ backgroundImage: `url(${wallpaperThumbUrl(url)})` }}
-                onClick={() => handlePickWallpaper(url)}
+                key={key}
+                className={`wallpaper-swatch${user.wallpaperUrl === key ? " selected" : ""}`}
+                style={{ backgroundImage: wallpaperGradient(key) }}
+                onClick={() => handlePickWallpaper(key)}
                 disabled={wallpaperSaving !== null}
               >
-                {user.wallpaperUrl === url && <Check size={16} />}
+                {user.wallpaperUrl === key && <Check size={16} />}
               </button>
             ))}
           </div>
