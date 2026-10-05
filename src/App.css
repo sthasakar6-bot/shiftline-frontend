@@ -4498,11 +4498,11 @@ td.attendance-grid-person-col {
   margin: 0 0 2px;
 }
 
-.wallpaper-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-  gap: 10px;
-  margin-top: 10px;
+.user-box-wallpaper-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 14px 12px;
 }
 
 .wallpaper-swatch {
@@ -4544,6 +4544,14 @@ td.attendance-grid-person-col {
 .wallpaper-swatch-none.selected {
   border-style: solid;
   border-color: var(--accent-solid);
+}
+
+.wallpaper-swatch-sm {
+  width: 32px;
+  height: 32px;
+  aspect-ratio: unset;
+  border-radius: 8px;
+  flex: 0 0 auto;
 }
 
 .danger-zone-panel {

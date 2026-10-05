@@ -259,8 +259,6 @@ export default {
     changePhoto: "Change photo",
     uploadingPhoto: "Uploading photo...",
     uploadPhotoFailed: "Failed to upload photo",
-    appearanceTitle: "Appearance",
-    appearanceHint: "Pick a background for your app.",
     appearanceDefault: "Default",
     privacyTitle: "Privacy & data",
     exportDataTitle: "Export your data",
@@ -664,6 +662,7 @@ export default {
   },
   userBox: {
     myProfile: "My Profile",
+    appBackground: "App background",
     switchToAdmin: "Switch to Administration",
     backToDashboard: "Back to Dashboard",
     enableNotifications: "Enable notifications",
