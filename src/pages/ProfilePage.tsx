@@ -1,7 +1,7 @@
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Camera, CalendarCheck, Clock, Palmtree, Thermometer, Download, Trash2 } from "lucide-react";
+import { ArrowLeft, Camera, CalendarCheck, Clock, Palmtree, Thermometer, Download, Trash2, Check } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { api, ApiError } from "../api/client";
 import Avatar from "../components/Avatar";
@@ -10,6 +10,7 @@ import PayslipsSection from "../components/PayslipsSection";
 import type { Attendance, LeaveRequest } from "../api/types";
 import { parseIsoDateLocal } from "../lib/dateOnly";
 import { formatDuration } from "../lib/formatDate";
+import { WALLPAPER_URLS, wallpaperThumbUrl } from "../lib/wallpapers";
 
 function countLeaveDays(l: LeaveRequest): number {
   const start = parseIsoDateLocal(l.startDate);
@@ -31,6 +32,7 @@ export default function ProfilePage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [privacyError, setPrivacyError] = useState<string | null>(null);
+  const [wallpaperSaving, setWallpaperSaving] = useState<string | null>(null);
 
   useEffect(() => {
     api.listAttendance().then(setAttendance).catch(() => {});
@@ -82,6 +84,18 @@ export default function ProfilePage() {
     } catch (err) {
       setPrivacyError(err instanceof ApiError ? err.message : t("profile.deleteFailed"));
       setDeleting(false);
+    }
+  }
+
+  async function handlePickWallpaper(wallpaperUrl: string | null) {
+    setWallpaperSaving(wallpaperUrl ?? "none");
+    try {
+      await api.updateWallpaper(wallpaperUrl);
+      await refreshUser();
+    } catch {
+      // Non-critical preference -- just leave the previous selection in place.
+    } finally {
+      setWallpaperSaving(null);
     }
   }
 
@@ -192,6 +206,34 @@ export default function ProfilePage() {
                 <div className="profile-stat-label">{t("profile.sickDaysTaken")}</div>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="panel profile-appearance-panel">
+          <h2 className="profile-section-kicker">{t("profile.appearanceTitle")}</h2>
+          <p className="hint">{t("profile.appearanceHint")}</p>
+          <div className="wallpaper-grid">
+            <button
+              type="button"
+              className={`wallpaper-swatch wallpaper-swatch-none${!user.wallpaperUrl ? " selected" : ""}`}
+              onClick={() => handlePickWallpaper(null)}
+              disabled={wallpaperSaving !== null}
+              title={t("profile.appearanceDefault")}
+            >
+              {!user.wallpaperUrl && <Check size={16} />}
+            </button>
+            {WALLPAPER_URLS.map((url) => (
+              <button
+                type="button"
+                key={url}
+                className={`wallpaper-swatch${user.wallpaperUrl === url ? " selected" : ""}`}
+                style={{ backgroundImage: `url(${wallpaperThumbUrl(url)})` }}
+                onClick={() => handlePickWallpaper(url)}
+                disabled={wallpaperSaving !== null}
+              >
+                {user.wallpaperUrl === url && <Check size={16} />}
+              </button>
+            ))}
           </div>
         </section>
 

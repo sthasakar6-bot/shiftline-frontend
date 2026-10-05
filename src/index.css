@@ -171,6 +171,13 @@ body {
   overscroll-behavior-y: contain;
 }
 
+body.has-wallpaper {
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
 h1,
 h2,
 h3 {

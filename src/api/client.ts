@@ -603,6 +603,11 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify({ currentPassword, newPassword }),
     }),
+  updateWallpaper: (wallpaperUrl: string | null) =>
+    request<void>("/api/auth/wallpaper", {
+      method: "PATCH",
+      body: JSON.stringify({ wallpaperUrl }),
+    }),
   updatePhone: (phone: string) =>
     request<void>("/api/auth/phone", { method: "PATCH", body: JSON.stringify({ phone }) }),
   completeOnboarding: (data: { password: string; phone?: string; address?: string }) =>

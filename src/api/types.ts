@@ -14,6 +14,7 @@ export interface User {
   companySlug: string;
   companyPlan: string;
   companyTrialEndsAt: string | null;
+  wallpaperUrl: string | null;
 }
 
 export interface AssistantChatTurn {
