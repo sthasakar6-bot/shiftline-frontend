@@ -1,4 +1,37 @@
+import { useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
+
+const KVK_LENGTH = 8;
+
+const BUSINESS_TYPES = ["BV", "VOF", "Eenmanszaak", "NV", "Maatschap", "CV", "Stichting", "Vereniging"];
+
+const INDUSTRIES = [
+  "Retail",
+  "Hospitality & Catering",
+  "Restaurants & Cafes",
+  "Hotels & Accommodation",
+  "Healthcare",
+  "Logistics & Transport",
+  "Warehousing",
+  "Construction",
+  "Manufacturing",
+  "Cleaning Services",
+  "Bakery & Food Production",
+  "Supermarkets & Grocery",
+  "Beauty & Wellness",
+  "Education",
+  "Agriculture",
+  "Automotive",
+  "IT & Technology",
+  "Finance & Insurance",
+  "Real Estate",
+  "Entertainment & Events",
+  "Security Services",
+  "Sports & Recreation",
+  "Non-profit",
+];
+
+const OTHER_VALUE = "__other__";
 
 export interface CompanyDetailsState {
   kvkNumber: string;
@@ -53,18 +86,46 @@ interface Props {
 
 export default function CompanyDetailsFields({ values, onChange }: Props) {
   const { t } = useTranslation();
+  const [businessTypeIsOther, setBusinessTypeIsOther] = useState(
+    () => values.businessType !== "" && !BUSINESS_TYPES.includes(values.businessType),
+  );
+  const [industryIsOther, setIndustryIsOther] = useState(
+    () => values.industry !== "" && !INDUSTRIES.includes(values.industry),
+  );
 
   function set<K extends keyof CompanyDetailsState>(key: K, value: CompanyDetailsState[K]) {
     onChange({ ...values, [key]: value });
   }
+
+  function handleKvkChange(e: ChangeEvent<HTMLInputElement>) {
+    const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, KVK_LENGTH);
+    set("kvkNumber", digitsOnly);
+  }
+
+  function handleEmployeeCountChange(e: ChangeEvent<HTMLInputElement>) {
+    const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 6);
+    set("estimatedEmployeeCount", digitsOnly);
+  }
+
+  const kvkError =
+    values.kvkNumber.length > 0 && values.kvkNumber.length !== KVK_LENGTH
+      ? t("companyDetails.kvkLengthError", { count: KVK_LENGTH })
+      : null;
 
   return (
     <>
       <h2 className="auth-section-title">{t("companyDetails.companyInfoTitle")}</h2>
       <label>
         {t("companyDetails.kvkNumber")}
-        <input value={values.kvkNumber} onChange={(e) => set("kvkNumber", e.target.value)} required />
+        <input
+          value={values.kvkNumber}
+          onChange={handleKvkChange}
+          inputMode="numeric"
+          maxLength={KVK_LENGTH}
+          required
+        />
       </label>
+      {kvkError && <p className="field-error">{kvkError}</p>}
       <div className="auth-form-row">
         <label className="field">
           <span className="field-label">{t("companyDetails.vatNumber")}</span>
@@ -72,31 +133,83 @@ export default function CompanyDetailsFields({ values, onChange }: Props) {
         </label>
         <label className="field">
           <span className="field-label">{t("companyDetails.businessType")}</span>
-          <input
-            value={values.businessType}
-            onChange={(e) => set("businessType", e.target.value)}
-            placeholder={t("companyDetails.businessTypePlaceholder")}
+          <select
+            value={businessTypeIsOther ? OTHER_VALUE : values.businessType}
+            onChange={(e) => {
+              if (e.target.value === OTHER_VALUE) {
+                setBusinessTypeIsOther(true);
+                set("businessType", "");
+              } else {
+                setBusinessTypeIsOther(false);
+                set("businessType", e.target.value);
+              }
+            }}
             required
-          />
+          >
+            <option value="" disabled>
+              {t("companyDetails.selectPlaceholder")}
+            </option>
+            {BUSINESS_TYPES.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+            <option value={OTHER_VALUE}>{t("companyDetails.other")}</option>
+          </select>
+          {businessTypeIsOther && (
+            <input
+              className="field-other-input"
+              value={values.businessType}
+              onChange={(e) => set("businessType", e.target.value)}
+              placeholder={t("companyDetails.specifyOther")}
+              required
+            />
+          )}
         </label>
       </div>
       <div className="auth-form-row">
         <label className="field">
           <span className="field-label">{t("companyDetails.industry")}</span>
-          <input
-            value={values.industry}
-            onChange={(e) => set("industry", e.target.value)}
-            placeholder={t("companyDetails.industryPlaceholder")}
+          <select
+            value={industryIsOther ? OTHER_VALUE : values.industry}
+            onChange={(e) => {
+              if (e.target.value === OTHER_VALUE) {
+                setIndustryIsOther(true);
+                set("industry", "");
+              } else {
+                setIndustryIsOther(false);
+                set("industry", e.target.value);
+              }
+            }}
             required
-          />
+          >
+            <option value="" disabled>
+              {t("companyDetails.selectPlaceholder")}
+            </option>
+            {INDUSTRIES.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+            <option value={OTHER_VALUE}>{t("companyDetails.other")}</option>
+          </select>
+          {industryIsOther && (
+            <input
+              className="field-other-input"
+              value={values.industry}
+              onChange={(e) => set("industry", e.target.value)}
+              placeholder={t("companyDetails.specifyOther")}
+              required
+            />
+          )}
         </label>
         <label className="field">
           <span className="field-label">{t("companyDetails.employeeCount")}</span>
           <input
-            type="number"
-            min={1}
+            type="text"
+            inputMode="numeric"
             value={values.estimatedEmployeeCount}
-            onChange={(e) => set("estimatedEmployeeCount", e.target.value)}
+            onChange={handleEmployeeCountChange}
             required
           />
         </label>
