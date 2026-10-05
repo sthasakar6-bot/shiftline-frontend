@@ -2385,8 +2385,9 @@
 
 .bookkeeper-upload-table li {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: minmax(140px, 260px) auto auto;
   align-items: center;
+  justify-content: start;
   gap: 14px;
   padding: 12px 10px;
   border-bottom: 1px solid var(--border);
