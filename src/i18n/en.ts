@@ -460,6 +460,7 @@ export default {
     uploadPayslips: "Upload Payslips",
     uploadContracts: "Upload Contracts",
     searchEmployees: "Search employees...",
+    uploadPdf: "Upload PDF",
     noSearchResults: "No employees match your search.",
     hoursThisMonth: "{{hours}}h worked this month",
     noEmployees: "No employees yet.",

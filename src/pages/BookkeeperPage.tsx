@@ -1,4 +1,4 @@
-import { type ChangeEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FileText, Receipt, Trash2, Folder, Search } from "lucide-react";
 import { api, ApiError } from "../api/client";
@@ -7,6 +7,7 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 import UserBox from "../components/UserBox";
 import { SkeletonRows } from "../components/Skeleton";
 import ConfirmDialog from "../components/ConfirmDialog";
+import FileUploadButton from "../components/FileUploadButton";
 
 type DeleteTarget = { type: "payslip" | "contract"; employeeId: number; id: number; label: string };
 type BookkeeperTab = "history" | "payslips" | "contracts";
@@ -48,12 +49,12 @@ export default function BookkeeperPage() {
     );
   }, [employees, search]);
 
-  function handlePayslipFileChange(employeeId: number, e: ChangeEvent<HTMLInputElement>) {
-    setPayslipFiles({ ...payslipFiles, [employeeId]: e.target.files?.[0] ?? null });
+  function handlePayslipFileChange(employeeId: number, file: File | null) {
+    setPayslipFiles({ ...payslipFiles, [employeeId]: file });
   }
 
-  function handleContractFileChange(employeeId: number, e: ChangeEvent<HTMLInputElement>) {
-    setContractFiles({ ...contractFiles, [employeeId]: e.target.files?.[0] ?? null });
+  function handleContractFileChange(employeeId: number, file: File | null) {
+    setContractFiles({ ...contractFiles, [employeeId]: file });
   }
 
   const payslipTargets = employees.filter((e) => payslipFiles[e.id]);
@@ -289,10 +290,12 @@ export default function BookkeeperPage() {
                       {e.name}
                       <span className="hint">{t("bookkeeper.hoursThisMonth", { hours: e.hoursThisMonth })}</span>
                     </span>
-                    <input
-                      type="file"
+                    <FileUploadButton
+                      id={`payslip-file-${e.id}`}
+                      file={payslipFiles[e.id] ?? null}
+                      onChange={(file) => handlePayslipFileChange(e.id, file)}
                       accept="application/pdf"
-                      onChange={(ev) => handlePayslipFileChange(e.id, ev)}
+                      label={t("bookkeeper.uploadPdf")}
                     />
                   </li>
                 ))}
@@ -327,10 +330,12 @@ export default function BookkeeperPage() {
                       value={contractRoles[e.id] ?? ""}
                       onChange={(ev) => setContractRoles({ ...contractRoles, [e.id]: ev.target.value })}
                     />
-                    <input
-                      type="file"
+                    <FileUploadButton
+                      id={`contract-file-${e.id}`}
+                      file={contractFiles[e.id] ?? null}
+                      onChange={(file) => handleContractFileChange(e.id, file)}
                       accept="application/pdf"
-                      onChange={(ev) => handleContractFileChange(e.id, ev)}
+                      label={t("bookkeeper.uploadPdf")}
                     />
                   </li>
                 ))}

@@ -2421,9 +2421,49 @@
   width: 140px;
 }
 
-.bookkeeper-upload-table input[type="file"] {
-  font-size: 12.5px;
-  max-width: 180px;
+.file-upload-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.file-upload-btn:hover {
+  border-color: var(--accent);
+}
+
+.file-upload-btn span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-upload-btn-filled {
+  border-color: var(--accent-solid);
+  background: var(--accent-bg);
+  color: var(--accent-solid);
+}
+
+.file-upload-btn-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
 }
 
 .list li.empty {

@@ -6,6 +6,7 @@ import type { Contract, Payslip } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { getDateLocale } from "../i18n";
 import Avatar from "./Avatar";
+import FileUploadButton from "./FileUploadButton";
 
 type Person = { id: number; name: string; hasAvatar: boolean; phone: string | null };
 
@@ -287,12 +288,12 @@ function PayrollDetailModal({
               </div>
               <span className="actions">
                 {c.pdfFilename && <button onClick={() => handleViewPdf(c.id)}>{t("team.viewPdf")}</button>}
-                <input
-                  type="file"
+                <FileUploadButton
+                  id={`contract-reupload-${c.id}`}
+                  file={reuploadFiles[c.id] ?? null}
+                  onChange={(file) => setReuploadFiles({ ...reuploadFiles, [c.id]: file })}
                   accept="application/pdf"
-                  onChange={(e) =>
-                    setReuploadFiles({ ...reuploadFiles, [c.id]: e.target.files?.[0] ?? null })
-                  }
+                  label={t("team.uploadPdf")}
                 />
                 <button onClick={() => handleUploadPdf(c.id)}>
                   {c.pdfFilename ? t("team.replacePdf") : t("team.uploadPdf")}
@@ -314,7 +315,13 @@ function PayrollDetailModal({
             <span className="field-label">{t("summary.to")}</span>
             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
           </label>
-          <input type="file" accept="application/pdf" onChange={(e) => setPdfFile(e.target.files?.[0] ?? null)} />
+          <FileUploadButton
+            id="new-contract-file"
+            file={pdfFile}
+            onChange={setPdfFile}
+            accept="application/pdf"
+            label={t("team.uploadPdf")}
+          />
           <button type="submit" disabled={saving}>
             {t("team.createContract")}
           </button>
